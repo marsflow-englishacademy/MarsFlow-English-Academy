@@ -708,7 +708,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         // ATENÇÃO: Adicionei 'where', 'updateDoc', 'arrayUnion' na linha abaixo
-        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, arrayUnion, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration - ATUALIZE COM SEUS DADOS
         const firebaseConfig = {
@@ -735,6 +735,7 @@
         window.setDoc = setDoc;
         window.updateDoc = updateDoc;
         window.arrayUnion = arrayUnion;
+        window.arrayRemove = arrayRemove;
         window.collection = collection;
         window.query = query;
         window.orderBy = orderBy;
