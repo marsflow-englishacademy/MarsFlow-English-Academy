@@ -980,6 +980,8 @@
             if (userData.role === 'developer') {
                 document.getElementById('userName').innerHTML += ' <span class="badge bg-danger">DEV</span>';
             }
+            if(window.checkNotifications) window.checkNotifications(); // <--- ADICIONE ISTO
+                setInterval(() => { if(window.checkNotifications) window.checkNotifications(); }, 60000); // Checa a cada 1 min
         }
 
         // FUNÇÕES DE PONTUAÇÃO E ATUALIZAÇÃO
@@ -1229,6 +1231,7 @@
             if(window.loadRules) window.loadRules();                           // Carregar Regras
             if(window.loadTeacherClasses) window.loadTeacherClasses(); // Carregar Turmas
         };
+        
 
         function hideAllSections() {
             const sections = document.querySelectorAll('.content-section');
