@@ -439,6 +439,146 @@ window.deliverOrder = async function(orderId, itemName) {
     }
 }
 
+// === GESTÃO DE COMPORTAMENTO (REGRAS & AJUSTES) ===
+
+// 1. Carregar Lista de Alunos para o Select
+window.loadStudentsForAdmin = async function() {
+    const select = document.getElementById('studentSelect');
+    if (!select || !window.db) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "users"), window.orderBy("name"));
+        const snapshot = await window.getDocs(q);
+
+        let html = '<option value="" selected disabled>Selecione um aluno...</option>';
+        
+        snapshot.forEach(doc => {
+            const u = doc.data();
+            // Mostra nome e saldo atual para facilitar
+            html += `<option value="${doc.id}">${u.name || 'Sem Nome'} (💰${u.coins || 0} | ⭐${u.experience || 0})</option>`;
+        });
+
+        select.innerHTML = html;
+    } catch (e) { console.error("Erro ao carregar alunos:", e); }
+}
+
+// 2. Criar Nova Regra
+window.createRule = async function() {
+    const name = document.getElementById('ruleName').value;
+    const xp = parseInt(document.getElementById('ruleXP').value) || 0;
+    const coins = parseInt(document.getElementById('ruleCoins').value) || 0;
+    const type = document.getElementById('ruleType').value;
+
+    if (!name) return alert("Dê um nome para a regra!");
+
+    try {
+        await window.addDoc(window.collection(window.db, "rules"), {
+            name, xp, coins, type, createdAt: new Date().toISOString()
+        });
+        
+        alert("Regra criada!");
+        document.getElementById('ruleName').value = ''; // Limpar form
+        loadRules(); // Recarregar lista
+    } catch (e) { alert("Erro ao criar regra."); }
+}
+
+// 3. Carregar Regras Existentes (Botões)
+window.loadRules = async function() {
+    const list = document.getElementById('rulesList');
+    if (!list) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "rules"), window.orderBy("createdAt", "desc"));
+        const snapshot = await window.getDocs(q);
+
+        if (snapshot.empty) {
+            list.innerHTML = '<span class="text-muted small">Nenhuma regra criada ainda.</span>';
+            return;
+        }
+
+        let html = '';
+        snapshot.forEach(doc => {
+            const r = doc.data();
+            // Define cor do botão (Verde para ganho, Vermelho para perda)
+            const btnClass = r.type === 'positive' ? 'btn-outline-success' : 'btn-outline-danger';
+            const icon = r.type === 'positive' ? 'fas fa-plus-circle' : 'fas fa-minus-circle';
+            const values = `(XP: ${r.xp > 0 ? '+' : ''}${r.xp} | 💰: ${r.coins > 0 ? '+' : ''}${r.coins})`;
+
+            html += `
+                <button class="btn ${btnClass} btn-sm mb-2" onclick="applyRuleToStudent('${r.name}', ${r.xp}, ${r.coins})">
+                    <i class="${icon}"></i> ${r.name} <small>${values}</small>
+                </button>
+            `;
+        });
+        list.innerHTML = html;
+
+    } catch (e) { console.error("Erro regras:", e); }
+}
+
+// 4. Aplicar Regra (Ao clicar no botão)
+window.applyRuleToStudent = async function(ruleName, xp, coins) {
+    const studentId = document.getElementById('studentSelect').value;
+    if (!studentId) return alert("Primeiro selecione um aluno na lista!");
+
+    if (!confirm(`Aplicar "${ruleName}" ao aluno selecionado?\nIsso vai alterar XP em ${xp} e Moedas em ${coins}.`)) return;
+
+    await updateUserStats(studentId, xp, coins, `Regra: ${ruleName}`);
+}
+
+// 5. Ajuste Manual (Formulário)
+window.applyManualAdjustment = async function() {
+    const studentId = document.getElementById('studentSelect').value;
+    const xp = parseInt(document.getElementById('manualXP').value) || 0;
+    const coins = parseInt(document.getElementById('manualCoins').value) || 0;
+    const reason = document.getElementById('manualReason').value;
+
+    if (!studentId) return alert("Selecione um aluno!");
+    if (xp === 0 && coins === 0) return alert("Insira algum valor de XP ou Moedas.");
+    if (!reason) return alert("Escreva um motivo para o histórico.");
+
+    await updateUserStats(studentId, xp, coins, `Ajuste Manual: ${reason}`);
+    
+    // Limpar form
+    document.getElementById('manualXP').value = '';
+    document.getElementById('manualCoins').value = '';
+    document.getElementById('manualReason').value = '';
+}
+
+// FUNÇÃO AUXILIAR CENTRAL: Atualiza o banco e notifica
+async function updateUserStats(userId, xpDelta, coinsDelta, reason) {
+    try {
+        const userRef = window.doc(window.db, "users", userId);
+        const userSnap = await window.getDoc(userRef);
+        
+        if (!userSnap.exists()) return alert("Aluno não encontrado.");
+        
+        const currentData = userSnap.data();
+        const newXP = (currentData.experience || 0) + xpDelta;
+        const newCoins = (currentData.coins || 0) + coinsDelta;
+        // Recalcula nível (Ex: a cada 100 xp sobe 1 nivel)
+        const newLevel = Math.floor(newXP / 100) + 1;
+
+        // 1. Atualiza Usuário
+        await window.updateDoc(userRef, {
+            experience: newXP,
+            coins: newCoins,
+            level: newLevel
+        });
+
+        // 2. Opcional: Registrar no histórico (transações) se quiser auditoria
+        // await window.addDoc(window.collection(window.db, "transactions"), { ... })
+
+        alert(`Sucesso! ${reason}\nNovo Saldo: ${newCoins} 💰 | ${newXP} XP`);
+        
+        // Recarrega lista para atualizar os saldos visuais no dropdown
+        loadStudentsForAdmin();
+
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao atualizar aluno.");
+    }
+}
+
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
@@ -449,3 +589,8 @@ window.rejectSubmission = rejectSubmission;
 window.loadStore = loadStore;
 window.loadPendingOrders = loadPendingOrders;
 window.deliverOrder = deliverOrder;
+window.loadStudentsForAdmin = loadStudentsForAdmin;
+window.createRule = createRule;
+window.loadRules = loadRules;
+window.applyRuleToStudent = applyRuleToStudent;
+window.applyManualAdjustment = applyManualAdjustment;
