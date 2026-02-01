@@ -519,7 +519,17 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
+        
+        // Expor auth e db para o escopo global (para o app.js usar)
+        window.db = db;
+        window.auth = auth;
+        window.getDocs = getDocs;
+        window.collection = collection;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        // --------------------------
+        
         // Global variables
         let currentUser = null;
         let userData = null;
