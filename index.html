@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hub Gamificado - Escola</title>
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -20,7 +17,6 @@
             margin: 0;
             padding: 0;
         }
-        
         .login-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -29,12 +25,7 @@
             margin-top: 50px;
             backdrop-filter: blur(10px);
         }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
+        .logo { text-align: center; margin-bottom: 30px; }
         .logo i {
             font-size: 60px;
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -42,57 +33,6 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 15px;
         }
-        
-        .logo h1 {
-            color: #333;
-            font-weight: 600;
-            font-size: 28px;
-        }
-        
-        .form-control {
-            border-radius: 12px;
-            border: 2px solid #e0e0e0;
-            padding: 12px 20px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .btn-login {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn-guest {
-            background: transparent;
-            border: 2px solid #667eea;
-            color: #667eea;
-            border-radius: 12px;
-            padding: 10px 25px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-guest:hover {
-            background: #667eea;
-            color: white;
-        }
-        
         .feature-card {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
@@ -102,38 +42,12 @@
             color: white;
             backdrop-filter: blur(10px);
         }
-        
-        .feature-card i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-        
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .alert {
-            border-radius: 12px;
-            border: none;
-        }
-        
-        @media (max-width: 768px) {
-            .login-container {
-                margin: 20px;
-                padding: 30px 20px;
-            }
-            
-            .logo h1 {
-                font-size: 24px;
-            }
-        }
+        .feature-card i { font-size: 40px; margin-bottom: 15px; color: #fff; }
+        .loading-spinner { display: none; text-align: center; margin-top: 20px; }
+        .content-section { display: none; } /* Esconde todas as seções por padrão */
     </style>
 </head>
 <body>
-    <!-- Tela de Login -->
     <div id="loginScreen" class="container">
         <div class="row justify-content-center">
             <div class="col-md-5">
@@ -146,125 +60,59 @@
                     
                     <form id="loginForm">
                         <div class="mb-3">
-                            <label for="email" class="form-label">
-                                <i class="fas fa-envelope me-2"></i>Email
-                            </label>
+                            <label for="email" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label>
                             <input type="email" class="form-control" id="email" required>
                         </div>
-                        
                         <div class="mb-4">
-                            <label for="password" class="form-label">
-                                <i class="fas fa-lock me-2"></i>Senha
-                            </label>
+                            <label for="password" class="form-label"><i class="fas fa-lock me-2"></i>Senha</label>
                             <input type="password" class="form-control" id="password" required>
                         </div>
-                        
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-login">
-                                <i class="fas fa-sign-in-alt me-2"></i>Entrar
-                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-sign-in-alt me-2"></i>Entrar</button>
                         </div>
-                        
                         <div class="text-center">
-                            <button type="button" class="btn btn-guest" onclick="guestLogin()">
-                                <i class="fas fa-user me-2"></i>Entrar como Convidado
-                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="guestLogin()">Entrar como Convidado</button>
                         </div>
                         
                         <div class="loading-spinner" id="loadingSpinner">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Carregando...</span>
-                            </div>
+                            <div class="spinner-border text-primary" role="status"></div>
                             <p class="mt-2">Entrando...</p>
                         </div>
-                        
-                        <div id="loginError" class="alert alert-danger" style="display: none;">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
+                        <div id="loginError" class="alert alert-danger mt-3" style="display: none;">
                             <span id="errorMessage"></span>
                         </div>
                     </form>
                 </div>
             </div>
-            
-            <div class="col-md-7">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="feature-card">
-                            <i class="fas fa-gamepad"></i>
-                            <h4>Aprenda Jogando</h4>
-                            <p>Quests educativas e desafios divertidos</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="feature-card">
-                            <i class="fas fa-trophy"></i>
-                            <h4>Competição Saudável</h4>
-                            <p>Ranking com seus colegas da turma</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="feature-card">
-                            <i class="fas fa-shopping-cart"></i>
-                            <h4>Loja Virtual</h4>
-                            <p>Ganhe moedas e personalize seu avatar</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="feature-card">
-                            <i class="fas fa-calendar-alt"></i>
-                            <h4>Tarefas Organizadas</h4>
-                            <p>Nunca mais perca um prazo</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Tela Principal do Aplicativo (oculta inicialmente) -->
     <div id="appScreen" style="display: none;">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
             <div class="container">
                 <a class="navbar-brand" href="#" onclick="showHome()">
                     <i class="fas fa-graduation-cap me-2"></i>Hub Gamificado
                 </a>
-                
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showHome()">
-                                <i class="fas fa-home me-1"></i>Home
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showGames()">
-                                <i class="fas fa-gamepad me-1"></i>Jogos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showStore()">
-                                <i class="fas fa-store me-1"></i>Loja
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showTasks()">
-                                <i class="fas fa-tasks me-1"></i>Tarefas
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showRanking()">
-                                <i class="fas fa-trophy me-1"></i>Ranking
-                            </a>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showHome()"><i class="fas fa-home me-1"></i>Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showGames()"><i class="fas fa-gamepad me-1"></i>Jogos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showStore()"><i class="fas fa-store me-1"></i>Loja</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showTasks()"><i class="fas fa-tasks me-1"></i>Tarefas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showRanking()"><i class="fas fa-trophy me-1"></i>Ranking</a></li>
                         
-                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showAdmin()" id="navAdminBtn" style="display: none;">
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="#" onclick="showAdmin()" id="navAdminBtn" style="display: none;">
                                 <i class="fas fa-user-shield me-1"></i>Professor
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn" style="display: none;">
+                                <i class="fas fa-code me-1"></i>DEV
                             </a>
                         </li>
                     </ul>
@@ -274,28 +122,17 @@
                             <a class="nav-link text-white" href="#" onclick="showNotifications()">
                                 <i class="fas fa-bell fa-lg"></i>
                                 <span id="notifBadge" class="position-absolute bg-danger border border-light rounded-circle" 
-                                      style="display: none; width: 12px; height: 12px; bottom: 8px; right: 5px;">
-                                    <span class="visually-hidden">Novos avisos</span>
-                                </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn" style="display: none;">
-                                <i class="fas fa-code me-1"></i>DEV
+                                      style="display: none; width: 12px; height: 12px; bottom: 8px; right: 5px;"></span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i><span id="userName">Usuário</span>
+                                <span id="userName">Usuário</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="showProfile()">
-                                    <i class="fas fa-user-cog me-1"></i>Perfil
-                                </a></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" onclick="showProfile()"><i class="fas fa-user-cog me-1"></i>Perfil</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="logout()">
-                                    <i class="fas fa-sign-out-alt me-1"></i>Sair
-                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-1"></i>Sair</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -303,157 +140,52 @@
             </div>
         </nav>
 
-        <!-- Conteúdo Principal -->
         <div class="container mt-4">
-            <!-- Home/Dashboard -->
+            
             <div id="homeContent" class="content-section">
                 <div class="row">
                     <div class="col-md-8">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-home me-2"></i>Bem-vindo ao Hub Gamificado!
-                                </h5>
-                            </div>
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-primary text-white"><h5 class="mb-0">Bem-vindo!</h5></div>
                             <div class="card-body">
                                 <div class="row text-center">
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body">
-                                                <i class="fas fa-coins fa-2x text-warning mb-2"></i>
-                                                <h4 id="userCoins">0</h4>
-                                                <small class="text-muted">Moedas</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body">
-                                                <i class="fas fa-star fa-2x text-info mb-2"></i>
-                                                <h4 id="userXP">0</h4>
-                                                <small class="text-muted">XP</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body">
-                                                <i class="fas fa-level-up-alt fa-2x text-success mb-2"></i>
-                                                <h4 id="userLevel">1</h4>
-                                                <small class="text-muted">Nível</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="card bg-light">
-                                            <div class="card-body">
-                                                <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
-                                                <h4 id="userRank">-</h4>
-                                                <small class="text-muted">Posição</small>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div class="col-md-3"><div class="card bg-light p-3"><h4 id="userCoins">0</h4><small>Moedas</small></div></div>
+                                    <div class="col-md-3"><div class="card bg-light p-3"><h4 id="userXP">0</h4><small>XP</small></div></div>
+                                    <div class="col-md-3"><div class="card bg-light p-3"><h4 id="userLevel">1</h4><small>Nível</small></div></div>
+                                    <div class="col-md-3"><div class="card bg-light p-3"><h4 id="userRank">-</h4><small>Posição</small></div></div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-bell me-2"></i>Últimas Atividades
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="activityList">
-                                    <div class="text-center text-muted">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Nenhuma atividade recente
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="card shadow-sm">
+                            <div class="card-header"><h5>Últimas Atividades</h5></div>
+                            <div class="card-body" id="activityList"><p class="text-muted">Nenhuma atividade recente.</p></div>
                         </div>
                     </div>
-                    
                     <div class="col-md-4">
-                        <div class="card mb-4">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-trophy me-2"></i>Top 5 Alunos
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="topStudents">
-                                    <div class="text-center text-muted">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Ranking não disponível
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-calendar me-2"></i>Próximas Atividades
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="upcomingActivities">
-                                    <div class="text-center text-muted">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Nenhuma atividade programada
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-success text-white"><h5>Top 5 Alunos</h5></div>
+                            <div class="card-body" id="topStudents">Carregando...</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Outras seções serão implementadas posteriormente -->
-            <div id="gamesContent" class="content-section" style="display: none;">
+            <div id="gamesContent" class="content-section">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-gamepad me-2"></i>Jogos Educativos
-                        </h5>
-                    </div>
+                    <div class="card-header"><h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Jogos Educativos</h5></div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
-                                        <h5>Quiz Educativo</h5>
-                                        <p class="text-muted">Teste seus conhecimentos</p>
-                                        <button class="btn btn-primary" onclick="window.open('quiz.html', '_blank')">
-                                            <i class="fas fa-play me-2"></i>Jogar
-                                        </button>
-                                    </div>
+                                <div class="card h-100 text-center p-3">
+                                    <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                                    <h5>Quiz</h5>
+                                    <button class="btn btn-primary" onclick="window.location.href='quiz.html'">Jogar</button>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-puzzle-piece fa-3x text-success mb-3"></i>
-                                        <h5>Quebra-cabeça</h5>
-                                        <p class="text-muted">Em breve...</p>
-                                        <button class="btn btn-secondary" disabled>
-                                            <i class="fas fa-clock me-2"></i>Em breve
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-memory fa-3x text-warning mb-3"></i>
-                                        <h5>Memória</h5>
-                                        <p class="text-muted">Em breve...</p>
-                                        <button class="btn btn-secondary" disabled>
-                                            <i class="fas fa-clock me-2"></i>Em breve
-                                        </button>
-                                    </div>
+                                <div class="card h-100 text-center p-3 opacity-50">
+                                    <i class="fas fa-puzzle-piece fa-3x text-secondary mb-3"></i>
+                                    <h5>Quebra-cabeça</h5><button class="btn btn-secondary" disabled>Em breve</button>
                                 </div>
                             </div>
                         </div>
@@ -461,167 +193,110 @@
                 </div>
             </div>
 
-            <!-- Seções placeholder -->
-            <div id="storeContent" class="content-section" style="display: none;">
+            <div id="storeContent" class="content-section">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-store text-success me-2"></i>Loja de Recompensas</h2>
+                    <h2><i class="fas fa-store text-success me-2"></i>Loja</h2>
                     <div class="bg-white p-2 rounded shadow-sm border">
-                        <small class="text-muted d-block">Seu Saldo</small>
-                        <span class="h4 text-warning fw-bold" id="storeBalance">
-                            <i class="fas fa-coins"></i> Carregando...
-                        </span>
+                        <small class="text-muted d-block">Saldo</small>
+                        <span class="h4 text-warning fw-bold" id="storeBalance">...</span>
                     </div>
                 </div>
-            
-                <div class="row" id="storeList">
-                    <div class="col-12 text-center p-5">
-                        <div class="spinner-border text-success" role="status"></div>
-                        <p class="mt-2 text-muted">Carregando ofertas...</p>
-                    </div>
-                </div>
+                <div class="row" id="storeList"><div class="col-12 text-center p-5">Carregando loja...</div></div>
             </div>
 
-            <div id="tasksContent" class="content-section" style="display: none;">
+            <div id="tasksContent" class="content-section">
                 <div class="row">
                     <div class="col-md-8">
                         <div class="card shadow-sm">
-                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quadro de Missões</h5>
-                                <span class="badge bg-light text-primary rounded-pill" id="taskCount">Carregando...</span>
+                            <div class="card-header bg-primary text-white d-flex justify-content-between">
+                                <h5>Quadro de Missões</h5><span class="badge bg-light text-primary" id="taskCount">0</span>
                             </div>
-                            <div class="card-body p-0">
-                                <div id="taskList" class="list-group list-group-flush">
-                                    <div class="text-center p-5">
-                                        <div class="spinner-border text-primary" role="status"></div>
-                                        <p class="mt-2 text-muted">Buscando missões...</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="card-body p-0"><div id="taskList" class="list-group list-group-flush">Carregando...</div></div>
                         </div>
                     </div>
-                    
                     <div class="col-md-4">
-                        <div class="card mb-3 border-0 bg-light">
-                            <div class="card-body text-center">
-                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                <h5>Como funciona?</h5>
-                                <p class="text-muted small">1. Escolha uma tarefa<br>2. Clique em Entregar<br>3. Aguarde o professor aprovar<br>4. Ganhe XP e Moedas!</p>
-                            </div>
-                        </div>
+                        <div class="card bg-light border-0"><div class="card-body text-center"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><p>Complete missões para ganhar XP!</p></div></div>
                     </div>
                 </div>
             </div>
 
-            <div id="rankingContent" class="content-section" style="display: none;">
+            <div id="rankingContent" class="content-section">
                 <div class="card">
                     <div class="card-header bg-warning text-dark">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Classificação</h5>
                             <span class="badge bg-dark text-warning" id="myClassBadge">Sem Turma</span>
                         </div>
-                        
                         <ul class="nav nav-tabs card-header-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active fw-bold" id="tabGeneral" href="#" onclick="switchRanking('general')">🏆 Geral</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" id="tabClass" href="#" onclick="switchRanking('class')">🏫 Minha Turma</a>
-                            </li>
+                            <li class="nav-item"><a class="nav-link active fw-bold" id="tabGeneral" href="#" onclick="switchRanking('general')">🏆 Geral</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark" id="tabClass" href="#" onclick="switchRanking('class')">🏫 Minha Turma</a></li>
                         </ul>
                     </div>
-                    
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover table-striped mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="text-center">#</th>
-                                        <th>Aluno</th>
-                                        <th class="text-center">Nível</th>
-                                        <th class="text-end">XP</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaRankingCompleta">
-                                    <tr><td colspan="4" class="text-center p-4">Carregando...</td></tr>
-                                </tbody>
+                                <thead class="table-dark"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Nível</th><th class="text-end">XP</th></tr></thead>
+                                <tbody id="tabelaRankingCompleta"><tr><td colspan="4" class="text-center p-4">Carregando...</td></tr></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="notificationsContent" class="content-section" style="display: none;">
+            <div id="notificationsContent" class="content-section">
                 <div class="row h-100" style="min-height: 500px;">
                     <div class="col-md-4 border-end pe-0">
                         <div class="list-group list-group-flush h-100 overflow-auto" id="notifList">
                             <div class="text-center p-4 text-muted">Carregando avisos...</div>
                         </div>
                     </div>
-                    
                     <div class="col-md-8 ps-0">
                         <div id="notifDetail" class="p-4 h-100 bg-white">
-                            <div class="text-center text-muted mt-5">
-                                <i class="far fa-envelope-open fa-3x mb-3"></i>
-                                <p>Selecione uma mensagem para ler.</p>
-                            </div>
+                            <div class="text-center text-muted mt-5"><i class="far fa-envelope-open fa-3x mb-3"></i><p>Selecione uma mensagem.</p></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="profileContent" class="content-section" style="display: none;">
+            <div id="profileContent" class="content-section">
                 <div class="row">
                     <div class="col-md-4 mb-4">
                         <div class="card shadow border-0" id="profileCard">
                             <div class="card-body text-center pt-5 pb-4">
                                 <div class="mb-3 position-relative d-inline-block">
                                     <div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-3 p-3 position-relative overflow-hidden" 
-                                         style="width: 120px; height: 120px; line-height: 1.2; background-size: cover; background-position: center;">
-                                        👤
-                                    </div>
+                                         style="width: 120px; height: 120px; line-height: 1.2; background-size: cover; background-position: center;">👤</div>
                                     <label for="photoUpload" class="position-absolute bottom-0 end-0 btn btn-sm btn-dark rounded-circle" style="cursor: pointer;" title="Alterar Foto">
                                         <i class="fas fa-camera"></i>
                                     </label>
                                     <input type="file" id="photoUpload" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)">
-                                    
-                                    <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-primary border border-2 border-white">
-                                        Lvl <span id="profileLevel">1</span>
-                                    </span>
+                                    <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-primary border border-2 border-white">Lvl <span id="profileLevel">1</span></span>
                                 </div>
                                 <div id="photoStatusBadge" class="mb-2"></div>
-                        
-                                <h3 class="mt-3 fw-bold" id="profileName">Carregando...</h3>
+
+                                <h3 class="mt-3 fw-bold" id="profileName">...</h3>
                                 
                                 <div class="px-4 mb-3">
-                                    <p class="text-muted small mb-1" id="profileBioDisplay">"Sem bio definida."</p>
-                                    <button class="btn btn-link btn-sm text-decoration-none p-0" onclick="editBio()">
-                                        <i class="fas fa-pen small"></i> Editar Bio
-                                    </button>
+                                    <p class="text-muted small mb-1" id="profileBioDisplay">"Sem bio."</p>
+                                    <button class="btn btn-link btn-sm text-decoration-none p-0" onclick="editBio()"><i class="fas fa-pen small"></i> Editar</button>
                                     <div id="bioEditContainer" style="display: none;" class="mt-2">
-                                        <textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2" maxlength="150" placeholder="Escreva algo sobre você..."></textarea>
+                                        <textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2" maxlength="150"></textarea>
                                         <button class="btn btn-primary btn-sm w-100" onclick="saveBio()">Salvar</button>
                                     </div>
                                 </div>
-                        
-                                <p class="text-muted mb-2" id="profileClass">Sem Turma</p>
+
+                                <p class="text-muted mb-2" id="profileClass">...</p>
                                 <p class="badge bg-warning text-dark" id="profileRole">Aluno</p>
-                        
                                 <div class="mt-4 px-3">
-                                    <div class="d-flex justify-content-between small text-muted mb-1">
-                                        <span>Progresso</span>
-                                        <span id="xpRatio">0 / 100 XP</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px;">
-                                        <div id="xpBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
-                                    </div>
-                                    <small class="text-muted mt-2 d-block">Faltam <span id="xpToNext">100</span> XP para o próximo nível</small>
+                                    <div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div>
+                                    <div class="progress" style="height: 10px;"><div id="xpBar" class="progress-bar bg-success" style="width: 0%"></div></div>
                                 </div>
                             </div>
-                        </div>   
+                        </div>
                     </div>
                     <div class="col-md-8">
                         <div class="card shadow-sm h-100">
-                            <div class="card-header bg-white py-3"><h5 class="mb-0"><i class="fas fa-box-open me-2 text-primary"></i>Meu Inventário</h5></div>
+                            <div class="card-header bg-white py-3"><h5 class="mb-0"><i class="fas fa-box-open me-2 text-primary"></i>Inventário</h5></div>
                             <div class="card-body bg-light">
                                 <div class="row g-3" id="inventoryList"><div class="col-12 text-center p-5 text-muted">Carregando...</div></div>
                             </div>
@@ -629,197 +304,74 @@
                     </div>
                 </div>
             </div>
-            <div id="adminContent" class="content-section" style="display: none;">
+
+            <div id="adminContent" class="content-section">
                 <h2 class="mb-4"><i class="fas fa-user-shield text-danger"></i> Painel do Professor</h2>
                 
                 <div class="row">
                     <div class="col-md-5">
                         <div class="card shadow-sm mb-4">
-                            <div class="card-header bg-danger text-white">Criar Nova Missão</div>
+                            <div class="card-header bg-danger text-white">Criar Missão</div>
                             <div class="card-body">
                                 <form onsubmit="event.preventDefault(); createTask();">
-                                    <div class="mb-3">
-                                        <label class="form-label">Título da Missão</label>
-                                        <input type="text" id="taskTitle" class="form-control" required placeholder="Ex: Ler Cap. 3">
+                                    <input type="text" id="taskTitle" class="form-control mb-2" required placeholder="Título">
+                                    <textarea id="taskDesc" class="form-control mb-2" required placeholder="Descrição"></textarea>
+                                    <div class="row mb-2">
+                                        <div class="col"><input type="number" id="taskXP" class="form-control" placeholder="XP" value="100"></div>
+                                        <div class="col"><input type="number" id="taskCoins" class="form-control" placeholder="Coins" value="50"></div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Descrição</label>
-                                        <textarea id="taskDesc" class="form-control" rows="2" required placeholder="Instruções..."></textarea>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-6 mb-3">
-                                            <label class="form-label">XP Reward</label>
-                                            <input type="number" id="taskXP" class="form-control" value="100">
-                                        </div>
-                                        <div class="col-6 mb-3">
-                                            <label class="form-label">Coins Reward</label>
-                                            <input type="number" id="taskCoins" class="form-control" value="50">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Data de Entrega</label>
-                                        <input type="date" id="taskDate" class="form-control">
-                                    </div>
-                                    <button type="submit" class="btn btn-danger w-100">Publicar Missão</button>
+                                    <input type="date" id="taskDate" class="form-control mb-2">
+                                    <button type="submit" class="btn btn-danger w-100">Publicar</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-            
                     <div class="col-md-7">
                         <div class="card shadow-sm">
                             <div class="card-header bg-dark text-white d-flex justify-content-between">
                                 <span>Entregas Pendentes</span>
                                 <button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Atualizar</button>
                             </div>
-                            <div class="card-body p-0">
-                                <div id="submissionsList" class="list-group list-group-flush">
-                                    <div class="text-center p-4 text-muted">Carregando...</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-md-4">
-                            <div class="card shadow-sm border-info">
-                                <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0"><i class="fas fa-camera-retro me-2"></i>Aprovar Fotos</h5>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div id="pendingPhotosList" class="list-group list-group-flush">
-                                        <div class="text-center p-3 text-muted small">Nenhuma foto pendente.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-8">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Histórico de Resgates</h5>
-                                    <div class="d-flex gap-2">
-                                        <select id="historyFilterClass" class="form-select form-select-sm" style="width: 120px;" onchange="loadRedemptionHistory()">
-                                            <option value="all">Todas Turmas</option>
-                                        </select>
-                                        <button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()"><i class="fas fa-sync"></i></button>
-                                    </div>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive" style="max-height: 300px;">
-                                        <table class="table table-striped mb-0 text-center small">
-                                            <thead>
-                                                <tr>
-                                                    <th>Data</th>
-                                                    <th>Aluno</th>
-                                                    <th>Item</th>
-                                                    <th>Valor</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="redemptionHistoryBody">
-                                                <tr><td colspan="4" class="p-3">Carregando...</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card shadow-sm border-success">
-                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0"><i class="fas fa-gift me-2"></i>Pedidos de Recompensa (Loja)</h5>
-                                    <button class="btn btn-sm btn-light text-success fw-bold" onclick="loadPendingOrders()">
-                                        <i class="fas fa-sync-alt"></i> Atualizar Pedidos
-                                    </button>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div id="ordersList" class="list-group list-group-flush">
-                                        <div class="text-center p-5 text-muted">
-                                            <i class="fas fa-box-open fa-2x mb-3"></i><br>
-                                            Clique em "Atualizar" para ver quem comprou itens.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="card-body p-0"><div id="submissionsList" class="list-group list-group-flush"><div class="p-3 text-center text-muted">Vazio</div></div></div>
                         </div>
                     </div>
                 </div>
+
                 <div class="row mt-4">
-                    <div class="col-md-8">
-                        <div class="card shadow-sm border-primary">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0"><i class="fas fa-users-cog me-2"></i>Gerenciar Aluno</h5>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-success">
+                            <div class="card-header bg-success text-white d-flex justify-content-between">
+                                <span><i class="fas fa-gift me-2"></i>Pedidos da Loja</span>
+                                <button class="btn btn-sm btn-light text-success" onclick="loadPendingOrders()">Atualizar</button>
                             </div>
-                            <div class="card-body">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">1. Selecione o Aluno:</label>
-                                    <select id="studentSelect" class="form-select form-select-lg">
-                                        <option value="" selected>Carregando alunos...</option>
-                                    </select>
-                                </div>
-                
-                                <div class="row">
-                                    <div class="col-md-7 border-end">
-                                        <label class="form-label fw-bold mb-3">2. Aplicar Regra Rápida:</label>
-                                        <div id="rulesList" class="d-flex flex-wrap gap-2">
-                                            <div class="text-muted small">Carregando regras...</div>
-                                        </div>
-                                    </div>
-                
-                                    <div class="col-md-5 ps-md-4">
-                                        <label class="form-label fw-bold mb-3">Ou Ajuste Manual:</label>
-                                        <form onsubmit="event.preventDefault(); applyManualAdjustment();">
-                                            <div class="input-group mb-2">
-                                                <span class="input-group-text">XP</span>
-                                                <input type="number" id="manualXP" class="form-control" placeholder="+/-">
-                                            </div>
-                                            <div class="input-group mb-2">
-                                                <span class="input-group-text">💰</span>
-                                                <input type="number" id="manualCoins" class="form-control" placeholder="+/-">
-                                            </div>
-                                            <input type="text" id="manualReason" class="form-control mb-2" placeholder="Motivo (Obrigatório)" required>
-                                            <button type="submit" class="btn btn-outline-primary w-100">Aplicar Ajuste</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="card-body p-0"><div id="ordersList" class="list-group list-group-flush"></div></div>
                         </div>
                     </div>
-                
-                    <div class="col-md-4">
-                        <div class="card shadow-sm border-secondary">
-                            <div class="card-header bg-secondary text-white">
-                                <h5 class="mb-0"><i class="fas fa-gavel me-2"></i>Criar Regra</h5>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm border-info">
+                            <div class="card-header bg-info text-white"><span><i class="fas fa-camera me-2"></i>Aprovar Fotos</span></div>
+                            <div class="card-body p-0"><div id="pendingPhotosList" class="list-group list-group-flush"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                         <div class="card shadow-sm">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                                <span><i class="fas fa-history me-2"></i>Histórico de Resgates</span>
+                                <div class="d-flex gap-2">
+                                    <select id="historyFilterClass" class="form-select form-select-sm" style="width:150px;" onchange="loadRedemptionHistory()"><option value="all">Todas</option></select>
+                                    <button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()">Sync</button>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <p class="small text-muted">Crie botões para comportamentos recorrentes.</p>
-                                <form onsubmit="event.preventDefault(); createRule();">
-                                    <div class="mb-2">
-                                        <label class="form-label">Nome da Regra</label>
-                                        <input type="text" id="ruleName" class="form-control" placeholder="Ex: Esqueceu Material" required>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-6">
-                                            <label class="form-label">XP (+/-)</label>
-                                            <input type="number" id="ruleXP" class="form-control" value="0">
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">Coins (+/-)</label>
-                                            <input type="number" id="ruleCoins" class="form-control" value="0">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Tipo</label>
-                                        <select id="ruleType" class="form-select">
-                                            <option value="positive" class="text-success">Positiva (Recompensa)</option>
-                                            <option value="negative" class="text-danger">Negativa (Punição)</option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-secondary w-100">Salvar Regra</button>
-                                </form>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 200px;">
+                                    <table class="table table-striped mb-0 text-center small">
+                                        <thead><tr><th>Data</th><th>Aluno</th><th>Item</th><th>$</th></tr></thead>
+                                        <tbody id="redemptionHistoryBody"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -828,194 +380,121 @@
                 <div class="row mt-4">
                     <div class="col-md-4">
                         <div class="card shadow-sm border-info">
-                            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-chalkboard me-2"></i>Minhas Turmas</h5>
-                                <button class="btn btn-sm btn-light text-info fw-bold" onclick="createNewClassPrompt()">
-                                    <i class="fas fa-plus"></i> Nova
-                                </button>
+                            <div class="card-header bg-info text-white d-flex justify-content-between">
+                                <span>Minhas Turmas</span>
+                                <button class="btn btn-sm btn-light" onclick="createNewClassPrompt()">+</button>
                             </div>
-                            <div class="card-body p-0">
-                                <div id="classList" class="list-group list-group-flush">
-                                    <div class="text-center p-3 text-muted small">Nenhuma turma encontrada.</div>
-                                </div>
-                            </div>
+                            <div class="card-body p-0"><div id="classList" class="list-group list-group-flush"></div></div>
                         </div>
                     </div>
-                
                     <div class="col-md-8">
                         <div class="card shadow-sm border-warning">
-                            <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Enviar Comunicado</h5>
-                            </div>
+                            <div class="card-header bg-warning text-dark">Enviar Comunicado</div>
                             <div class="card-body">
                                 <form onsubmit="event.preventDefault(); sendNotification();">
-                                    <div class="row mb-3">
-                                        <div class="col-md-8">
-                                            <label class="form-label fw-bold">Título</label>
-                                            <input type="text" id="notifTitle" class="form-control" placeholder="Ex: Prova de Inglês" required>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-bold">Destino</label>
-                                            <select id="notifTarget" class="form-select">
-                                                <option value="all">Todas as Minhas Turmas</option>
-                                                </select>
-                                        </div>
+                                    <div class="row mb-2">
+                                        <div class="col"><input type="text" id="notifTitle" class="form-control" placeholder="Título" required></div>
+                                        <div class="col"><select id="notifTarget" class="form-select"></select></div>
                                     </div>
-                
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Mensagem</label>
-                                        <textarea id="notifMessage" class="form-control" rows="3" placeholder="Escreva o aviso aqui..." required></textarea>
+                                    <textarea id="notifMessage" class="form-control mb-2" rows="2" placeholder="Mensagem"></textarea>
+                                    <div class="row mb-2">
+                                        <div class="col"><select id="notifType" class="form-select"><option value="homework">Homework</option><option value="test">Prova</option><option value="event">Evento</option></select></div>
+                                        <div class="col"><select id="notifUrgency" class="form-select"><option value="chill">Tranquilo</option><option value="attention">Atenção</option><option value="urgent">Urgente</option></select></div>
                                     </div>
-                
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Tipo</label>
-                                            <select id="notifType" class="form-select">
-                                                <option value="homework">📚 Homework (Tarefa)</option>
-                                                <option value="test">📝 Test (Prova)</option>
-                                                <option value="event">🎉 Event (Evento)</option>
-                                                <option value="dm">💬 DM (Mensagem Direta)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Nível de Urgência</label>
-                                            <select id="notifUrgency" class="form-select">
-                                                <option value="chill" class="text-success">😎 Tranquila (Chill)</option>
-                                                <option value="attention" class="text-warning">⚠️ Atenção (Attention)</option>
-                                                <option value="urgent" class="text-danger">🔥 Urgente (Panic Mode)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                
-                                    <button type="submit" class="btn btn-warning w-100 fw-bold">
-                                        <i class="fas fa-paper-plane me-2"></i>Enviar Notificação
-                                    </button>
+                                    <button type="submit" class="btn btn-warning w-100">Enviar</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                </div>                
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-header bg-primary text-white">Gerenciar Aluno (Regras/Ajustes)</div>
+                            <div class="card-body">
+                                <select id="studentSelect" class="form-select mb-3"><option>Carregando...</option></select>
+                                <div class="row">
+                                    <div class="col-md-6 border-end">
+                                        <label class="fw-bold">Regras Rápidas:</label>
+                                        <div id="rulesList" class="d-flex flex-wrap gap-2"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <form onsubmit="event.preventDefault(); applyManualAdjustment();">
+                                            <div class="input-group mb-2"><span class="input-group-text">XP</span><input type="number" id="manualXP" class="form-control"></div>
+                                            <div class="input-group mb-2"><span class="input-group-text">$</span><input type="number" id="manualCoins" class="form-control"></div>
+                                            <button type="submit" class="btn btn-outline-primary w-100">Aplicar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-secondary text-white">Criar Regra</div>
+                            <div class="card-body">
+                                <form onsubmit="event.preventDefault(); createRule();">
+                                    <input type="text" id="ruleName" class="form-control mb-2" placeholder="Nome" required>
+                                    <div class="row mb-2"><div class="col"><input type="number" id="ruleXP" class="form-control" placeholder="XP"></div><div class="col"><input type="number" id="ruleCoins" class="form-control" placeholder="$"></div></div>
+                                    <select id="ruleType" class="form-select mb-2"><option value="positive">Positiva</option><option value="negative">Negativa</option></select>
+                                    <button type="submit" class="btn btn-secondary w-100">Salvar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div> 
-           
-            <div id="devContent" class="content-section" style="display: none;">
+
+            <div id="devContent" class="content-section">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="text-danger"><i class="fas fa-terminal me-2"></i>Developer Console</h2>
-                    <span class="badge bg-danger">Acesso Restrito: fmartimr@gmail.com</span>
+                    <span class="badge bg-danger">Restrito</span>
                 </div>
-            
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card shadow-sm border-danger mb-4">
-                            <div class="card-header bg-danger text-white">
-                                <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>Pré-Cadastrar Usuário</h5>
-                            </div>
+                            <div class="card-header bg-danger text-white">Pré-Cadastrar Usuário</div>
                             <div class="card-body">
                                 <form onsubmit="event.preventDefault(); createPreRegistry();">
-                                    <div class="mb-3">
-                                        <label class="form-label">Tipo de Usuário</label>
-                                        <select id="devUserRole" class="form-select" onchange="toggleDevFields()">
-                                            <option value="student">Aluno</option>
-                                            <option value="teacher">Professor</option>
-                                            <option value="parent">Responsável (Pai/Mãe)</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Nome Completo</label>
-                                        <input type="text" id="devUserName" class="form-control" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Email de Acesso</label>
-                                        <input type="email" id="devUserEmail" class="form-control" required>
-                                    </div>
-            
+                                    <select id="devUserRole" class="form-select mb-3" onchange="toggleDevFields()">
+                                        <option value="student">Aluno</option><option value="teacher">Professor</option><option value="parent">Responsável</option>
+                                    </select>
+                                    <input type="text" id="devUserName" class="form-control mb-3" placeholder="Nome Completo" required>
+                                    <input type="email" id="devUserEmail" class="form-control mb-3" placeholder="Email" required>
+
                                     <div id="devStudentFields">
-                                        <div class="mb-3">
-                                            <label class="form-label">Data de Nascimento</label>
-                                            <input type="date" id="devUserDOB" class="form-control">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Turma</label>
-                                            <select id="devUserClass" class="form-select">
-                                                <option value="">Selecione...</option>
-                                                </select>
-                                        </div>
+                                        <label>Data Nasc.</label><input type="date" id="devUserDOB" class="form-control mb-3">
+                                        <label>Turma</label><select id="devUserClass" class="form-select mb-3"></select>
                                     </div>
-            
                                     <div id="devTeacherFields" style="display: none;">
-                                        <div class="mb-3">
-                                            <label class="form-label">Turmas Vinculadas (Segure Ctrl para selecionar várias)</label>
-                                            <select id="devUserClasses" class="form-select" multiple>
-                                                </select>
-                                        </div>
+                                        <label>Turmas (Ctrl+Click)</label><select id="devUserClasses" class="form-select mb-3" multiple></select>
                                     </div>
-            
                                     <div id="devParentFields" style="display: none;">
-                                        <div class="mb-3">
-                                            <label class="form-label">Filhos (Segure Ctrl para selecionar vários)</label>
-                                            <select id="devUserChildren" class="form-select" multiple>
-                                                </select>
-                                        </div>
+                                        <label>Filhos (Ctrl+Click)</label><select id="devUserChildren" class="form-select mb-3" multiple></select>
                                     </div>
-            
                                     <button type="submit" class="btn btn-outline-danger w-100">Criar Pré-Cadastro</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-            
                     <div class="col-md-6">
-                        <div class="card shadow-sm border-dark mb-4">
-                            <div class="card-header bg-dark text-white">
-                                <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Gestão de Dados</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-secondary text-start" onclick="alert('Funcionalidade de Reverter Alterações em breve!')">
-                                        <i class="fas fa-undo me-2"></i> Reverter Alterações de Perfil
-                                    </button>
-                                    <button class="btn btn-outline-secondary text-start" onclick="manageNotifications()">
-                                        <i class="fas fa-bell-slash me-2"></i> Gerenciar/Apagar Notificações
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="alert alert-info small">
-                            <i class="fas fa-info-circle"></i> <strong>Como funciona:</strong> Crie o cadastro aqui. Quando o usuário se registrar no login com o <b>mesmo email</b>, ele herdará automaticamente os dados (Turma, Filhos, Perfil).
-                        </div>
+                         <div class="alert alert-info">Use o pré-cadastro para criar usuários. Quando eles logarem com o email definido, receberão automaticamente a Turma e Perfil configurados.</div>
                     </div>
                 </div>
             </div>
 
-            <div id="storeContent" class="content-section" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-shopping-cart text-success"></i> Loja de Recompensas</h2>
-                    <div class="bg-white p-2 rounded shadow-sm border">
-                        <small class="text-muted d-block">Seu Saldo</small>
-                        <span class="h4 text-warning fw-bold" id="storeBalance">0 💰</span>
-                    </div>
-                </div>
-            
-                <div class="row" id="storeList">
-                    <div class="col-12 text-center p-5">
-                        <div class="spinner-border text-success"></div>
-                        <p>Carregando ofertas...</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Firebase SDK -->
+    
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        // ATENÇÃO: Adicionei 'where', 'updateDoc', 'arrayUnion' na linha abaixo
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration - ATUALIZE COM SEUS DADOS
+        // CONFIGURAÇÃO DO FIREBASE (MANTIDA)
         const firebaseConfig = {
           apiKey: "AIzaSyBYe4oRa-uS1hTodVAsa7Zer1fOAU9-kcA",
           authDomain: "marsflow-english-academy.firebaseapp.com",
@@ -1026,430 +505,162 @@
           measurementId: "G-1NC30HNJLQ"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // --- ADICIONE ISTO ---
-        // Permitir que o app.js acesse o banco de dados
-        window.db = db;
-        window.auth = auth;
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.setDoc = setDoc;
-        window.updateDoc = updateDoc;
-        window.arrayUnion = arrayUnion;
-        window.arrayRemove = arrayRemove;
-        window.collection = collection;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.limit = limit;
-        window.getDocs = getDocs;
-        window.where = where;
-        window.addDoc = addDoc;
-        // ---------------------
-        
-        // Global variables
+        // Exportações Globais Essenciais
+        window.db = db; window.auth = auth;
+        window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.addDoc = addDoc;
+        window.arrayUnion = arrayUnion; window.arrayRemove = arrayRemove;
+        window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where;
+
         let currentUser = null;
         let userData = null;
 
-        // Check authentication state
+        // AUTH LISTENER
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                await loadUserData();
+                await loadUserData(); // Aqui acontece a mágica do pré-cadastro
                 showAppScreen();
-
-                if (window.initializeApp) {
-                    window.initializeApp();
-                }
-    
-                if(window.checkNotifications) window.checkNotifications(); {
-                    setInterval(() => { if(window.checkNotifications) window.checkNotifications(); }, 60000);
-                }
-                
-            // ---------------------
+                if (window.initializeApp) window.initializeApp();
+                if(window.checkNotifications) setInterval(() => window.checkNotifications(), 60000);
             } else {
                 showLoginScreen();
             }
         });
 
-        // Login form submission
+        // LOGIN
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            
             try {
-                showLoading(true);
-                
+                document.getElementById('loadingSpinner').style.display = 'block';
                 await signInWithEmailAndPassword(auth, email, password);
-                
-                showLoading(false);
+                document.getElementById('loadingSpinner').style.display = 'none';
             } catch (error) {
-                showLoading(false);
-                showError(getErrorMessage(error.code));
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('errorMessage').innerText = "Erro no login: " + error.code;
             }
         });
 
-        // Guest login
         window.guestLogin = function() {
-            // For demo purposes, create a guest session
-            const guestData = {
-                uid: 'guest_' + Date.now(),
-                email: 'convidado@escola.com',
-                name: 'Convidado',
-                role: 'student',
-                level: 1,
-                experience: 0,
-                coins: 100
-            };
-            
-            currentUser = guestData;
-            userData = guestData;
-            window.userData = userData; // <--- O SEGREDO ESTÁ AQUI
+            currentUser = { uid: 'guest', email: 'convidado@teste.com' };
+            userData = { name: 'Visitante', role: 'student', coins: 100, level: 1 };
+            window.userData = userData;
             showAppScreen();
         };
 
-        // Load user data from Firestore
+        // CARREGAR DADOS + PRÉ-CADASTRO
         async function loadUserData() {
             if (!currentUser) return;
-            
             try {
                 const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
                 
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                 } else {
-                    // CRIAÇÃO DE NOVO USUÁRIO (COM ESTRUTURA NOVA)
+                    // LÓGICA DE PRÉ-CADASTRO (Recupera dados criados pelo DEV)
+                    const emailKey = currentUser.email.toLowerCase();
+                    const preRegDoc = await getDoc(doc(db, "pre_registers", emailKey));
+                    
+                    let initialData = {};
+                    if (preRegDoc.exists()) {
+                        console.log("Pré-cadastro encontrado!");
+                        initialData = preRegDoc.data();
+                        delete initialData.isPreRegistered;
+                    } else {
+                        initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 };
+                    }
+
                     userData = {
+                        ...initialData,
                         uid: currentUser.uid,
                         email: currentUser.email,
-                        name: currentUser.email.split('@')[0],
-                        
-                        // --- NOVOS CAMPOS DE HIERARQUIA ---
-                        role: 'student',       // Padrão: aluno. Opções: student, teacher, parent, admin, developer
-                        classId: null,         // ID da turma (para alunos)
-                        myClasses: [],         // IDs das turmas (para professores)
-                        childrenIds: [],       // IDs dos filhos (para pais)
-                        parentId: null,        // ID do pai (para alunos)
-                        // ----------------------------------
-                        
-                        level: 1,
-                        experience: 0,
-                        coins: 100,
                         inventory: [],
                         createdAt: new Date().toISOString()
                     };
-                    
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
-                window.userData = userData; // <--- O SEGREDO ESTÁ AQUI
+                window.userData = userData;
                 updateUserInterface();
                 
-            } catch (error) {
-                console.error('Error loading user data:', error);
-            }
+            } catch (error) { console.error('Erro load user:', error); }
         }
 
-// Atualizar interface baseado nos dados e PERMISSÕES
         function updateUserInterface() {
             if (!userData) return;
+            
+            // Icon + Nome
             const icon = userData.equippedIcon || '';
-            // 1. Atualizar textos básicos
-            document.getElementById('userCoins').textContent = userData.coins || 0;
-            document.getElementById('userXP').textContent = userData.experience || 0;
-            document.getElementById('userLevel').textContent = userData.level || 1;
-            document.getElementById('userName').innerHTML = `${icon} ${userData.name || 'Usuário'}`;
-                        `;
+            document.getElementById('userName').innerHTML = `${icon} ${userData.name}`;
             
-            const rank = Math.floor((userData.experience || 0) / 100) + 1;
-            document.getElementById('userRank').textContent = rank;
+            // Stats
+            document.getElementById('userCoins').innerText = userData.coins || 0;
+            document.getElementById('userXP').innerText = userData.experience || 0;
+            document.getElementById('userLevel').innerText = userData.level || 1;
+            
+            // Controle de Menu (RBAC)
+            const isAdmin = ['teacher', 'admin', 'developer'].includes(userData.role);
+            const isDev = (currentUser.email === 'fmartimr@gmail.com');
 
-            // 2. CONTROLE DE ACESSO (Permissões)
-            const adminRoles = ['teacher', 'admin', 'developer'];
-            const isAdmin = adminRoles.includes(userData.role);
-            
-            // Procura o botão do menu "Professor" (vamos adicionar um ID nele para facilitar)
             const adminBtn = document.getElementById('navAdminBtn');
-            if(adminBtn) {
-                adminBtn.style.display = isAdmin ? 'block' : 'none';
-            }
-            
-            // Se for Desenvolvedor, mostra um aviso visual
-            if (userData.role === 'developer') {
-                document.getElementById('userName').innerHTML += ' <span class="badge bg-danger">DEV</span>';
-            }
-            if(window.checkNotifications) window.checkNotifications(); // <--- ADICIONE ISTO
-                setInterval(() => { if(window.checkNotifications) window.checkNotifications(); }, 60000); // Checa a cada 1 min
+            const devBtn = document.getElementById('navDevBtn');
+
+            if(adminBtn) adminBtn.style.display = isAdmin ? 'block' : 'none';
+            if(devBtn) devBtn.style.display = isDev ? 'block' : 'none';
+
+            // Carrega dados específicos se for professor
+            if(isAdmin && window.loadPendingPhotos) window.loadPendingPhotos();
         }
 
-        // FUNÇÕES DE PONTUAÇÃO E ATUALIZAÇÃO
-        // Função para atualizar pontuação (moedas e XP)
-        async function atualizarPontuacao(moedas, xp) {
-            if (!currentUser || !userData) {
-                console.error('Usuário não está logado');
-                return false;
-            }
-            
-            try {
-                // Calcular novos valores
-                const novosDados = {
-                    coins: (userData.coins || 0) + moedas,
-                    experience: (userData.experience || 0) + xp,
-                    level: Math.floor(((userData.experience || 0) + xp) / 100) + 1,
-                    ultimaAtualizacao: new Date().toISOString()
-                };
-                
-                // Atualizar no Firestore
-                await setDoc(doc(db, 'users', currentUser.uid), novosDados, { merge: true });
-                
-                // Atualizar dados locais
-                userData = { ...userData, ...novosDados };
-                
-                // Atualizar interface
-                updateUserInterface();
-                
-                console.log(`Pontuação atualizada: +${moedas} moedas, +${xp} XP`);
-                return true;
-                
-            } catch (error) {
-                console.error('Erro ao atualizar pontuação:', error);
-                return false;
-            }
-        }
+        window.logout = async function() { await signOut(auth); window.location.reload(); };
 
-        // Função para obter ranking dos usuários
-        async function obterRanking(top = 10) {
-            try {
-                const usuariosRef = collection(db, 'users');
-                const q = query(usuariosRef, orderBy('experience', 'desc'), limit(top));
-                const querySnapshot = await getDocs(q);
-                
-                const ranking = [];
-                let posicao = 1;
-                
-                querySnapshot.forEach((doc) => {
-                    ranking.push({
-                        posicao: posicao++,
-                        nome: doc.data().name || 'Anônimo',
-                        experiencia: doc.data().experience || 0,
-                        nivel: doc.data().level || 1
-                    });
-                });
-                
-                return ranking;
-            } catch (error) {
-                console.error('Erro ao obter ranking:', error);
-                return [];
-            }
-        }
+        // Navegação
+        window.showLoginScreen = () => { document.getElementById('loginScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
+        window.showAppScreen = () => { document.getElementById('loginScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; window.showHome(); }
+        window.hideAllSections = () => { document.querySelectorAll('.content-section').forEach(s => s.style.display='none'); }
 
-        // Função para adicionar atividade ao histórico
-        async function adicionarAtividade(tipo, descricao, moedas = 0, xp = 0) {
-            if (!currentUser) return;
-            
-            try {
-                const atividade = {
-                    tipo: tipo,
-                    descricao: descricao,
-                    moedas: moedas,
-                    xp: xp,
-                    data: new Date().toISOString()
-                };
-                
-                // Salvar no Firestore (coleção separada ou campo array)
-                const atividadesRef = doc(db, 'atividades', currentUser.uid + '_' + Date.now());
-                await setDoc(atividadesRef, atividade);
-                
-                console.log('Atividade registrada:', descricao);
-            } catch (error) {
-                console.error('Erro ao adicionar atividade:', error);
-            }
-        }
-
-        // UI Functions
-        function showLoginScreen() {
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('appScreen').style.display = 'none';
-        }
-
-        function showAppScreen() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'block';
-            showHome();
-        }
-
-        function showLoading(show) {
-            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('loginError');
-            document.getElementById('errorMessage').textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function getErrorMessage(errorCode) {
-            const errorMessages = {
-                'auth/invalid-email': 'Email inválido',
-                'auth/user-disabled': 'Usuário desativado',
-                'auth/user-not-found': 'Usuário não encontrado',
-                'auth/wrong-password': 'Senha incorreta',
-                'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde'
-            };
-            return errorMessages[errorCode] || 'Erro ao fazer login. Tente novamente.';
-        }
-
-        // Navigation functions
-        window.showHome = function() {
-            hideAllSections();
-            document.getElementById('homeContent').style.display = 'block';
+        window.showHome = () => { hideAllSections(); document.getElementById('homeContent').style.display='block'; };
+        window.showGames = () => { hideAllSections(); document.getElementById('gamesContent').style.display='block'; };
+        window.showStore = () => { hideAllSections(); document.getElementById('storeContent').style.display='block'; if(window.loadStore) window.loadStore(); };
+        window.showTasks = () => { hideAllSections(); document.getElementById('tasksContent').style.display='block'; if(window.loadTasks) window.loadTasks(); };
+        
+        window.showRanking = () => { 
+            hideAllSections(); 
+            document.getElementById('rankingContent').style.display='block'; 
+            if(window.loadRealRanking) window.loadRealRanking(); 
         };
 
-        window.showGames = function() {
-            hideAllSections();
-            document.getElementById('gamesContent').style.display = 'block';
-        };
-
-        window.showStore = function() {
-            hideAllSections();
-            document.getElementById('storeContent').style.display = 'block';
-            
-            // Atualiza o saldo visualmente
-            if(userData) {
-                document.getElementById('storeBalance').innerText = (userData.coins || 0) + ' 💰';
-            }
-            
-            // Carrega os produtos
-            if(window.loadStore) {
-                window.loadStore();
-            }
-        };
-
-        window.showTasks = function() {
-            hideAllSections();
-            document.getElementById('tasksContent').style.display = 'block';
-           
-            if(window.loadTasks) {
-                window.loadTasks();
-            }
-        };
-
-        window.showRanking = async function() {
-            hideAllSections();
-            document.getElementById('rankingContent').style.display = 'block';
-        
-            const tbody = document.getElementById('tabelaRankingCompleta');
-            
-            // Mostra loading se estiver vazio
-            if (!tbody.innerHTML.includes('spinner')) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4"><div class="spinner-border text-primary"></div><p>Atualizando...</p></td></tr>';
-            }
-        
-            try {
-                // Usa a função obterRanking que já existe no seu código
-                const ranking = await obterRanking(50);
-        
-                if (ranking.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">Nenhum aluno pontuou ainda. Seja o primeiro!</td></tr>';
-                    return;
-                }
-        
-                let html = '';
-                ranking.forEach(aluno => {
-                    // Verifica se é o usuário logado para destacar
-                    const isCurrentUser = (userData && aluno.nome === userData.name);
-                    const linhaClass = isCurrentUser ? 'table-primary border-primary' : '';
-                    const textoClass = isCurrentUser ? 'fw-bold text-primary' : '';
-                    
-                    // Ícones para os top 3
-                    let posicaoDisplay = `<span class="badge bg-secondary rounded-pill">${aluno.posicao}º</span>`;
-                    if (aluno.posicao === 1) posicaoDisplay = '🥇';
-                    if (aluno.posicao === 2) posicaoDisplay = '🥈';
-                    if (aluno.posicao === 3) posicaoDisplay = '🥉';
-        
-                    html += `
-                        <tr class="${linhaClass}">
-                            <td class="text-center align-middle h4">${posicaoDisplay}</td>
-                            <td class="align-middle ${textoClass}">${aluno.nome}</td>
-                            <td class="text-center align-middle"><span class="badge bg-info text-dark">Lvl ${aluno.nivel}</span></td>
-                            <td class="text-end align-middle fw-bold text-warning">${aluno.experiencia} XP</td>
-                        </tr>
-                    `;
-                });
-        
-                tbody.innerHTML = html;
-        
-            } catch (error) {
-                console.error("Erro ao carregar ranking:", error);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger p-4">Erro ao carregar ranking. Tente recarregar a página.</td></tr>';
-            }
-        };
-
-        window.showNotifications = function() {
-            hideAllSections();
-            document.getElementById('notificationsContent').style.display = 'block';
-            if(window.loadNotificationsScreen) window.loadNotificationsScreen();
-        };
-
-        window.showProfile = function() {
+        window.showProfile = () => {
             hideAllSections();
             document.getElementById('profileContent').style.display = 'block';
             if(window.loadProfile) window.loadProfile();
         };
 
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                currentUser = null;
-                userData = null;
-                showLoginScreen();
-            } catch (error) {
-                console.error('Error signing out:', error);
-            }
+        window.showAdmin = () => {
+            hideAllSections();
+            document.getElementById('adminContent').style.display = 'block';
+            // Carrega tudo do admin
+            if(window.loadPendingSubmissions) window.loadPendingSubmissions();
+            if(window.loadPendingOrders) window.loadPendingOrders();
+            if(window.loadStudentsForAdmin) window.loadStudentsForAdmin();
+            if(window.loadRules) window.loadRules();
+            if(window.loadTeacherClasses) window.loadTeacherClasses();
+            if(window.loadPendingPhotos) window.loadPendingPhotos();
+            if(window.loadRedemptionHistory) window.loadRedemptionHistory();
         };
 
-        window.playQuiz = function() {
-            // Abrir o quiz em uma nova página
-            window.location.href = 'quiz.html';
-        };
-
-        window.showNotifications = function() {
+        window.showNotifications = () => {
             hideAllSections();
             document.getElementById('notificationsContent').style.display = 'block';
             if(window.loadNotificationsScreen) window.loadNotificationsScreen();
         };
 
-        window.showAdmin = function() {
-            hideAllSections();
-            document.getElementById('adminContent').style.display = 'block';
-            if(window.loadPendingSubmissions) window.loadPendingSubmissions(); // Carregar Tarefas
-            if(window.loadPendingOrders) window.loadPendingOrders();  // Carregar Pedidos da Loja
-            if(window.loadStudentsForAdmin) window.loadStudentsForAdmin();     // Carregar Alunos
-            if(window.loadRules) window.loadRules();                           // Carregar Regras
-            if(window.loadTeacherClasses) window.loadTeacherClasses(); // Carregar Turmas
-        };
-        
-
-        function hideAllSections() {
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
-        }
-
-        // Make functions global
-        window.hideAllSections = hideAllSections;
-        window.updateUserInterface = updateUserInterface;
-        
     </script>
-    
     <script src="js/app.js"></script>
 </body>
 </html>
