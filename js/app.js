@@ -1,27 +1,26 @@
-// JavaScript principal do Hub Gamificado
+// JavaScript principal do Hub Gamificado (Atualizado com Tarefas e Aprovação)
 
-// Inicializar
+// Inicializar quando o DOM estiver pronto (apenas log)
 document.addEventListener('DOMContentLoaded', function() {
     console.log('App carregado.');
 });
 
-// Função chamada pelo index.html após login
+// === 1. INICIALIZAÇÃO ===
+// Esta função é chamada pelo index.html assim que o usuário faz login
 window.initializeApp = function() {
     console.log('Inicializando dados reais...');
     loadRealRanking();
     loadRealActivities();
+    loadTasks(); // Nova função de tarefas
 }
 
-// Carregar Ranking Real do Firebase
+// === 2. SISTEMA DE RANKING (DADOS REAIS) ===
 async function loadRealRanking() {
     const topStudentsDiv = document.getElementById('topStudents');
-    topStudentsDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary spinner-border-sm"></div> Carregando...</div>';
+    if(topStudentsDiv) topStudentsDiv.innerHTML = '<div class="text-center"><div class="spinner-border text-primary spinner-border-sm"></div> Carregando...</div>';
 
     try {
-        if (!window.db) {
-            console.error('Banco de dados não disponível.');
-            return;
-        }
+        if (!window.db) return;
 
         // Busca os 5 alunos com mais XP
         const q = window.query(
@@ -35,7 +34,7 @@ async function loadRealRanking() {
         let posicao = 1;
 
         if (querySnapshot.empty) {
-            topStudentsDiv.innerHTML = '<div class="text-center text-muted">Sem dados ainda.</div>';
+            if(topStudentsDiv) topStudentsDiv.innerHTML = '<div class="text-center text-muted">Sem dados ainda.</div>';
             return;
         }
 
@@ -62,33 +61,84 @@ async function loadRealRanking() {
             posicao++;
         });
 
-        topStudentsDiv.innerHTML = html;
+        if(topStudentsDiv) topStudentsDiv.innerHTML = html;
 
     } catch (error) {
         console.error('Erro ao carregar ranking:', error);
-        topStudentsDiv.innerHTML = '<div class="text-center text-danger">Erro. Verifique o console.</div>';
     }
 }
 
-// Carregar Atividades (Simples baseada no perfil)
+// === 3. SISTEMA DE ATIVIDADES RECENTES ===
 function loadRealActivities() {
     const activityList = document.getElementById('activityList');
+    if(!activityList) return;
+    
     // Pega dados da tela pois userData é local do index.html
     const xp = parseInt(document.getElementById('userXP')?.innerText || '0');
     
     let html = '';
+    // Mostra atividade fictícia se tiver XP (futuramente virá do banco)
     if (xp > 0) {
         html += `
             <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
                 <div class="me-3"><span style="font-size: 24px;">🎮</span></div>
                 <div class="flex-grow-1">
-                    <div class="fw-bold">Participação no Quiz</div>
-                    <small class="text-muted">Recente</small>
+                    <div class="fw-bold">Atividade Recente</div>
+                    <small class="text-muted">Você ganhou XP recentemente!</small>
                 </div>
                 <div class="text-end"><small class="text-success fw-bold">+XP</small></div>
             </div>`;
     } else {
-        html = '<div class="text-center text-muted">Jogue para pontuar!</div>';
+        html = '<div class="text-center text-muted">Jogue ou faça tarefas para pontuar!</div>';
     }
     activityList.innerHTML = html;
 }
+
+// === 4. SISTEMA DE TAREFAS (COM APROVAÇÃO) ===
+async function loadTasks() {
+    const taskList = document.getElementById('taskList');
+    
+    if (!window.db || !window.auth.currentUser) return;
+    if (!taskList) return; 
+
+    try {
+        const userId = window.auth.currentUser.uid;
+
+        // A. Buscar todas as tarefas disponíveis
+        const qTasks = window.query(
+            window.collection(window.db, "tasks"), 
+            window.orderBy("dueDate", "asc")
+        );
+        const snapshotTasks = await window.getDocs(qTasks);
+        
+        // B. Buscar o que o aluno já entregou
+        const qSubmissions = window.query(
+            window.collection(window.db, "submissions"),
+            window.where("userId", "==", userId)
+        );
+        const snapshotSubmissions = await window.getDocs(qSubmissions);
+        
+        // Mapear status das entregas: { id_tarefa: 'pending' ou 'approved' }
+        const userSubmissions = {};
+        snapshotSubmissions.forEach(doc => {
+            const data = doc.data();
+            userSubmissions[data.taskId] = data.status;
+        });
+
+        let html = '';
+        let pendingCount = 0;
+
+        if (snapshotTasks.empty) {
+            taskList.innerHTML = '<div class="p-4 text-center text-muted">Nenhuma tarefa ativa.</div>';
+            return;
+        }
+
+        snapshotTasks.forEach((doc) => {
+            const task = doc.data();
+            const taskId = doc.id;
+            const status = userSubmissions[taskId] || null;
+
+            // Formatar data
+            const dataEntrega = task.dueDate ? new Date(task.dueDate).toLocaleDateString('pt-BR') : 'Sem prazo';
+
+            // Configurar botões e status visual
