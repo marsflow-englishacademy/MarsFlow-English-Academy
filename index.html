@@ -439,6 +439,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-4 mb-3">
+                   <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                            <h5>Quiz Educativo</h5>
+                            <p class="text-muted">Teste seus conhecimentos!</p>
+                            <button class="btn btn-primary" onclick="window.location.href='quiz.html'">
+                                Jogar Agora
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Seções placeholder -->
@@ -519,6 +531,26 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+        // Função para atualizar pontuação real
+        function atualizarPontuacao(alunoId, moedas, xp) {
+            // Use 'db' que já foi criado acima, não 'firebase.firestore()'
+            db.collection('alunos').doc(alunoId).get().then((doc) => {
+                const dados = doc.data();
+                const novoTotal = {
+                    moedas: (dados.moedas || 0) + moedas,
+                    xp: (dados.xp || 0) + xp,
+                    nivel: Math.floor(((dados.xp || 0) + xp) / 100) + 1
+                };
+        
+                // Atualizar no Firebase
+                return db.collection('alunos').doc(alunoId).update(novoTotal);
+                }).then(() => {
+                    console.log("Pontuação atualizada com sucesso!");
+                }).catch((error) => {
+                    console.error("Erro ao atualizar pontuação:", error);
+                });
+            }
 
         // Global variables
         let currentUser = null;
