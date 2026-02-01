@@ -602,6 +602,83 @@
                         </div>
                     </div>
                 </div>
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-users-cog me-2"></i>Gerenciar Aluno</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">1. Selecione o Aluno:</label>
+                                    <select id="studentSelect" class="form-select form-select-lg">
+                                        <option value="" selected>Carregando alunos...</option>
+                                    </select>
+                                </div>
+                
+                                <div class="row">
+                                    <div class="col-md-7 border-end">
+                                        <label class="form-label fw-bold mb-3">2. Aplicar Regra Rápida:</label>
+                                        <div id="rulesList" class="d-flex flex-wrap gap-2">
+                                            <div class="text-muted small">Carregando regras...</div>
+                                        </div>
+                                    </div>
+                
+                                    <div class="col-md-5 ps-md-4">
+                                        <label class="form-label fw-bold mb-3">Ou Ajuste Manual:</label>
+                                        <form onsubmit="event.preventDefault(); applyManualAdjustment();">
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">XP</span>
+                                                <input type="number" id="manualXP" class="form-control" placeholder="+/-">
+                                            </div>
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">💰</span>
+                                                <input type="number" id="manualCoins" class="form-control" placeholder="+/-">
+                                            </div>
+                                            <input type="text" id="manualReason" class="form-control mb-2" placeholder="Motivo (Obrigatório)" required>
+                                            <button type="submit" class="btn btn-outline-primary w-100">Aplicar Ajuste</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="fas fa-gavel me-2"></i>Criar Regra</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted">Crie botões para comportamentos recorrentes.</p>
+                                <form onsubmit="event.preventDefault(); createRule();">
+                                    <div class="mb-2">
+                                        <label class="form-label">Nome da Regra</label>
+                                        <input type="text" id="ruleName" class="form-control" placeholder="Ex: Esqueceu Material" required>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label">XP (+/-)</label>
+                                            <input type="number" id="ruleXP" class="form-control" value="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Coins (+/-)</label>
+                                            <input type="number" id="ruleCoins" class="form-control" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tipo</label>
+                                        <select id="ruleType" class="form-select">
+                                            <option value="positive" class="text-success">Positiva (Recompensa)</option>
+                                            <option value="negative" class="text-danger">Negativa (Punição)</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary w-100">Salvar Regra</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div> 
 
             <div id="storeContent" class="content-section" style="display: none;">
@@ -1005,8 +1082,10 @@
         window.showAdmin = function() {
             hideAllSections();
             document.getElementById('adminContent').style.display = 'block';
-            if(window.loadPendingSubmissions) window.loadPendingSubmissions(); // Carrega Tarefas
-            if(window.loadPendingOrders) window.loadPendingOrders();  // Carrega Pedidos da Loja
+            if(window.loadPendingSubmissions) window.loadPendingSubmissions(); // Carregar Tarefas
+            if(window.loadPendingOrders) window.loadPendingOrders();  // Carregar Pedidos da Loja
+            if(window.loadStudentsForAdmin) window.loadStudentsForAdmin();     // Carregar Alunos
+            if(window.loadRules) window.loadRules();                           // Carregar Regras
         };
 
         function hideAllSections() {
