@@ -710,6 +710,106 @@ window.becomeDeveloper = async function() {
     alert("Você agora é um Desenvolvedor! Recarregue a página.");
 }
 
+// === SISTEMA DE COMUNICAÇÃO E TURMAS (ETAPA 2) ===
+
+// 1. Carregar Turmas do Professor (Para lista e select)
+window.loadTeacherClasses = async function() {
+    const listDiv = document.getElementById('classList');
+    const selectTarget = document.getElementById('notifTarget');
+    
+    if (!window.db || !window.auth.currentUser) return;
+
+    try {
+        // Se for admin/dev, vê todas. Se for professor, vê as dele.
+        let q;
+        if (window.userData.role === 'admin' || window.userData.role === 'developer') {
+            q = window.query(window.collection(window.db, "classes"));
+        } else {
+            q = window.query(window.collection(window.db, "classes"), window.where("teacherId", "==", window.auth.currentUser.uid));
+        }
+
+        const snapshot = await window.getDocs(q);
+        
+        // Limpar lista e select (mantendo a opção "Todas")
+        listDiv.innerHTML = '';
+        selectTarget.innerHTML = '<option value="all">📢 Todas as Turmas</option>';
+
+        if (snapshot.empty) {
+            listDiv.innerHTML = '<div class="p-3 text-center text-muted">Você não tem turmas.</div>';
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const turma = doc.data();
+            const alunoCount = turma.studentIds ? turma.studentIds.length : 0;
+            
+            // Adicionar na lista lateral
+            listDiv.innerHTML += `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${turma.name}</strong><br>
+                        <small class="text-muted">ID: ${doc.id}</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">${alunoCount} 👤</span>
+                </div>
+            `;
+
+            // Adicionar no Select de notificação
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.text = `Turma: ${turma.name}`;
+            selectTarget.appendChild(option);
+        });
+
+    } catch (e) { console.error("Erro ao carregar turmas:", e); }
+}
+
+// 2. Criar Nova Turma (Botão Visual)
+window.createNewClassPrompt = async function() {
+    const className = prompt("Nome da nova turma (Ex: 8º Ano B):");
+    if (!className) return;
+    
+    // Reutiliza a função que criamos na Etapa 1
+    await window.createClass(className);
+    loadTeacherClasses(); // Atualiza a lista
+}
+
+// 3. Enviar Notificação
+window.sendNotification = async function() {
+    const title = document.getElementById('notifTitle').value;
+    const message = document.getElementById('notifMessage').value;
+    const target = document.getElementById('notifTarget').value;
+    const type = document.getElementById('notifType').value;
+    const urgency = document.getElementById('notifUrgency').value;
+
+    if (!title || !message) return alert("Preencha título e mensagem!");
+
+    try {
+        const notifData = {
+            title: title,
+            content: message,
+            type: type,         // homework, test, event...
+            urgency: urgency,   // chill, attention, urgent
+            targetId: target,   // 'all' ou ID da turma
+            senderId: window.auth.currentUser.uid,
+            senderName: window.userData.name || "Professor",
+            readBy: [],         // Lista de quem já leu
+            createdAt: new Date().toISOString()
+        };
+
+        await window.addDoc(window.collection(window.db, "notifications"), notifData);
+
+        alert("📢 Notificação enviada com sucesso!");
+        
+        // Limpar formulário
+        document.getElementById('notifTitle').value = '';
+        document.getElementById('notifMessage').value = '';
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao enviar notificação.");
+    }
+}
+
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
@@ -726,3 +826,6 @@ window.createRule = createRule;
 window.loadRules = loadRules;
 window.applyRuleToStudent = applyRuleToStudent;
 window.applyManualAdjustment = applyManualAdjustment;
+window.loadTeacherClasses = loadTeacherClasses;
+window.createNewClassPrompt = createNewClassPrompt;
+window.sendNotification = sendNotification;
