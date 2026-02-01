@@ -570,51 +570,30 @@
                         <div class="card shadow border-0" id="profileCard">
                             <div class="card-body text-center pt-5 pb-4">
                                 <div class="mb-3 position-relative d-inline-block">
-                                    <div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-3 p-3" 
-                                         style="width: 120px; height: 120px; line-height: 1.2;">
-                                        👤
-                                    </div>
-                                    <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-primary border border-2 border-white">
-                                        Lvl <span id="profileLevel">1</span>
-                                    </span>
+                                    <div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-3 p-3" style="width: 120px; height: 120px; line-height: 1.2;">👤</div>
+                                    <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-primary border border-2 border-white">Lvl <span id="profileLevel">1</span></span>
                                 </div>
-                                
                                 <h3 class="mt-3 fw-bold" id="profileName">Carregando...</h3>
                                 <p class="text-muted mb-2" id="profileClass">Sem Turma</p>
                                 <p class="badge bg-warning text-dark" id="profileRole">Aluno</p>
-            
                                 <div class="mt-4 px-3">
-                                    <div class="d-flex justify-content-between small text-muted mb-1">
-                                        <span>Progresso</span>
-                                        <span id="xpRatio">0 / 100 XP</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px;">
-                                        <div id="xpBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
-                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0 / 100 XP</span></div>
+                                    <div class="progress" style="height: 10px;"><div id="xpBar" class="progress-bar bg-success" style="width: 0%"></div></div>
                                     <small class="text-muted mt-2 d-block">Faltam <span id="xpToNext">100</span> XP para o próximo nível</small>
                                 </div>
                             </div>
                         </div>
                     </div>
-            
                     <div class="col-md-8">
                         <div class="card shadow-sm h-100">
-                            <div class="card-header bg-white py-3">
-                                <h5 class="mb-0"><i class="fas fa-box-open me-2 text-primary"></i>Meu Inventário</h5>
-                            </div>
+                            <div class="card-header bg-white py-3"><h5 class="mb-0"><i class="fas fa-box-open me-2 text-primary"></i>Meu Inventário</h5></div>
                             <div class="card-body bg-light">
-                                <div class="row g-3" id="inventoryList">
-                                    <div class="col-12 text-center p-5 text-muted">
-                                        <i class="fas fa-search fa-2x mb-3"></i><br>
-                                        Carregando seus itens...
-                                    </div>
-                                </div>
+                                <div class="row g-3" id="inventoryList"><div class="col-12 text-center p-5 text-muted">Carregando...</div></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div id="adminContent" class="content-section" style="display: none;">
                 <h2 class="mb-4"><i class="fas fa-user-shield text-danger"></i> Painel do Professor</h2>
                 
@@ -1007,15 +986,13 @@
 // Atualizar interface baseado nos dados e PERMISSÕES
         function updateUserInterface() {
             if (!userData) return;
-            
+            const icon = userData.equippedIcon || '';
             // 1. Atualizar textos básicos
-            document.getElementById('userName').textContent = userData.name || 'Usuário';
             document.getElementById('userCoins').textContent = userData.coins || 0;
             document.getElementById('userXP').textContent = userData.experience || 0;
             document.getElementById('userLevel').textContent = userData.level || 1;
-            document.getElementById('userName').innerHTML = `
-                ${userData.equippedIcon || ''} ${userData.name || 'Usuário'}
-            `;
+            document.getElementById('userName').innerHTML = `${icon} ${userData.name || 'Usuário'}`;
+                        `;
             
             const rank = Math.floor((userData.experience || 0) / 100) + 1;
             document.getElementById('userRank').textContent = rank;
