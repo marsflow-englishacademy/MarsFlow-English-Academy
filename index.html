@@ -270,6 +270,15 @@
                     </ul>
                     
                     <ul class="navbar-nav">
+                        <li class="nav-item me-3 position-relative">
+                            <a class="nav-link text-white" href="#" onclick="showNotifications()">
+                                <i class="fas fa-bell fa-lg"></i>
+                                <span id="notifBadge" class="position-absolute bg-danger border border-light rounded-circle" 
+                                      style="display: none; width: 12px; height: 12px; bottom: 8px; right: 5px;">
+                                    <span class="visually-hidden">Novos avisos</span>
+                                </span>
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i><span id="userName">Usuário</span>
@@ -500,32 +509,56 @@
 
             <div id="rankingContent" class="content-section" style="display: none;">
                 <div class="card">
-                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-trophy me-2"></i>Classificação Geral
-                        </h5>
-                        <small>Top 50 Alunos</small>
+                    <div class="card-header bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Classificação</h5>
+                            <span class="badge bg-dark text-warning" id="myClassBadge">Sem Turma</span>
+                        </div>
+                        
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active fw-bold" id="tabGeneral" href="#" onclick="switchRanking('general')">🏆 Geral</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" id="tabClass" href="#" onclick="switchRanking('class')">🏫 Minha Turma</a>
+                            </li>
+                        </ul>
                     </div>
+                    
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover table-striped mb-0">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col" class="text-center">#</th>
-                                        <th scope="col">Aluno</th>
-                                        <th scope="col" class="text-center">Nível</th>
-                                        <th scope="col" class="text-end">XP Total</th>
+                                        <th class="text-center">#</th>
+                                        <th>Aluno</th>
+                                        <th class="text-center">Nível</th>
+                                        <th class="text-end">XP</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaRankingCompleta">
-                                    <tr>
-                                        <td colspan="4" class="text-center p-4">
-                                            <div class="spinner-border text-primary" role="status"></div>
-                                            <p class="mt-2 mb-0">Carregando classificação...</p>
-                                        </td>
-                                    </tr>
+                                    <tr><td colspan="4" class="text-center p-4">Carregando...</td></tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="notificationsContent" class="content-section" style="display: none;">
+                <div class="row h-100" style="min-height: 500px;">
+                    <div class="col-md-4 border-end pe-0">
+                        <div class="list-group list-group-flush h-100 overflow-auto" id="notifList">
+                            <div class="text-center p-4 text-muted">Carregando avisos...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8 ps-0">
+                        <div id="notifDetail" class="p-4 h-100 bg-white">
+                            <div class="text-center text-muted mt-5">
+                                <i class="far fa-envelope-open fa-3x mb-3"></i>
+                                <p>Selecione uma mensagem para ler.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -827,13 +860,13 @@
                 await loadUserData();
                 showAppScreen();
 
-            if (window.initializeApp) {
-                window.initializeApp();
-            }
-
-            if(window.initializeApp) {
-                window.initializeApp();
-            }
+                if (window.initializeApp) {
+                    window.initializeApp();
+                }
+    
+                if(window.checkNotifications) window.checkNotifications(); {
+                    setInterval(() => { if(window.checkNotifications) window.checkNotifications(); }, 60000);
+                }
                 
             // ---------------------
             } else {
@@ -1155,6 +1188,12 @@
             }
         };
 
+        window.showNotifications = function() {
+            hideAllSections();
+            document.getElementById('notificationsContent').style.display = 'block';
+            if(window.loadNotificationsScreen) window.loadNotificationsScreen();
+        };
+
         window.showProfile = function() {
             alert('Perfil em desenvolvimento!');
         };
@@ -1173,6 +1212,12 @@
         window.playQuiz = function() {
             // Abrir o quiz em uma nova página
             window.location.href = 'quiz.html';
+        };
+
+        window.showNotifications = function() {
+            hideAllSections();
+            document.getElementById('notificationsContent').style.display = 'block';
+            if(window.loadNotificationsScreen) window.loadNotificationsScreen();
         };
 
         window.showAdmin = function() {
