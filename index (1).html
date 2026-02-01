@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub Gamificado - Escola</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-top: 50px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo i {
+            font-size: 60px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-weight: 600;
+            font-size: 28px;
+        }
+        
+        .form-control {
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-guest {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 12px;
+            padding: 10px 25px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-guest:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-card i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="login-container">
+                    <div class="logo">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h1>Hub Gamificado</h1>
+                        <p class="text-muted">Sua escola virtual</p>
+                    </div>
+                    
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>Senha
+                            </label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-login">
+                                <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                            </button>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="button" class="btn btn-guest" onclick="guestLogin()">
+                                <i class="fas fa-user me-2"></i>Entrar como Convidado
+                            </button>
+                        </div>
+                        
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p class="mt-2">Entrando...</p>
+                        </div>
+                        
+                        <div id="loginError" class="alert alert-danger" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="errorMessage"></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-md-7">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <i class="fas fa-gamepad"></i>
+                            <h4>Aprenda Jogando</h4>
+                            <p>Quests educativas e desafios divertidos</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <i class="fas fa-trophy"></i>
+                            <h4>Competição Saudável</h4>
+                            <p>Ranking com seus colegas da turma</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h4>Loja Virtual</h4>
+                            <p>Ganhe moedas e personalize seu avatar</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h4>Tarefas Organizadas</h4>
+                            <p>Nunca mais perca um prazo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Principal do Aplicativo (oculta inicialmente) -->
+    <div id="appScreen" style="display: none;">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#" onclick="showHome()">
+                    <i class="fas fa-graduation-cap me-2"></i>Hub Gamificado
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showHome()">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showGames()">
+                                <i class="fas fa-gamepad me-1"></i>Jogos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showStore()">
+                                <i class="fas fa-store me-1"></i>Loja
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showTasks()">
+                                <i class="fas fa-tasks me-1"></i>Tarefas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showRanking()">
+                                <i class="fas fa-trophy me-1"></i>Ranking
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i><span id="userName">Usuário</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="showProfile()">
+                                    <i class="fas fa-user-cog me-1"></i>Perfil
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Sair
+                                </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Conteúdo Principal -->
+        <div class="container mt-4">
+            <!-- Home/Dashboard -->
+            <div id="homeContent" class="content-section">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-home me-2"></i>Bem-vindo ao Hub Gamificado!
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <i class="fas fa-coins fa-2x text-warning mb-2"></i>
+                                                <h4 id="userCoins">0</h4>
+                                                <small class="text-muted">Moedas</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <i class="fas fa-star fa-2x text-info mb-2"></i>
+                                                <h4 id="userXP">0</h4>
+                                                <small class="text-muted">XP</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <i class="fas fa-level-up-alt fa-2x text-success mb-2"></i>
+                                                <h4 id="userLevel">1</h4>
+                                                <small class="text-muted">Nível</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                                                <h4 id="userRank">-</h4>
+                                                <small class="text-muted">Posição</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-bell me-2"></i>Últimas Atividades
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="activityList">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Nenhuma atividade recente
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-trophy me-2"></i>Top 5 Alunos
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="topStudents">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Ranking não disponível
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-calendar me-2"></i>Próximas Atividades
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="upcomingActivities">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Nenhuma atividade programada
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outras seções serão implementadas posteriormente -->
+            <div id="gamesContent" class="content-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-gamepad me-2"></i>Jogos Educativos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                                        <h5>Quiz Educativo</h5>
+                                        <p class="text-muted">Teste seus conhecimentos</p>
+                                        <button class="btn btn-primary" onclick="window.open('quiz.html', '_blank')">
+                                            <i class="fas fa-play me-2"></i>Jogar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-puzzle-piece fa-3x text-success mb-3"></i>
+                                        <h5>Quebra-cabeça</h5>
+                                        <p class="text-muted">Em breve...</p>
+                                        <button class="btn btn-secondary" disabled>
+                                            <i class="fas fa-clock me-2"></i>Em breve
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-memory fa-3x text-warning mb-3"></i>
+                                        <h5>Memória</h5>
+                                        <p class="text-muted">Em breve...</p>
+                                        <button class="btn btn-secondary" disabled>
+                                            <i class="fas fa-clock me-2"></i>Em breve
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seções placeholder -->
+            <div id="storeContent" class="content-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-store me-2"></i>Loja Virtual
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                            <h5>Loja em desenvolvimento</h5>
+                            <p class="text-muted">Em breve você poderá personalizar seu avatar!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tasksContent" class="content-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tasks me-2"></i>Tarefas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                            <h5>Sistema de tarefas em desenvolvimento</h5>
+                            <p class="text-muted">Em breve seus trabalhos escolares aparecerão aqui!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rankingContent" class="content-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy me-2"></i>Ranking
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                            <h5>Ranking em desenvolvimento</h5>
+                            <p class="text-muted">Em breve você verá sua posição na turma!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration - ATUALIZE COM SEUS DADOS
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global variables
+        let currentUser = null;
+        let userData = null;
+
+        // Check authentication state
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                showAppScreen();
+            } else {
+                showLoginScreen();
+            }
+        });
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                showLoading(true);
+                
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                showLoading(false);
+            } catch (error) {
+                showLoading(false);
+                showError(getErrorMessage(error.code));
+            }
+        });
+
+        // Guest login
+        window.guestLogin = function() {
+            // For demo purposes, create a guest session
+            const guestData = {
+                uid: 'guest_' + Date.now(),
+                email: 'convidado@escola.com',
+                name: 'Convidado',
+                role: 'student',
+                level: 1,
+                experience: 0,
+                coins: 100
+            };
+            
+            currentUser = guestData;
+            userData = guestData;
+            showAppScreen();
+        };
+
+        // Load user data from Firestore
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                } else {
+                    // Create new user document
+                    userData = {
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        name: currentUser.email.split('@')[0],
+                        role: 'student',
+                        level: 1,
+                        experience: 0,
+                        coins: 100,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    await setDoc(doc(db, 'users', currentUser.uid), userData);
+                }
+                
+                updateUserInterface();
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Update user interface with user data
+        function updateUserInterface() {
+            if (!userData) return;
+            
+            document.getElementById('userName').textContent = userData.name || 'Usuário';
+            document.getElementById('userCoins').textContent = userData.coins || 0;
+            document.getElementById('userXP').textContent = userData.experience || 0;
+            document.getElementById('userLevel').textContent = userData.level || 1;
+            
+            // Calculate rank (simplified)
+            const rank = Math.floor((userData.experience || 0) / 100) + 1;
+            document.getElementById('userRank').textContent = rank;
+        }
+
+        // FUNÇÕES DE PONTUAÇÃO E ATUALIZAÇÃO
+        // Função para atualizar pontuação (moedas e XP)
+        async function atualizarPontuacao(moedas, xp) {
+            if (!currentUser || !userData) {
+                console.error('Usuário não está logado');
+                return false;
+            }
+            
+            try {
+                // Calcular novos valores
+                const novosDados = {
+                    coins: (userData.coins || 0) + moedas,
+                    experience: (userData.experience || 0) + xp,
+                    level: Math.floor(((userData.experience || 0) + xp) / 100) + 1,
+                    ultimaAtualizacao: new Date().toISOString()
+                };
+                
+                // Atualizar no Firestore
+                await setDoc(doc(db, 'users', currentUser.uid), novosDados, { merge: true });
+                
+                // Atualizar dados locais
+                userData = { ...userData, ...novosDados };
+                
+                // Atualizar interface
+                updateUserInterface();
+                
+                console.log(`Pontuação atualizada: +${moedas} moedas, +${xp} XP`);
+                return true;
+                
+            } catch (error) {
+                console.error('Erro ao atualizar pontuação:', error);
+                return false;
+            }
+        }
+
+        // Função para obter ranking dos usuários
+        async function obterRanking(top = 10) {
+            try {
+                const usuariosRef = collection(db, 'users');
+                const q = query(usuariosRef, orderBy('experience', 'desc'), limit(top));
+                const querySnapshot = await getDocs(q);
+                
+                const ranking = [];
+                let posicao = 1;
+                
+                querySnapshot.forEach((doc) => {
+                    ranking.push({
+                        posicao: posicao++,
+                        nome: doc.data().name || 'Anônimo',
+                        experiencia: doc.data().experience || 0,
+                        nivel: doc.data().level || 1
+                    });
+                });
+                
+                return ranking;
+            } catch (error) {
+                console.error('Erro ao obter ranking:', error);
+                return [];
+            }
+        }
+
+        // Função para adicionar atividade ao histórico
+        async function adicionarAtividade(tipo, descricao, moedas = 0, xp = 0) {
+            if (!currentUser) return;
+            
+            try {
+                const atividade = {
+                    tipo: tipo,
+                    descricao: descricao,
+                    moedas: moedas,
+                    xp: xp,
+                    data: new Date().toISOString()
+                };
+                
+                // Salvar no Firestore (coleção separada ou campo array)
+                const atividadesRef = doc(db, 'atividades', currentUser.uid + '_' + Date.now());
+                await setDoc(atividadesRef, atividade);
+                
+                console.log('Atividade registrada:', descricao);
+            } catch (error) {
+                console.error('Erro ao adicionar atividade:', error);
+            }
+        }
+
+        // UI Functions
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('appScreen').style.display = 'none';
+        }
+
+        function showAppScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            showHome();
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            document.getElementById('errorMessage').textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function getErrorMessage(errorCode) {
+            const errorMessages = {
+                'auth/invalid-email': 'Email inválido',
+                'auth/user-disabled': 'Usuário desativado',
+                'auth/user-not-found': 'Usuário não encontrado',
+                'auth/wrong-password': 'Senha incorreta',
+                'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde'
+            };
+            return errorMessages[errorCode] || 'Erro ao fazer login. Tente novamente.';
+        }
+
+        // Navigation functions
+        window.showHome = function() {
+            hideAllSections();
+            document.getElementById('homeContent').style.display = 'block';
+        };
+
+        window.showGames = function() {
+            hideAllSections();
+            document.getElementById('gamesContent').style.display = 'block';
+        };
+
+        window.showStore = function() {
+            hideAllSections();
+            document.getElementById('storeContent').style.display = 'block';
+        };
+
+        window.showTasks = function() {
+            hideAllSections();
+            document.getElementById('tasksContent').style.display = 'block';
+        };
+
+        window.showRanking = function() {
+            hideAllSections();
+            document.getElementById('rankingContent').style.display = 'block';
+        };
+
+        window.showProfile = function() {
+            alert('Perfil em desenvolvimento!');
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                currentUser = null;
+                userData = null;
+                showLoginScreen();
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        };
+
+        window.playQuiz = function() {
+            // Abrir o quiz em uma nova página
+            window.location.href = 'quiz.html';
+        };
+
+        function hideAllSections() {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+        }
+
+        // Make functions global
+        window.hideAllSections = hideAllSections;
+        window.updateUserInterface = updateUserInterface;
+        
+    </script>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
