@@ -706,6 +706,7 @@
             
             currentUser = guestData;
             userData = guestData;
+            window.userData = userData; // <--- O SEGREDO ESTÁ AQUI
             showAppScreen();
         };
 
@@ -733,7 +734,8 @@
                     
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
-                
+
+                window.userData = userData; // <--- O SEGREDO ESTÁ AQUI
                 updateUserInterface();
             } catch (error) {
                 console.error('Error loading user data:', error);
