@@ -373,6 +373,72 @@ window.rejectSubmission = async function(subId) {
     } catch (e) { alert("Erro ao rejeitar."); }
 }
 
+// === GESTÃO DE PEDIDOS DA LOJA (ADMIN) ===
+
+// 1. Carregar Pedidos Pendentes
+window.loadPendingOrders = async function() {
+    const list = document.getElementById('ordersList');
+    if(!list || !window.db) return;
+
+    try {
+        // Busca pedidos com status 'pending_delivery'
+        const q = window.query(
+            window.collection(window.db, "orders"), 
+            window.where("status", "==", "pending_delivery")
+        );
+        const snapshot = await window.getDocs(q);
+
+        if (snapshot.empty) {
+            list.innerHTML = '<div class="p-4 text-center text-muted">Nenhum pedido pendente de entrega.</div>';
+            return;
+        }
+
+        let html = '';
+        snapshot.forEach(doc => {
+            const order = doc.data();
+            const dataCompra = new Date(order.purchasedAt).toLocaleDateString('pt-BR');
+            
+            html += `
+                <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold">${order.studentName} <span class="badge bg-light text-dark border ms-2">${dataCompra}</span></div>
+                        <div class="text-muted small">Comprou: <span class="text-success fw-bold" style="font-size: 1.1em;">${order.itemName}</span></div>
+                        <div class="small text-secondary">Pagou: ${order.pricePaid} moedas</div>
+                    </div>
+                    <button class="btn btn-success btn-sm px-3" onclick="deliverOrder('${doc.id}', '${order.itemName}')">
+                        <i class="fas fa-check-circle me-1"></i> Marcar Entregue
+                    </button>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+
+    } catch (e) {
+        console.error("Erro pedidos:", e);
+        list.innerHTML = '<div class="p-4 text-center text-danger">Erro ao carregar pedidos.</div>';
+    }
+}
+
+// 2. Marcar Pedido como Entregue
+window.deliverOrder = async function(orderId, itemName) {
+    if(!confirm(`Confirmar a entrega do item "${itemName}" para o aluno?`)) return;
+
+    try {
+        // Atualiza status para 'delivered'
+        await window.updateDoc(window.doc(window.db, "orders", orderId), { 
+            status: 'delivered', 
+            deliveredAt: new Date().toISOString() 
+        });
+
+        alert("Item marcado como entregue! O pedido saiu da lista.");
+        loadPendingOrders(); // Atualiza a lista
+        
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao atualizar pedido.");
+    }
+}
+
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
@@ -381,3 +447,5 @@ window.loadPendingSubmissions = loadPendingSubmissions;
 window.approveSubmission = approveSubmission;
 window.rejectSubmission = rejectSubmission;
 window.loadStore = loadStore;
+window.loadPendingOrders = loadPendingOrders;
+window.deliverOrder = deliverOrder;
