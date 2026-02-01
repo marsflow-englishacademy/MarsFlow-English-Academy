@@ -262,9 +262,9 @@
                             </a>
                         </li>
                         
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showAdmin()">
-                                <i class="fas fa-trophy me-1"></i>Professor
+                         <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showAdmin()" id="navAdminBtn" style="display: none;">
+                                <i class="fas fa-user-shield me-1"></i>Professor
                             </a>
                         </li>
                     </ul>
@@ -818,40 +818,64 @@
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                 } else {
-                    // Create new user document
+                    // CRIAÇÃO DE NOVO USUÁRIO (COM ESTRUTURA NOVA)
                     userData = {
                         uid: currentUser.uid,
                         email: currentUser.email,
                         name: currentUser.email.split('@')[0],
-                        role: 'student',
+                        
+                        // --- NOVOS CAMPOS DE HIERARQUIA ---
+                        role: 'student',       // Padrão: aluno. Opções: student, teacher, parent, admin, developer
+                        classId: null,         // ID da turma (para alunos)
+                        myClasses: [],         // IDs das turmas (para professores)
+                        childrenIds: [],       // IDs dos filhos (para pais)
+                        parentId: null,        // ID do pai (para alunos)
+                        // ----------------------------------
+                        
                         level: 1,
                         experience: 0,
                         coins: 100,
+                        inventory: [],
                         createdAt: new Date().toISOString()
                     };
                     
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
-
                 window.userData = userData; // <--- O SEGREDO ESTÁ AQUI
                 updateUserInterface();
+                
             } catch (error) {
                 console.error('Error loading user data:', error);
             }
         }
 
-        // Update user interface with user data
+// Atualizar interface baseado nos dados e PERMISSÕES
         function updateUserInterface() {
             if (!userData) return;
             
+            // 1. Atualizar textos básicos
             document.getElementById('userName').textContent = userData.name || 'Usuário';
             document.getElementById('userCoins').textContent = userData.coins || 0;
             document.getElementById('userXP').textContent = userData.experience || 0;
             document.getElementById('userLevel').textContent = userData.level || 1;
             
-            // Calculate rank (simplified)
             const rank = Math.floor((userData.experience || 0) / 100) + 1;
             document.getElementById('userRank').textContent = rank;
+
+            // 2. CONTROLE DE ACESSO (Permissões)
+            const adminRoles = ['teacher', 'admin', 'developer'];
+            const isAdmin = adminRoles.includes(userData.role);
+            
+            // Procura o botão do menu "Professor" (vamos adicionar um ID nele para facilitar)
+            const adminBtn = document.getElementById('navAdminBtn');
+            if(adminBtn) {
+                adminBtn.style.display = isAdmin ? 'block' : 'none';
+            }
+            
+            // Se for Desenvolvedor, mostra um aviso visual
+            if (userData.role === 'developer') {
+                document.getElementById('userName').innerHTML += ' <span class="badge bg-danger">DEV</span>';
+            }
         }
 
         // FUNÇÕES DE PONTUAÇÃO E ATUALIZAÇÃO
