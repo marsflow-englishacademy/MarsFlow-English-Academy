@@ -242,6 +242,104 @@ window.rejectSubmission = async function(subId) {
     } catch (e) { alert("Erro ao rejeitar."); }
 }
 
+// === 4. SISTEMA DE LOJA ===
+
+// Carregar Produtos
+async function loadStore() {
+    const storeList = document.getElementById('storeList');
+    if(!storeList || !window.db) return;
+
+    try {
+        // Busca produtos da coleção 'shop_items'
+        const q = window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc"));
+        const snapshot = await window.getDocs(q);
+
+        if (snapshot.empty) {
+            storeList.innerHTML = '<div class="col-12 text-center text-muted">A loja está sendo reabastecida!</div>';
+            return;
+        }
+
+        // Busca inventário do usuário para saber o que ele já tem
+        const userRef = window.doc(window.db, "users", window.auth.currentUser.uid);
+        const userSnap = await window.getDoc(userRef);
+        const inventory = userSnap.data().inventory || [];
+
+        let html = '';
+        
+        snapshot.forEach((doc) => {
+            const item = doc.data();
+            const itemId = doc.id;
+            const alreadyOwns = inventory.includes(itemId);
+            
+            // Lógica do Botão
+            let btnAction = '';
+            if (alreadyOwns && item.type !== 'consumable') {
+                btnAction = `<button class="btn btn-secondary w-100" disabled>Comprado</button>`;
+            } else {
+                btnAction = `
+                    <button class="btn btn-success w-100" onclick="buyItem('${itemId}', '${item.name}', ${item.price})">
+                        Comprar
+                    </button>`;
+            }
+
+            html += `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <div class="display-4 mb-3">${item.icon || '🎁'}</div>
+                            <h5 class="card-title">${item.name}</h5>
+                            <p class="card-text text-muted small">${item.description}</p>
+                            <h4 class="text-warning fw-bold my-3">${item.price} 💰</h4>
+                            ${btnAction}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        storeList.innerHTML = html;
+
+    } catch (e) {
+        console.error("Erro loja:", e);
+        storeList.innerHTML = '<div class="col-12 text-danger text-center">Erro ao carregar loja.</div>';
+    }
+}
+
+// Comprar Item
+window.buyItem = async function(itemId, itemName, price) {
+    if(!confirm(`Deseja comprar "${itemName}" por ${price} moedas?`)) return;
+
+    try {
+        const userId = window.auth.currentUser.uid;
+        const userRef = window.doc(window.db, "users", userId);
+        
+        // 1. Verificar saldo atualizado
+        const userSnap = await window.getDoc(userRef);
+        const currentCoins = userSnap.data().coins || 0;
+
+        if (currentCoins < price) {
+            alert("Saldo insuficiente! Vá fazer tarefas para ganhar mais moedas.");
+            return;
+        }
+
+        // 2. Processar compra (Descontar saldo e adicionar ao inventário)
+        await window.updateDoc(userRef, {
+            coins: currentCoins - price,
+            inventory: window.arrayUnion(itemId)
+        });
+
+        alert(`Compra realizada com sucesso! Você obteve: ${itemName}`);
+        
+        // 3. Atualizar interface
+        loadStore(); // Recarrega loja
+        if(window.loadUserData) window.loadUserData(); // Atualiza saldo no topo
+
+    } catch (e) {
+        console.error(e);
+        alert("Erro na transação. Tente novamente.");
+    }
+}
+
 // Expor funções globais
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
@@ -249,3 +347,4 @@ window.createTask = createTask;
 window.loadPendingSubmissions = loadPendingSubmissions;
 window.approveSubmission = approveSubmission;
 window.rejectSubmission = rejectSubmission;
+window.loadStore = loadStore;
