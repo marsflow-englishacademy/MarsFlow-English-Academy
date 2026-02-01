@@ -1,4 +1,4 @@
-// JavaScript Principal - Hub Gamificado (Versão Admin + Tarefas)
+// JavaScript Principal - Hub Gamificado (Versão: Loja Avançada + Tarefas)
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => console.log('App pronto.'));
@@ -7,6 +7,7 @@ window.initializeApp = function() {
     loadRealRanking();
     loadRealActivities();
     loadTasks();
+    // A loja carrega sob demanda ao clicar no menu
 }
 
 // === 1. RANKING & ATIVIDADES ===
@@ -41,7 +42,6 @@ async function loadRealRanking() {
 }
 
 function loadRealActivities() {
-    // Espaço reservado para histórico futuro
     const list = document.getElementById('activityList');
     if(list) list.innerHTML = '<div class="text-center text-muted small">Suas conquistas aparecerão aqui.</div>';
 }
@@ -54,10 +54,10 @@ async function loadTasks() {
     try {
         const userId = window.auth.currentUser.uid;
         
-        // Buscar todas as tarefas
+        // Tarefas
         const tasksSnap = await window.getDocs(window.query(window.collection(window.db, "tasks"), window.orderBy("dueDate", "asc")));
         
-        // Buscar entregas do aluno
+        // Entregas do aluno
         const subsSnap = await window.getDocs(window.query(
             window.collection(window.db, "submissions"), 
             window.where("userId", "==", userId)
@@ -84,8 +84,8 @@ async function loadTasks() {
                 badge = '<span class="badge bg-warning text-dark ms-2">Analisando</span>';
                 btn = '<button class="btn btn-secondary btn-sm" disabled>Enviada</button>';
             } else {
-                pendentes++;
                 if (status === 'rejected') badge = '<span class="badge bg-danger ms-2">Refazer</span>';
+                pendentes++;
             }
 
             html += `
@@ -114,12 +114,12 @@ async function loadTasks() {
 }
 
 window.submitTask = async function(taskId, title) {
-    const just = prompt("Confirmação de entrega (Escreva 'Feito' ou cole um link):");
+    const just = prompt("Confirmação (Escreva 'Feito' ou cole um link):");
     if (!just) return;
 
     try {
         const uid = window.auth.currentUser.uid;
-        const name = document.getElementById('userName')?.innerText || "Aluno";
+        const name = window.userData?.name || "Aluno";
         
         await window.setDoc(window.doc(window.db, "submissions", `${uid}_${taskId}`), {
             taskId, userId: uid, studentName: name, taskTitle: title,
@@ -131,9 +131,158 @@ window.submitTask = async function(taskId, title) {
     } catch (e) { alert("Erro ao enviar."); }
 }
 
-// === 3. PAINEL DO PROFESSOR (ADMIN) ===
+// === 3. SISTEMA DE LOJA AVANÇADO (Estoque + Inflação + Pedidos) ===
 
-// A. Criar Nova Tarefa
+window.loadStore = async function() {
+    const storeList = document.getElementById('storeList');
+    const storeBalance = document.getElementById('storeBalance');
+    
+    // Atualiza saldo visual
+    if (window.userData && storeBalance) {
+        storeBalance.innerHTML = `<i class="fas fa-coins"></i> ${window.userData.coins || 0}`;
+    }
+
+    if (!storeList || !window.db) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc"));
+        const snapshot = await window.getDocs(q);
+
+        if (snapshot.empty) {
+            storeList.innerHTML = '<div class="col-12 text-center text-muted">Loja vazia.</div>';
+            return;
+        }
+
+        const inventory = window.userData?.inventory || [];
+        let html = '';
+        
+        snapshot.forEach((doc) => {
+            const item = doc.data();
+            const itemId = doc.id;
+            const price = Math.ceil(item.price); 
+            const stock = (item.stock !== undefined) ? item.stock : 99;
+            
+            const userCoins = window.userData?.coins || 0;
+            const alreadyOwns = inventory.includes(itemId);
+            
+            // Lógica do Botão
+            let btnHtml = '';
+            let stockBadge = stock < 5 ? `<span class="badge bg-danger mb-2">Restam ${stock}!</span>` : `<span class="badge bg-secondary mb-2">Estoque: ${stock}</span>`;
+
+            if (stock <= 0) {
+                 btnHtml = `<button class="btn btn-secondary w-100" disabled>Esgotado</button>`;
+                 stockBadge = `<span class="badge bg-dark mb-2">Esgotado</span>`;
+            } else if (alreadyOwns && item.type !== 'consumable') {
+                btnHtml = `<button class="btn btn-secondary w-100" disabled><i class="fas fa-check"></i> Comprado</button>`;
+            } else if (userCoins < price) {
+                btnHtml = `<button class="btn btn-outline-danger w-100" disabled>Faltam ${price - userCoins} 💰</button>`;
+            } else {
+                btnHtml = `
+                    <button class="btn btn-success w-100" onclick="buyItem('${itemId}', '${item.name}', ${price})">
+                        Comprar por ${price}
+                    </button>`;
+            }
+
+            html += `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0 position-relative">
+                        <div class="card-body text-center">
+                            ${stockBadge}
+                            <div class="display-4 mb-3">${item.icon || '🎁'}</div>
+                            <h5 class="card-title">${item.name}</h5>
+                            <p class="card-text text-muted small">${item.description}</p>
+                            
+                            <h4 class="text-warning fw-bold my-3">${price} 💰</h4>
+                            ${btnHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        storeList.innerHTML = html;
+
+    } catch (e) { console.error("Erro loja:", e); }
+}
+
+window.buyItem = async function(itemId, itemName, currentPrice) {
+    if (!confirm(`Confirmar compra de "${itemName}" por ${currentPrice} moedas?`)) return;
+
+    try {
+        const userId = window.auth.currentUser.uid;
+        const userName = window.userData?.name || "Aluno";
+        const userRef = window.doc(window.db, "users", userId);
+        const itemRef = window.doc(window.db, "shop_items", itemId);
+
+        // 1. Verificar dados ATUAIS do item
+        const itemSnap = await window.getDoc(itemRef);
+        const itemData = itemSnap.data();
+        
+        if (itemData.stock !== undefined && itemData.stock <= 0) {
+            alert("Ops! Esse item acabou de esgotar.");
+            loadStore();
+            return;
+        }
+
+        const realPrice = Math.ceil(itemData.price);
+        const userSnap = await window.getDoc(userRef);
+        const userCoins = userSnap.data().coins || 0;
+
+        if (userCoins < realPrice) {
+            alert("Saldo insuficiente! O preço pode ter subido.");
+            loadStore();
+            return;
+        }
+
+        // === TRANSAÇÃO DE COMPRA ===
+        
+        // A. Descontar do Usuário e dar o item
+        await window.updateDoc(userRef, {
+            coins: userCoins - realPrice,
+            inventory: window.arrayUnion(itemId)
+        });
+
+        // B. Criar PEDIDO para o Professor (orders)
+        await window.addDoc(window.collection(window.db, "orders"), {
+            userId: userId,
+            studentName: userName,
+            itemId: itemId,
+            itemName: itemName,
+            pricePaid: realPrice,
+            status: "pending_delivery", 
+            purchasedAt: new Date().toISOString()
+        });
+
+        // C. Atualizar a Loja (Reduzir Estoque e Aumentar Preço)
+        const inflationRate = itemData.inflation || 0; 
+        const newPrice = realPrice + (realPrice * inflationRate);
+        const newStock = (itemData.stock !== undefined) ? itemData.stock - 1 : 99;
+
+        await window.updateDoc(itemRef, {
+            stock: newStock,
+            price: newPrice
+        });
+
+        alert(`🎉 Compra realizada com sucesso!\nO item foi adicionado aos seus pedidos.`);
+        
+        // Atualizar visual local
+        if (window.userData) {
+            window.userData.coins = userCoins - realPrice;
+            if(!window.userData.inventory) window.userData.inventory = [];
+            window.userData.inventory.push(itemId);
+        }
+        
+        loadStore();
+        if(window.updateUserInterface) window.updateUserInterface();
+
+    } catch (e) {
+        console.error("Erro compra:", e);
+        alert("Erro ao processar compra. Tente novamente.");
+    }
+}
+
+// === PAINEL DO PROFESSOR (ADMIN) - Tarefas ===
+
 window.createTask = async function() {
     const title = document.getElementById('taskTitle').value;
     const desc = document.getElementById('taskDesc').value;
@@ -147,19 +296,17 @@ window.createTask = async function() {
         await window.addDoc(window.collection(window.db, "tasks"), {
             title, description: desc, xp, coins, dueDate: date, createdAt: new Date().toISOString()
         });
-        alert("Missão criada com sucesso!");
-        document.getElementById('taskTitle').value = ''; // Limpar form
-        loadTasks(); // Atualizar lista
-    } catch (e) { alert("Erro ao criar missão: " + e.message); }
+        alert("Missão criada!");
+        document.getElementById('taskTitle').value = ''; 
+        loadTasks(); 
+    } catch (e) { alert("Erro: " + e.message); }
 }
 
-// B. Carregar Entregas Pendentes
 window.loadPendingSubmissions = async function() {
     const list = document.getElementById('submissionsList');
     if(!list) return;
 
     try {
-        // Buscar apenas status 'pending'
         const q = window.query(window.collection(window.db, "submissions"), window.where("status", "==", "pending"));
         const snapshot = await window.getDocs(q);
 
@@ -192,21 +339,16 @@ window.loadPendingSubmissions = async function() {
             `;
         });
         list.innerHTML = html;
-
     } catch (e) { console.error("Erro admin:", e); list.innerHTML = 'Erro ao carregar.'; }
 }
 
-// C. Aprovar Entrega (Dar pontos!)
 window.approveSubmission = async function(subId, taskId, userId) {
     if(!confirm("Aprovar e dar os pontos?")) return;
-
     try {
-        // 1. Pegar dados da tarefa para saber quanto XP dar
         const taskDoc = await window.getDoc(window.doc(window.db, "tasks", taskId));
         const xpReward = taskDoc.data().xp || 0;
         const coinsReward = taskDoc.data().coins || 0;
 
-        // 2. Atualizar o Aluno
         const userRef = window.doc(window.db, "users", userId);
         const userSnap = await window.getDoc(userRef);
         const userData = userSnap.data();
@@ -215,158 +357,23 @@ window.approveSubmission = async function(subId, taskId, userId) {
         const newCoins = (userData.coins || 0) + coinsReward;
         const newLevel = Math.floor(newXP / 100) + 1;
 
-        await window.updateDoc(userRef, {
-            experience: newXP,
-            coins: newCoins,
-            level: newLevel
-        });
-
-        // 3. Marcar submissão como aprovada
+        await window.updateDoc(userRef, { experience: newXP, coins: newCoins, level: newLevel });
         await window.updateDoc(window.doc(window.db, "submissions", subId), { status: 'approved' });
 
         alert(`Aprovado! Aluno ganhou ${xpReward} XP.`);
-        loadPendingSubmissions(); // Recarregar lista
-
-    } catch (e) { 
-        console.error(e); 
-        alert("Erro ao aprovar. Verifique o console."); 
-    }
+        loadPendingSubmissions();
+    } catch (e) { alert("Erro ao aprovar."); }
 }
 
-// D. Rejeitar Entrega
 window.rejectSubmission = async function(subId) {
-    if(!confirm("Rejeitar esta entrega? O aluno terá que refazer.")) return;
+    if(!confirm("Rejeitar esta entrega?")) return;
     try {
         await window.updateDoc(window.doc(window.db, "submissions", subId), { status: 'rejected' });
         loadPendingSubmissions();
     } catch (e) { alert("Erro ao rejeitar."); }
 }
 
-// === 4. SISTEMA DE LOJA ===
-
-// === LÓGICA DA LOJA ===
-
-// Carregar Produtos do Firebase
-window.loadStore = async function() {
-    const storeList = document.getElementById('storeList');
-    const storeBalance = document.getElementById('storeBalance');
-    
-    // Atualiza saldo visualmente usando a variável global 'userData' do index.html
-    if (window.userData && storeBalance) {
-        storeBalance.innerHTML = `<i class="fas fa-coins"></i> ${window.userData.coins || 0}`;
-    }
-
-    if (!storeList || !window.db) return;
-
-    try {
-        // Busca produtos da coleção 'shop_items' ordenados por preço
-        const q = window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc"));
-        const snapshot = await window.getDocs(q);
-
-        if (snapshot.empty) {
-            storeList.innerHTML = `
-                <div class="col-12 text-center text-muted">
-                    <i class="fas fa-box-open fa-3x mb-3"></i><br>
-                    A loja está vazia no momento.<br>
-                    <small>Use o console (F12) para adicionar itens de teste.</small>
-                </div>`;
-            return;
-        }
-
-        // Pega inventário do usuário para saber o que já comprou
-        const inventory = (window.userData && window.userData.inventory) ? window.userData.inventory : [];
-        
-        let html = '';
-        
-        snapshot.forEach((doc) => {
-            const item = doc.data();
-            const itemId = doc.id;
-            const alreadyOwns = inventory.includes(itemId);
-            const userCoins = (window.userData && window.userData.coins) ? window.userData.coins : 0;
-            const canAfford = userCoins >= item.price;
-            
-            // Define o botão
-            let btnHtml = '';
-            
-            if (alreadyOwns && item.type !== 'consumable') {
-                btnHtml = `<button class="btn btn-secondary w-100" disabled><i class="fas fa-check"></i> Comprado</button>`;
-            } else if (!canAfford) {
-                btnHtml = `<button class="btn btn-outline-danger w-100" disabled>Faltam ${item.price - userCoins} 💰</button>`;
-            } else {
-                btnHtml = `
-                    <button class="btn btn-success w-100" onclick="buyItem('${itemId}', '${item.name}', ${item.price})">
-                        Comprar
-                    </button>`;
-            }
-
-            html += `
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body text-center">
-                            <div class="display-4 mb-3">${item.icon || '🎁'}</div>
-                            <h5 class="card-title">${item.name}</h5>
-                            <p class="card-text text-muted small">${item.description}</p>
-                            <h4 class="text-warning fw-bold my-3">${item.price} 💰</h4>
-                            ${btnHtml}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        storeList.innerHTML = html;
-
-    } catch (e) {
-        console.error("Erro loja:", e);
-        storeList.innerHTML = '<div class="col-12 text-danger text-center">Erro ao carregar loja.</div>';
-    }
-}
-
-// Função de Comprar
-window.buyItem = async function(itemId, itemName, price) {
-    if (!confirm(`Comprar "${itemName}" por ${price} moedas?`)) return;
-
-    try {
-        const userId = window.auth.currentUser.uid;
-        const userRef = window.doc(window.db, "users", userId);
-        
-        // 1. Verificar saldo atualizado no banco (segurança)
-        const userSnap = await window.getDoc(userRef);
-        const currentData = userSnap.data();
-        const currentCoins = currentData.coins || 0;
-
-        if (currentCoins < price) {
-            alert("Saldo insuficiente!");
-            loadStore(); // Recarrega para atualizar visual
-            return;
-        }
-
-        // 2. Processar a compra
-        await window.updateDoc(userRef, {
-            coins: currentCoins - price,
-            inventory: window.arrayUnion(itemId)
-        });
-
-        alert(`🎉 Sucesso! Você comprou: ${itemName}`);
-        
-        // 3. Atualizar dados locais imediatamente para a UI reagir
-        if (window.userData) {
-            window.userData.coins = currentCoins - price;
-            if (!window.userData.inventory) window.userData.inventory = [];
-            window.userData.inventory.push(itemId);
-        }
-        
-        // 4. Recarregar a tela
-        loadStore();
-        if(window.updateUserInterface) window.updateUserInterface();
-
-    } catch (e) {
-        console.error("Erro compra:", e);
-        alert("Erro ao processar compra.");
-    }
-}
-
-// Expor funções globais
+// Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
 window.createTask = createTask;
