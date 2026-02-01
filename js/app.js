@@ -244,39 +244,56 @@ window.rejectSubmission = async function(subId) {
 
 // === 4. SISTEMA DE LOJA ===
 
-// Carregar Produtos
-async function loadStore() {
+// === LÓGICA DA LOJA ===
+
+// Carregar Produtos do Firebase
+window.loadStore = async function() {
     const storeList = document.getElementById('storeList');
-    if(!storeList || !window.db) return;
+    const storeBalance = document.getElementById('storeBalance');
+    
+    // Atualiza saldo visualmente usando a variável global 'userData' do index.html
+    if (window.userData && storeBalance) {
+        storeBalance.innerHTML = `<i class="fas fa-coins"></i> ${window.userData.coins || 0}`;
+    }
+
+    if (!storeList || !window.db) return;
 
     try {
-        // Busca produtos da coleção 'shop_items'
+        // Busca produtos da coleção 'shop_items' ordenados por preço
         const q = window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc"));
         const snapshot = await window.getDocs(q);
 
         if (snapshot.empty) {
-            storeList.innerHTML = '<div class="col-12 text-center text-muted">A loja está sendo reabastecida!</div>';
+            storeList.innerHTML = `
+                <div class="col-12 text-center text-muted">
+                    <i class="fas fa-box-open fa-3x mb-3"></i><br>
+                    A loja está vazia no momento.<br>
+                    <small>Use o console (F12) para adicionar itens de teste.</small>
+                </div>`;
             return;
         }
 
-        // Busca inventário do usuário para saber o que ele já tem
-        const userRef = window.doc(window.db, "users", window.auth.currentUser.uid);
-        const userSnap = await window.getDoc(userRef);
-        const inventory = userSnap.data().inventory || [];
-
+        // Pega inventário do usuário para saber o que já comprou
+        const inventory = (window.userData && window.userData.inventory) ? window.userData.inventory : [];
+        
         let html = '';
         
         snapshot.forEach((doc) => {
             const item = doc.data();
             const itemId = doc.id;
             const alreadyOwns = inventory.includes(itemId);
+            const userCoins = (window.userData && window.userData.coins) ? window.userData.coins : 0;
+            const canAfford = userCoins >= item.price;
             
-            // Lógica do Botão
-            let btnAction = '';
+            // Define o botão
+            let btnHtml = '';
+            
             if (alreadyOwns && item.type !== 'consumable') {
-                btnAction = `<button class="btn btn-secondary w-100" disabled>Comprado</button>`;
+                btnHtml = `<button class="btn btn-secondary w-100" disabled><i class="fas fa-check"></i> Comprado</button>`;
+            } else if (!canAfford) {
+                btnHtml = `<button class="btn btn-outline-danger w-100" disabled>Faltam ${item.price - userCoins} 💰</button>`;
             } else {
-                btnAction = `
+                btnHtml = `
                     <button class="btn btn-success w-100" onclick="buyItem('${itemId}', '${item.name}', ${item.price})">
                         Comprar
                     </button>`;
@@ -290,7 +307,7 @@ async function loadStore() {
                             <h5 class="card-title">${item.name}</h5>
                             <p class="card-text text-muted small">${item.description}</p>
                             <h4 class="text-warning fw-bold my-3">${item.price} 💰</h4>
-                            ${btnAction}
+                            ${btnHtml}
                         </div>
                     </div>
                 </div>
@@ -305,38 +322,47 @@ async function loadStore() {
     }
 }
 
-// Comprar Item
+// Função de Comprar
 window.buyItem = async function(itemId, itemName, price) {
-    if(!confirm(`Deseja comprar "${itemName}" por ${price} moedas?`)) return;
+    if (!confirm(`Comprar "${itemName}" por ${price} moedas?`)) return;
 
     try {
         const userId = window.auth.currentUser.uid;
         const userRef = window.doc(window.db, "users", userId);
         
-        // 1. Verificar saldo atualizado
+        // 1. Verificar saldo atualizado no banco (segurança)
         const userSnap = await window.getDoc(userRef);
-        const currentCoins = userSnap.data().coins || 0;
+        const currentData = userSnap.data();
+        const currentCoins = currentData.coins || 0;
 
         if (currentCoins < price) {
-            alert("Saldo insuficiente! Vá fazer tarefas para ganhar mais moedas.");
+            alert("Saldo insuficiente!");
+            loadStore(); // Recarrega para atualizar visual
             return;
         }
 
-        // 2. Processar compra (Descontar saldo e adicionar ao inventário)
+        // 2. Processar a compra
         await window.updateDoc(userRef, {
             coins: currentCoins - price,
             inventory: window.arrayUnion(itemId)
         });
 
-        alert(`Compra realizada com sucesso! Você obteve: ${itemName}`);
+        alert(`🎉 Sucesso! Você comprou: ${itemName}`);
         
-        // 3. Atualizar interface
-        loadStore(); // Recarrega loja
-        if(window.loadUserData) window.loadUserData(); // Atualiza saldo no topo
+        // 3. Atualizar dados locais imediatamente para a UI reagir
+        if (window.userData) {
+            window.userData.coins = currentCoins - price;
+            if (!window.userData.inventory) window.userData.inventory = [];
+            window.userData.inventory.push(itemId);
+        }
+        
+        // 4. Recarregar a tela
+        loadStore();
+        if(window.updateUserInterface) window.updateUserInterface();
 
     } catch (e) {
-        console.error(e);
-        alert("Erro na transação. Tente novamente.");
+        console.error("Erro compra:", e);
+        alert("Erro ao processar compra.");
     }
 }
 
