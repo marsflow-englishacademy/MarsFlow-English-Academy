@@ -614,6 +614,102 @@ async function updateUserStats(userId, xpDelta, coinsDelta, reason) {
     }
 }
 
+// === SISTEMA DE GESTÃO ESCOLAR (Turmas e Relações) ===
+
+// 1. Criar Nova Turma (Apenas Admin/Teacher/Dev)
+window.createClass = async function(className) {
+    if (!['admin', 'developer', 'teacher'].includes(window.userData.role)) {
+        return alert("Sem permissão.");
+    }
+
+    try {
+        const classRef = await window.addDoc(window.collection(window.db, "classes"), {
+            name: className,
+            teacherId: window.auth.currentUser.uid, // Quem criou é o professor responsável
+            studentIds: [],
+            createdAt: new Date().toISOString()
+        });
+
+        // Atualiza o professor para incluir essa turma na lista dele
+        await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), {
+            myClasses: window.arrayUnion(classRef.id)
+        });
+
+        alert(`Turma "${className}" criada com ID: ${classRef.id}`);
+        console.log("Class ID:", classRef.id);
+        return classRef.id;
+    } catch (e) { console.error(e); alert("Erro ao criar turma."); }
+}
+
+// 2. Adicionar Aluno à Turma
+window.addStudentToClass = async function(studentEmail, classId) {
+    // Busca o aluno pelo email (precisamos fazer uma query pois não sabemos o ID)
+    try {
+        const q = window.query(window.collection(window.db, "users"), window.where("email", "==", studentEmail));
+        const querySnapshot = await window.getDocs(q);
+
+        if (querySnapshot.empty) return alert("Aluno não encontrado com este email.");
+
+        const studentDoc = querySnapshot.docs[0];
+        const studentId = studentDoc.id;
+
+        // 1. Atualiza o Aluno (adiciona classId)
+        await window.updateDoc(window.doc(window.db, "users", studentId), {
+            classId: classId,
+            role: 'student' // Garante que é aluno
+        });
+
+        // 2. Atualiza a Turma (adiciona studentId na lista)
+        await window.updateDoc(window.doc(window.db, "classes", classId), {
+            studentIds: window.arrayUnion(studentId)
+        });
+
+        alert(`Aluno ${studentEmail} adicionado à turma!`);
+
+    } catch (e) { console.error(e); alert("Erro ao vincular aluno."); }
+}
+
+// 3. Vincular Pai ao Filho
+window.linkParentToChild = async function(parentEmail, childEmail) {
+    try {
+        // Busca Pai
+        const qPai = window.query(window.collection(window.db, "users"), window.where("email", "==", parentEmail));
+        const snapPai = await window.getDocs(qPai);
+        if (snapPai.empty) return alert("Email do PAI não encontrado.");
+        
+        // Busca Filho
+        const qFilho = window.query(window.collection(window.db, "users"), window.where("email", "==", childEmail));
+        const snapFilho = await window.getDocs(qFilho);
+        if (snapFilho.empty) return alert("Email do FILHO não encontrado.");
+
+        const paiId = snapPai.docs[0].id;
+        const filhoId = snapFilho.docs[0].id;
+
+        // Atualiza Pai (adiciona filho na lista)
+        await window.updateDoc(window.doc(window.db, "users", paiId), {
+            childrenIds: window.arrayUnion(filhoId),
+            role: 'parent' // Garante role de pai
+        });
+
+        // Atualiza Filho (adiciona id do pai)
+        await window.updateDoc(window.doc(window.db, "users", filhoId), {
+            parentId: paiId
+        });
+
+        alert("Vínculo familiar criado com sucesso!");
+
+    } catch (e) { console.error(e); alert("Erro no vínculo familiar."); }
+}
+
+// 4. Função Mágica para virar Desenvolvedor (Rode no console)
+window.becomeDeveloper = async function() {
+    if(!window.auth.currentUser) return;
+    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), {
+        role: 'developer'
+    });
+    alert("Você agora é um Desenvolvedor! Recarregue a página.");
+}
+
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
