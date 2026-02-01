@@ -460,17 +460,31 @@
             </div>
 
             <div id="tasksContent" class="content-section" style="display: none;">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-tasks me-2"></i>Tarefas
-                        </h5>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quadro de Missões</h5>
+                                <span class="badge bg-light text-primary rounded-pill" id="taskCount">Carregando...</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="taskList" class="list-group list-group-flush">
+                                    <div class="text-center p-5">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                        <p class="mt-2 text-muted">Buscando missões...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
-                            <h5>Sistema de tarefas em desenvolvimento</h5>
-                            <p class="text-muted">Em breve seus trabalhos escolares aparecerão aqui!</p>
+                    
+                    <div class="col-md-4">
+                        <div class="card mb-3 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <h5>Como funciona?</h5>
+                                <p class="text-muted small">1. Escolha uma tarefa<br>2. Clique em Entregar<br>3. Aguarde o professor aprovar<br>4. Ganhe XP e Moedas!</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -518,7 +532,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration - ATUALIZE COM SEUS DADOS
         const firebaseConfig = {
@@ -545,6 +559,9 @@
         window.orderBy = orderBy;
         window.limit = limit;
         window.getDocs = getDocs;
+        window.where = where;       
+        window.doc = doc;         
+        window.setDoc = setDoc;   
         // ---------------------
         
         // Global variables
