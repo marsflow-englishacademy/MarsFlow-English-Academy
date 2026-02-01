@@ -373,15 +373,14 @@ window.rejectSubmission = async function(subId) {
     } catch (e) { alert("Erro ao rejeitar."); }
 }
 
-// === GESTÃO DE PEDIDOS DA LOJA (ADMIN) ===
+// === GESTÃO DE PEDIDOS DA LOJA (ATUALIZADO COM ESTORNO) ===
 
-// 1. Carregar Pedidos Pendentes
+// 1. Carregar Pedidos Pendentes (Com botão de Cancelar)
 window.loadPendingOrders = async function() {
     const list = document.getElementById('ordersList');
     if(!list || !window.db) return;
 
     try {
-        // Busca pedidos com status 'pending_delivery'
         const q = window.query(
             window.collection(window.db, "orders"), 
             window.where("status", "==", "pending_delivery")
@@ -389,7 +388,7 @@ window.loadPendingOrders = async function() {
         const snapshot = await window.getDocs(q);
 
         if (snapshot.empty) {
-            list.innerHTML = '<div class="p-4 text-center text-muted">Nenhum pedido pendente de entrega.</div>';
+            list.innerHTML = '<div class="p-4 text-center text-muted">Nenhum pedido pendente.</div>';
             return;
         }
 
@@ -397,17 +396,23 @@ window.loadPendingOrders = async function() {
         snapshot.forEach(doc => {
             const order = doc.data();
             const dataCompra = new Date(order.purchasedAt).toLocaleDateString('pt-BR');
+            const itemId = order.itemId || ''; // Garante que temos o ID do item
             
             html += `
                 <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
                     <div>
                         <div class="fw-bold">${order.studentName} <span class="badge bg-light text-dark border ms-2">${dataCompra}</span></div>
-                        <div class="text-muted small">Comprou: <span class="text-success fw-bold" style="font-size: 1.1em;">${order.itemName}</span></div>
-                        <div class="small text-secondary">Pagou: ${order.pricePaid} moedas</div>
+                        <div class="text-muted small">Item: <span class="text-success fw-bold">${order.itemName}</span></div>
+                        <div class="small text-secondary">Valor Pago: ${order.pricePaid} moedas</div>
                     </div>
-                    <button class="btn btn-success btn-sm px-3" onclick="deliverOrder('${doc.id}', '${order.itemName}')">
-                        <i class="fas fa-check-circle me-1"></i> Marcar Entregue
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-danger btn-sm" onclick="cancelOrder('${doc.id}', '${order.userId}', ${order.pricePaid}, '${order.itemName}', '${itemId}')">
+                            <i class="fas fa-undo"></i> Estornar
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="deliverOrder('${doc.id}', '${order.itemName}')">
+                            <i class="fas fa-check"></i> Entregar
+                        </button>
+                    </div>
                 </div>
             `;
         });
@@ -419,23 +424,53 @@ window.loadPendingOrders = async function() {
     }
 }
 
-// 2. Marcar Pedido como Entregue
+// 2. Entregar Pedido (Mantido)
 window.deliverOrder = async function(orderId, itemName) {
-    if(!confirm(`Confirmar a entrega do item "${itemName}" para o aluno?`)) return;
-
+    if(!confirm(`Confirmar entrega de "${itemName}"?`)) return;
     try {
-        // Atualiza status para 'delivered'
         await window.updateDoc(window.doc(window.db, "orders", orderId), { 
             status: 'delivered', 
             deliveredAt: new Date().toISOString() 
         });
+        alert("Entregue!");
+        loadPendingOrders();
+    } catch (e) { alert("Erro ao entregar."); }
+}
 
-        alert("Item marcado como entregue! O pedido saiu da lista.");
-        loadPendingOrders(); // Atualiza a lista
+// 3. CANCELAR E ESTORNAR (NOVO)
+window.cancelOrder = async function(orderId, userId, pricePaid, itemName, itemId) {
+    if(!confirm(`⚠️ ATENÇÃO:\n\nDeseja cancelar o pedido de "${itemName}"?\nIsso vai devolver ${pricePaid} moedas para o aluno e remover o item do inventário dele.`)) return;
+
+    try {
+        const userRef = window.doc(window.db, "users", userId);
         
+        // A. Buscar saldo atual do aluno para somar
+        const userSnap = await window.getDoc(userRef);
+        if (!userSnap.exists()) return alert("Aluno não encontrado!");
+        
+        const currentCoins = userSnap.data().coins || 0;
+
+        // B. Devolver dinheiro e remover item
+        await window.updateDoc(userRef, {
+            coins: currentCoins + pricePaid,       // Devolve o dinheiro
+            inventory: window.arrayRemove(itemId)  // Remove o item
+        });
+
+        // C. Marcar pedido como Cancelado
+        await window.updateDoc(window.doc(window.db, "orders", orderId), {
+            status: 'cancelled',
+            cancelledAt: new Date().toISOString()
+        });
+        
+        // Opcional: Se quiser devolver ao estoque da loja, precisaria atualizar o item também.
+        // Por enquanto, vamos focar no estorno financeiro.
+
+        alert(`✅ Pedido cancelado!\nO aluno recebeu ${pricePaid} moedas de volta.`);
+        loadPendingOrders(); // Atualiza a lista
+
     } catch (e) {
         console.error(e);
-        alert("Erro ao atualizar pedido.");
+        alert("Erro ao cancelar pedido: " + e.message);
     }
 }
 
