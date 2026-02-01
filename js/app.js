@@ -839,10 +839,12 @@ window.loadRealRanking = async function() {
 
         // Atualiza badge da turma
         const classBadge = document.getElementById('myClassBadge');
-        if(classBadge) classBadge.innerText = window.userData.classId ? "Turma Vinculada" : "Sem Turma";
+        if(classBadge && window.userData) {
+            classBadge.innerText = window.userData.classId ? "Turma Vinculada" : "Sem Turma";
+        }
 
         if (window.currentRankingMode === 'class') {
-            if (!window.userData.classId) {
+            if (!window.userData || !window.userData.classId) {
                 tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">Você não está em nenhuma turma.</td></tr>';
                 return;
             }
@@ -856,6 +858,11 @@ window.loadRealRanking = async function() {
         const snapshot = await window.getDocs(q);
         let html = '';
         let posicao = 1;
+
+        if (snapshot.empty) {
+             tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Nenhum aluno encontrado.</td></tr>';
+             return;
+        }
 
         snapshot.forEach(doc => {
             const u = doc.data();
@@ -889,21 +896,16 @@ window.checkNotifications = async function() {
     if (!window.db || !window.auth.currentUser) return;
     
     try {
-        // Busca notificações onde eu sou o alvo (ou minha turma, ou todos)
-        // Nota: Firestore tem limites de 'OR' queries, então faremos uma busca ampla e filtraremos no cliente por simplicidade
-        // Em produção, ideal seria duplicar notifs ou usar índices compostos avançados
-        
         const q = window.query(window.collection(window.db, "notifications"), window.orderBy("createdAt", "desc"), window.limit(20));
         const snapshot = await window.getDocs(q);
         
         let unreadCount = 0;
         const myId = window.auth.currentUser.uid;
-        const myClass = window.userData.classId;
+        const myClass = window.userData ? window.userData.classId : null;
 
         snapshot.forEach(doc => {
             const n = doc.data();
-            
-            // Verifica se é pra mim
+            // Verifica se é pra mim (ID direto, minha turma ou todos)
             const isForMe = (n.targetId === 'all') || (n.targetId === myId) || (n.targetId === myClass);
             
             if (isForMe) {
@@ -933,7 +935,7 @@ window.loadNotificationsScreen = async function() {
         const snapshot = await window.getDocs(q);
         
         const myId = window.auth.currentUser.uid;
-        const myClass = window.userData.classId;
+        const myClass = window.userData ? window.userData.classId : null;
         let html = '';
         let hasItems = false;
 
@@ -946,7 +948,7 @@ window.loadNotificationsScreen = async function() {
             
             if (isForMe) {
                 hasItems = true;
-                window.currentNotifs[doc.id] = n; // Salva para abrir depois
+                window.currentNotifs[doc.id] = n; 
                 
                 const isUnread = !(n.readBy || []).includes(myId);
                 const bgClass = isUnread ? 'bg-light border-start border-5 border-primary' : '';
@@ -1016,6 +1018,11 @@ function getUrgencyLabel(u) {
     return u === 'urgent' ? 'Urgente' : u === 'attention' ? 'Atenção' : 'Informativo';
 }
 
+// Exportações Finais
+window.switchRanking = switchRanking;
+window.checkNotifications = checkNotifications;
+window.loadNotificationsScreen = loadNotificationsScreen;
+window.openNotification = openNotification;
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
