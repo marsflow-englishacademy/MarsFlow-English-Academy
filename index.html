@@ -1005,7 +1005,8 @@
         window.showAdmin = function() {
             hideAllSections();
             document.getElementById('adminContent').style.display = 'block';
-            if(window.loadPendingSubmissions) window.loadPendingSubmissions();
+            if(window.loadPendingSubmissions) window.loadPendingSubmissions(); // Carrega Tarefas
+            if(window.loadPendingOrders) window.loadPendingOrders();  // Carrega Pedidos da Loja
         };
 
         function hideAllSections() {
