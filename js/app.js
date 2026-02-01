@@ -1,466 +1,853 @@
-// JavaScript Principal - Hub Gamificado (Versão Definitiva 2.0)
-// Contém: Ranking, Tarefas, Loja, Perfil (Foto/Bio), Admin, Professor e Dev.
+// JavaScript Principal - Mars Flow English Academy
+// Versão: 3.0 (Branding, Dashboards, Mensagens, Dev Tools & Simulador)
 
-document.addEventListener('DOMContentLoaded', () => console.log('App pronto.'));
+document.addEventListener('DOMContentLoaded', () => console.log('Mars Flow App Pronto.'));
 
+// Inicialização Global (Chamada ao logar)
 window.initializeApp = function() {
-    loadRealRanking();
-    loadTasks();
+    // Carrega dados iniciais baseados no perfil
+    const role = window.userData.role;
+    
+    // Se for aluno, carrega ranking e tarefas
+    if (role === 'student') {
+        loadRealRanking();
+        loadTasks();
+    }
+    
+    // Se for professor, carrega notificações pendentes para o dashboard
+    if (role === 'teacher' || role === 'admin') {
+        if(window.loadTeacherDashboard) window.loadTeacherDashboard();
+    }
+
+    // Inicia checagem de notificações para todos
     if(window.checkNotifications) window.checkNotifications();
 }
 
 // =================================================================
-// 1. RANKING & INTERFACE GERAL
+// 1. DASHBOARDS PERSONALIZADOS (Lógica da Home)
+// =================================================================
+
+// 1.1 Dashboard Aluno
+window.loadStudentDashboard = async function() {
+    const u = window.userData;
+    
+    // Preenche Hero Section
+    document.getElementById('homeStudentName').innerText = u.name.split(' ')[0]; // Primeiro nome
+    document.getElementById('homeStudentLevel').innerText = u.level || 1;
+    document.getElementById('homeStudentXP').innerText = u.experience || 0;
+    document.getElementById('homeStudentCoins').innerText = u.coins || 0;
+    
+    // Avatar
+    const avatarDiv = document.getElementById('homeStudentAvatar');
+    if (u.photoURL) {
+        avatarDiv.innerText = '';
+        avatarDiv.style.backgroundImage = `url('${u.photoURL}')`;
+    } else {
+        avatarDiv.style.backgroundImage = '';
+        avatarDiv.innerText = u.equippedIcon || '👤';
+    }
+
+    // Barra de XP (Cálculo simples: 0 a 100 por nível)
+    const xpInLevel = (u.experience || 0) % 100;
+    document.getElementById('homeStudentXPBar').style.width = `${xpInLevel}%`;
+
+    // Ranking Preview (Top 5)
+    const topDiv = document.getElementById('homeTopStudents');
+    if(topDiv && window.db) {
+        try {
+            const q = window.query(window.collection(window.db, "users"), window.orderBy("experience", "desc"), window.limit(5));
+            const snap = await window.getDocs(q);
+            let html = '';
+            let pos = 1;
+            snap.forEach(doc => {
+                const s = doc.data();
+                const icon = s.equippedIcon || '👤';
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><strong class="text-danger me-2">#${pos}</strong> ${icon} ${s.name.split(' ')[0]}</span>
+                        <span class="badge bg-light text-dark border">${s.experience} XP</span>
+                    </div>`;
+                pos++;
+            });
+            topDiv.innerHTML = html;
+        } catch(e) { console.error("Erro dashboard rank:", e); }
+    }
+    
+    // Contar Missões Pendentes (Simples)
+    try {
+        const qTasks = window.query(window.collection(window.db, "tasks")); // Em produção, filtrar por data
+        const snapT = await window.getDocs(qTasks); // Apenas contagem aproximada para demo
+        document.getElementById('homeStudentTasks').innerText = snapT.size; 
+    } catch(e){}
+}
+
+// 1.2 Dashboard Professor
+window.loadTeacherDashboard = async function() {
+    // Tenta usar getCountFromServer (mais eficiente), se falhar usa getDocs
+    try {
+        // Pedidos Pendentes
+        const qOrders = window.query(window.collection(window.db, "orders"), window.where("status", "==", "pending_delivery"));
+        const snapOrders = await window.getCountFromServer(qOrders);
+        document.getElementById('dashTeacherOrders').innerText = snapOrders.data().count;
+
+        // Entregas Pendentes
+        const qSubs = window.query(window.collection(window.db, "submissions"), window.where("status", "==", "pending"));
+        const snapSubs = await window.getCountFromServer(qSubs);
+        document.getElementById('dashTeacherSubs').innerText = snapSubs.data().count;
+
+        // Fotos Pendentes
+        const qPhotos = window.query(window.collection(window.db, "users"), window.where("photoStatus", "==", "pending"));
+        const snapPhotos = await window.getCountFromServer(qPhotos);
+        document.getElementById('dashTeacherPhotos').innerText = snapPhotos.data().count;
+
+    } catch (e) {
+        console.warn("getCountFromServer falhou ou não importado, usando fallback...", e);
+        document.getElementById('dashTeacherOrders').innerText = "-";
+        document.getElementById('dashTeacherSubs').innerText = "-";
+        document.getElementById('dashTeacherPhotos').innerText = "-";
+    }
+}
+
+// 1.3 Dashboard Pais
+window.loadParentDashboard = async function() {
+    // Tenta pegar o primeiro filho vinculado
+    if (window.userData.childrenIds && window.userData.childrenIds.length > 0) {
+        const childId = window.userData.childrenIds[0];
+        try {
+            const childSnap = await window.getDoc(window.doc(window.db, "users", childId));
+            if (childSnap.exists()) {
+                const child = childSnap.data();
+                document.getElementById('dashParentChildName').innerText = child.name;
+                document.getElementById('dashParentChildLevel').innerText = child.level || 1;
+                document.getElementById('dashParentChildXP').innerText = child.experience || 0;
+                document.getElementById('dashParentChildCoins').innerText = child.coins || 0;
+            }
+        } catch(e) { console.error("Erro loading child:", e); }
+    } else {
+        document.getElementById('dashParentChildName').innerText = "Nenhum filho vinculado";
+    }
+}
+
+// 1.4 Dashboard Dev
+window.loadDevStats = async function() {
+    try {
+        const qUsers = window.query(window.collection(window.db, "users"));
+        const snapUsers = await window.getCountFromServer(qUsers);
+        document.getElementById('devStatUsers').innerText = snapUsers.data().count;
+    } catch(e) { document.getElementById('devStatUsers').innerText = "Err"; }
+}
+
+// =================================================================
+// 2. NAVEGAÇÃO DE ABAS (ADMIN & DEV)
+// =================================================================
+
+// Navegação Professor (Sidebar)
+window.showAdminTab = function(tabName) {
+    document.querySelectorAll('.admin-tab').forEach(el => el.style.display = 'none');
+    document.getElementById(`adminTab-${tabName}`).style.display = 'block';
+    
+    // Atualiza classe 'active' no menu
+    if(event && event.currentTarget) {
+        document.querySelectorAll('#adminSidebar button').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    // Carregamento sob demanda (Lazy Loading)
+    if (tabName === 'store') { loadPendingOrders(); loadRedemptionHistory(); }
+    if (tabName === 'classes') { loadTeacherClasses(); loadStudentsForAdmin(); loadPendingPhotos(); }
+    if (tabName === 'comms') { loadInbox(); loadTeacherClasses(); }
+}
+
+// Navegação Dev (Sidebar)
+window.showDevTab = function(tabName) {
+    document.querySelectorAll('.dev-tab').forEach(el => el.style.display = 'none');
+    document.getElementById(`devTab-${tabName}`).style.display = 'block';
+    
+    if(event && event.currentTarget) {
+        document.querySelectorAll('#devSidebar button').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    if (tabName === 'users') loadDevDropdowns();
+    if (tabName === 'store') loadStoreManagement();
+}
+
+
+// =================================================================
+// 3. SISTEMA DE MENSAGENS (DM)
+// =================================================================
+
+window.sendMessage = async function() {
+    const subject = document.getElementById('msgSubject').value;
+    const content = document.getElementById('msgContent').value;
+
+    if (!content) return alert("Escreva uma mensagem!");
+
+    try {
+        const user = window.userData;
+        await window.addDoc(window.collection(window.db, "messages"), {
+            senderId: window.auth.currentUser.uid,
+            senderName: user.name,
+            senderRole: user.role,
+            subject: subject,
+            content: content,
+            status: 'unread',
+            createdAt: new Date().toISOString()
+        });
+
+        alert("📨 Mensagem enviada! O professor receberá em breve.");
+        document.getElementById('msgContent').value = '';
+        loadMyMessages(); 
+    } catch (e) { alert("Erro ao enviar."); }
+}
+
+window.loadMyMessages = async function() {
+    const list = document.getElementById('myMessagesList');
+    if(!list) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "messages"), window.where("senderId", "==", window.auth.currentUser.uid), window.orderBy("createdAt", "desc"));
+        const snap = await window.getDocs(q);
+
+        if (snap.empty) { list.innerHTML = '<div class="text-center p-5 text-muted">Nenhuma mensagem enviada.</div>'; return; }
+
+        let html = '';
+        snap.forEach(doc => {
+            const m = doc.data();
+            const date = new Date(m.createdAt).toLocaleDateString('pt-BR');
+            let badge = '<span class="badge bg-secondary">Enviada</span>';
+            if (m.status === 'replied') badge = '<span class="badge bg-success">Respondida</span>';
+            
+            html += `
+                <div class="list-group-item p-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <strong class="text-mars-navy">${m.subject}</strong><small class="text-muted">${date}</small>
+                    </div>
+                    <p class="mb-2 small text-muted text-truncate">${m.content}</p>
+                    <div class="d-flex justify-content-between align-items-center">${badge}</div>
+                </div>`;
+        });
+        list.innerHTML = html;
+    } catch (e) { console.error("Erro msg:", e); }
+}
+
+window.loadInbox = async function() {
+    const tbody = document.getElementById('inboxTableBody');
+    if(!tbody) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "messages"), window.orderBy("createdAt", "desc"), window.limit(50));
+        const snap = await window.getDocs(q);
+
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Caixa de entrada vazia.</td></tr>'; return; }
+
+        let html = '';
+        snap.forEach(doc => {
+            const m = doc.data();
+            const date = new Date(m.createdAt).toLocaleDateString('pt-BR');
+            const roleBadge = m.senderRole === 'parent' ? '<span class="badge bg-warning text-dark me-1">Pai</span>' : '<span class="badge bg-light text-dark border me-1">Aluno</span>';
+            const btnReply = `<button class="btn btn-sm btn-outline-primary" onclick="replyToMessage('${doc.id}', '${m.senderId}', '${m.senderName}', '${m.subject}')"><i class="fas fa-reply"></i></button>`;
+            const statusIcon = m.status === 'replied' ? '<i class="fas fa-check-double text-success"></i>' : '<i class="fas fa-envelope text-warning"></i>';
+
+            html += `
+                <tr>
+                    <td><small>${date}</small></td>
+                    <td>${roleBadge} <strong>${m.senderName}</strong></td>
+                    <td>${statusIcon} ${m.subject}</td>
+                    <td style="max-width: 250px;"><div class="text-truncate">${m.content}</div></td>
+                    <td class="text-end">${btnReply}</td>
+                </tr>`;
+        });
+        tbody.innerHTML = html;
+    } catch (e) { console.error("Erro inbox:", e); }
+}
+
+window.replyToMessage = function(msgId, studentId, studentName, subject) {
+    // Redireciona para aba de Comunicação
+    showAdminTab('comms');
+    
+    // Preenche Form de Notificação
+    document.getElementById('notifTitle').value = `RE: ${subject}`;
+    document.getElementById('notifMessage').value = `Olá ${studentName}, sobre sua mensagem...`;
+    document.getElementById('notifType').value = 'dm';
+    document.getElementById('notifUrgency').value = 'chill';
+    
+    // Configura Target Dinamicamente
+    const targetSelect = document.getElementById('notifTarget');
+    let optionExists = false;
+    for (let i = 0; i < targetSelect.options.length; i++) {
+        if (targetSelect.options[i].value === studentId) optionExists = true;
+    }
+    if (!optionExists) {
+        const opt = document.createElement('option');
+        opt.value = studentId; 
+        opt.text = `👤 ${studentName}`;
+        targetSelect.add(opt);
+    }
+    targetSelect.value = studentId;
+
+    // Atualiza status da msg original
+    window.updateDoc(window.doc(window.db, "messages", msgId), { status: 'replied' });
+    alert(`Preencha a resposta e clique em Enviar.`);
+}
+
+// =================================================================
+// 4. DESENVOLVEDOR (USER FACTORY, STORE CRUD, SIMULATOR)
+// =================================================================
+
+// 4.1 Pré-Cadastro de Usuários
+window.createPreRegistry = async function() {
+    const role = document.getElementById('devUserRole').value;
+    const name = document.getElementById('devUserName').value;
+    let login = document.getElementById('devUserEmail').value.trim().toLowerCase();
+    
+    if(!login || !name) return alert("Dados incompletos.");
+
+    // Lógica do Login sem Email
+    if (role === 'student' && !login.includes('@')) {
+        login += '@aluno.marsflow';
+    }
+
+    const data = { name, email: login, role, createdAt: new Date().toISOString(), isPreRegistered: true };
+
+    if (role === 'student') {
+        data.birthDate = document.getElementById('devUserDOB').value;
+        data.classId = document.getElementById('devUserClass').value;
+        data.level = 1; data.coins = 50; data.experience = 0;
+    } else if (role === 'teacher') {
+        data.myClasses = Array.from(document.getElementById('devUserClasses').selectedOptions).map(o => o.value);
+    } else if (role === 'parent') {
+        data.childrenIds = Array.from(document.getElementById('devUserChildren').selectedOptions).map(o => o.value);
+    }
+
+    try {
+        await window.setDoc(window.doc(window.db, "pre_registers", login), data);
+        alert(`✅ Cadastro criado!\nLogin: ${login}`);
+        // Limpar
+        document.getElementById('devUserName').value = '';
+        document.getElementById('devUserEmail').value = '';
+    } catch (e) { alert("Erro: " + e.message); }
+}
+
+window.loadDevDropdowns = async function() {
+    // Carregar Turmas
+    const snapClasses = await window.getDocs(window.query(window.collection(window.db, "classes")));
+    let opts = '<option value="">Selecione...</option>';
+    let optsMulti = '';
+    snapClasses.forEach(doc => {
+        opts += `<option value="${doc.id}">${doc.data().name}</option>`;
+        optsMulti += `<option value="${doc.id}">${doc.data().name}</option>`;
+    });
+    
+    if(document.getElementById('devUserClass')) document.getElementById('devUserClass').innerHTML = opts;
+    if(document.getElementById('devUserClasses')) document.getElementById('devUserClasses').innerHTML = optsMulti;
+    if(document.getElementById('historyFilterClass')) document.getElementById('historyFilterClass').innerHTML = '<option value="all">Todas</option>' + optsMulti;
+
+    // Carregar Alunos (para pais)
+    const snapStudents = await window.getDocs(window.query(window.collection(window.db, "users"), window.where("role", "==", "student")));
+    let stuOpts = '';
+    snapStudents.forEach(doc => { stuOpts += `<option value="${doc.id}">${doc.data().name}</option>`; });
+    if(document.getElementById('devUserChildren')) document.getElementById('devUserChildren').innerHTML = stuOpts;
+}
+
+window.toggleDevFields = function() {
+    const role = document.getElementById('devUserRole').value;
+    document.getElementById('devStudentFields').style.display = role === 'student' ? 'block' : 'none';
+    document.getElementById('devTeacherFields').style.display = role === 'teacher' ? 'block' : 'none';
+    document.getElementById('devParentFields').style.display = role === 'parent' ? 'block' : 'none';
+}
+
+// 4.2 Gestão da Loja (CRUD)
+window.loadStoreManagement = async function() {
+    const tbody = document.getElementById('devStoreList');
+    if(!tbody) return;
+    try {
+        const snap = await window.getDocs(window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc")));
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5">Vazia.</td></tr>'; return; }
+        
+        let html = '';
+        snap.forEach(doc => {
+            const i = doc.data();
+            const itemStr = encodeURIComponent(JSON.stringify({...i, id: doc.id}));
+            html += `<tr><td class="fs-4">${i.icon}</td><td class="text-start fw-bold">${i.name}</td><td class="text-success">${i.price}</td><td>${i.stock}</td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="editStoreItem('${itemStr}')"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteStoreItem('${doc.id}', '${i.name}')"><i class="fas fa-trash"></i></button></td></tr>`;
+        });
+        tbody.innerHTML = html;
+    } catch (e) { console.error(e); }
+}
+
+window.saveStoreItem = async function() {
+    const id = document.getElementById('devItemId').value;
+    const data = {
+        icon: document.getElementById('devItemIcon').value,
+        name: document.getElementById('devItemName').value,
+        price: parseInt(document.getElementById('devItemPrice').value),
+        description: document.getElementById('devItemDesc').value,
+        type: document.getElementById('devItemType').value,
+        category: document.getElementById('devItemCat').value,
+        stock: parseInt(document.getElementById('devItemStock').value)
+    };
+    if (!data.name || !data.price) return alert("Preencha dados.");
+    
+    try {
+        if (id) await window.updateDoc(window.doc(window.db, "shop_items", id), data);
+        else await window.addDoc(window.collection(window.db, "shop_items"), data);
+        alert("Salvo!");
+        document.getElementById('devItemId').value = ''; 
+        loadStoreManagement();
+    } catch(e) { alert("Erro: " + e.message); }
+}
+
+window.editStoreItem = function(str) {
+    const item = JSON.parse(decodeURIComponent(str));
+    document.getElementById('devItemId').value = item.id;
+    document.getElementById('devItemIcon').value = item.icon;
+    document.getElementById('devItemName').value = item.name;
+    document.getElementById('devItemPrice').value = item.price;
+    document.getElementById('devItemDesc').value = item.description || '';
+    document.getElementById('devItemType').value = item.type;
+    document.getElementById('devItemCat').value = item.category || 'avatar';
+    document.getElementById('devItemStock').value = item.stock;
+    document.getElementById('devTab-store').scrollIntoView();
+}
+
+window.deleteStoreItem = async function(id, name) {
+    if(!confirm(`Apagar "${name}"?`)) return;
+    try { await window.deleteDoc(window.doc(window.db, "shop_items", id)); loadStoreManagement(); } catch(e) { alert("Erro ao deletar."); }
+}
+
+// 4.3 Simulador de Papel
+window.originalRole = null;
+window.activateSimulation = function(targetRole) {
+    if (!window.userData) return;
+    const isDev = (window.auth.currentUser.email === 'fmartimr@gmail.com');
+    if (!isDev) return alert("Apenas DEV.");
+
+    if (!window.originalRole) window.originalRole = window.userData.role;
+
+    if (targetRole === 'dev') {
+        window.userData.role = window.originalRole;
+        window.originalRole = null;
+        document.getElementById('simulationBar').style.display = 'none';
+        alert("Modo DEV restaurado.");
+    } else {
+        window.userData.role = targetRole;
+        document.getElementById('simulationBar').style.display = 'block';
+        document.getElementById('simRoleName').innerText = targetRole.toUpperCase();
+    }
+    updateUserInterface();
+    showHome();
+}
+
+// =================================================================
+// 5. RANKING, TAREFAS E LOJA (CLIENTE)
 // =================================================================
 
 window.currentRankingMode = 'general';
-
 window.switchRanking = function(mode) {
     window.currentRankingMode = mode;
-    document.getElementById('tabGeneral').className = mode === 'general' ? 'nav-link active fw-bold' : 'nav-link text-dark';
-    document.getElementById('tabClass').className = mode === 'class' ? 'nav-link active fw-bold' : 'nav-link text-dark';
+    document.getElementById('tabGeneral').className = mode === 'general' ? 'nav-link active fw-bold' : 'nav-link text-white opacity-75';
+    document.getElementById('tabClass').className = mode === 'class' ? 'nav-link active fw-bold' : 'nav-link text-white opacity-75';
     loadRealRanking();
 }
 
 window.loadRealRanking = async function() {
     const tbody = document.getElementById('tabelaRankingCompleta');
     if(!tbody || !window.db) return;
-    
     tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4"><div class="spinner-border text-primary"></div></td></tr>';
 
     try {
-        let q;
-        const usersRef = window.collection(window.db, "users");
-
-        // Atualiza badge da turma
-        const classBadge = document.getElementById('myClassBadge');
-        if(classBadge && window.userData) {
-            classBadge.innerText = window.userData.classId ? "Turma Vinculada" : "Sem Turma";
-        }
+        let q = window.collection(window.db, "users");
+        
+        // Update badge
+        const badge = document.getElementById('myClassBadge');
+        if(badge) badge.innerText = window.userData.classId ? "Turma Vinculada" : "Sem Turma";
 
         if (window.currentRankingMode === 'class') {
-            if (!window.userData || !window.userData.classId) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">Você não está em nenhuma turma.</td></tr>';
-                return;
-            }
-            q = window.query(usersRef, window.where("classId", "==", window.userData.classId), window.orderBy("experience", "desc"), window.limit(50));
+             if (!window.userData.classId) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Você não tem turma.</td></tr>'; return; }
+             q = window.query(q, window.where("classId", "==", window.userData.classId), window.orderBy("experience", "desc"), window.limit(50));
         } else {
-            q = window.query(usersRef, window.orderBy("experience", "desc"), window.limit(50));
+             q = window.query(q, window.orderBy("experience", "desc"), window.limit(50));
         }
 
-        const snapshot = await window.getDocs(q);
-        let html = '';
-        let posicao = 1;
-
-        if(snapshot.empty) {
-             tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Ninguém pontuou ainda.</td></tr>';
-             return;
-        }
-
-        snapshot.forEach(doc => {
+        const snap = await window.getDocs(q);
+        let html = ''; let pos = 1;
+        snap.forEach(doc => {
             const u = doc.data();
             const isMe = (window.auth.currentUser.uid === doc.id);
-            const rowClass = isMe ? 'table-primary fw-bold' : '';
-            
-            let posDisplay = posicao;
-            if (posicao === 1) posDisplay = '🥇';
-            if (posicao === 2) posDisplay = '🥈';
-            if (posicao === 3) posDisplay = '🥉';
-
-            html += `
-                <tr class="${rowClass}">
-                    <td class="text-center">${posDisplay}</td>
-                    <td>${u.name} ${isMe ? '(Você)' : ''}</td>
-                    <td class="text-center"><span class="badge bg-light text-dark border">Lvl ${u.level || 1}</span></td>
-                    <td class="text-end text-warning fw-bold">${u.experience || 0} XP</td>
-                </tr>
-            `;
-            posicao++;
+            const rowClass = isMe ? 'table-info fw-bold' : '';
+            const medals = {1:'🥇', 2:'🥈', 3:'🥉'};
+            html += `<tr class="${rowClass}"><td class="text-center">${medals[pos]||pos}</td><td>${u.equippedIcon||''} ${u.name}</td><td class="text-center">${u.level||1}</td><td class="text-end fw-bold text-mars-navy">${u.experience||0} XP</td></tr>`;
+            pos++;
         });
-        tbody.innerHTML = html;
-    } catch (e) { console.error("Erro ranking:", e); tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar.</td></tr>'; }
+        tbody.innerHTML = html || '<tr><td colspan="4">Sem dados.</td></tr>';
+    } catch (e) { console.error(e); }
 }
-
-// =================================================================
-// 2. TAREFAS (MISSÕES)
-// =================================================================
 
 window.loadTasks = async function() {
     const list = document.getElementById('taskList');
-    if (!list || !window.db) return;
+    const countBadge = document.getElementById('taskCount');
+    if (!list) return;
 
     try {
         const userId = window.auth.currentUser.uid;
-        // Busca tarefas
         const tasksSnap = await window.getDocs(window.query(window.collection(window.db, "tasks"), window.orderBy("dueDate", "asc")));
-        // Busca minhas entregas
         const subsSnap = await window.getDocs(window.query(window.collection(window.db, "submissions"), window.where("userId", "==", userId)));
         
         const mySubs = {};
         subsSnap.forEach(d => mySubs[d.data().taskId] = d.data().status);
 
-        let html = '';
-        let pendentes = 0;
-
+        let html = ''; let pendentes = 0;
         tasksSnap.forEach((doc) => {
             const t = doc.data();
-            const status = mySubs[doc.id];
+            const st = mySubs[doc.id];
             const date = t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : 'S/ Data';
-
-            let btn = `<button class="btn btn-primary btn-sm" onclick="submitTask('${doc.id}', '${t.title}')">Entregar</button>`;
+            
+            let action = `<button class="btn btn-primary btn-sm rounded-pill" onclick="submitTask('${doc.id}', '${t.title}')">Entregar</button>`;
             let badge = '';
 
-            if (status === 'approved') {
-                badge = '<span class="badge bg-success ms-2">Feita</span>';
-                btn = '';
-            } else if (status === 'pending') {
-                badge = '<span class="badge bg-warning text-dark ms-2">Analisando</span>';
-                btn = '<button class="btn btn-secondary btn-sm" disabled>Enviada</button>';
-            } else {
-                if (status === 'rejected') badge = '<span class="badge bg-danger ms-2">Refazer</span>';
-                pendentes++;
-            }
+            if (st === 'approved') { badge = '<span class="badge bg-success ms-2">Feita</span>'; action = ''; }
+            else if (st === 'pending') { badge = '<span class="badge bg-warning text-dark ms-2">Analisando</span>'; action = ''; }
+            else { if (st === 'rejected') badge = '<span class="badge bg-danger ms-2">Refazer</span>'; pendentes++; }
 
             html += `
-                <div class="list-group-item p-3 mb-2 shadow-sm rounded">
+                <div class="list-group-item p-3 mb-2 shadow-sm rounded border-start border-4 border-primary">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1 text-primary">${t.title} ${badge}</h5>
-                            <small class="text-muted">${t.description} • 📅 ${date}</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="mb-2">
-                                <span class="badge bg-light text-dark border">+${t.xp} XP</span>
-                                <span class="badge bg-light text-dark border">+${t.coins} $</span>
-                            </div>
-                            ${btn}
-                        </div>
+                        <div><h6 class="mb-1 text-mars-navy fw-bold">${t.title} ${badge}</h6><small class="text-muted">${t.description} • 📅 ${date}</small></div>
+                        <div class="text-end"><div class="mb-2"><span class="badge bg-light text-dark border">+${t.xp} XP</span> <span class="badge bg-light text-dark border">+${t.coins} $</span></div>${action}</div>
                     </div>
                 </div>`;
         });
-
-        list.innerHTML = html || '<div class="p-4 text-center">Nenhuma missão ativa.</div>';
-        const counter = document.getElementById('taskCount');
-        if(counter) counter.innerText = `${pendentes} pendentes`;
-
+        list.innerHTML = html || '<div class="p-4 text-center">Nenhuma missão.</div>';
+        if(countBadge) countBadge.innerText = pendentes;
     } catch (e) { console.error(e); }
 }
 
 window.submitTask = async function(taskId, title) {
-    const just = prompt("Confirmação (Escreva 'Feito' ou cole um link):");
+    const just = prompt("Cole o link ou escreva 'Feito':");
     if (!just) return;
-
     try {
-        const uid = window.auth.currentUser.uid;
-        const name = window.userData?.name || "Aluno";
-        await window.setDoc(window.doc(window.db, "submissions", `${uid}_${taskId}`), {
-            taskId, userId: uid, studentName: name, taskTitle: title,
+        await window.setDoc(window.doc(window.db, "submissions", `${window.auth.currentUser.uid}_${taskId}`), {
+            taskId, userId: window.auth.currentUser.uid, studentName: window.userData.name, taskTitle: title,
             justification: just, status: 'pending', submittedAt: new Date().toISOString()
         });
-        alert("Enviado para o professor!");
-        loadTasks();
-    } catch (e) { alert("Erro ao enviar."); }
+        alert("Enviado!"); loadTasks();
+    } catch (e) { alert("Erro."); }
 }
 
-// =================================================================
-// 3. LOJA
-// =================================================================
-
 window.loadStore = async function() {
-    const storeList = document.getElementById('storeList');
-    const storeBalance = document.getElementById('storeBalance');
-    
-    if (window.userData && storeBalance) {
-        storeBalance.innerHTML = `${window.userData.coins || 0} 💰`;
-    }
-
-    if (!storeList || !window.db) return;
+    const list = document.getElementById('storeList');
+    if(document.getElementById('storeBalance')) document.getElementById('storeBalance').innerHTML = `${window.userData.coins || 0}`;
 
     try {
-        const q = window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc"));
-        const snapshot = await window.getDocs(q);
+        const snap = await window.getDocs(window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc")));
+        if (snap.empty) { list.innerHTML = '<div class="col-12 text-center text-muted">Loja vazia.</div>'; return; }
 
-        if (snapshot.empty) {
-            storeList.innerHTML = '<div class="col-12 text-center text-muted">Loja vazia.</div>';
-            return;
-        }
-
-        const inventory = window.userData?.inventory || [];
+        const inventory = window.userData.inventory || [];
         let html = '';
         
-        snapshot.forEach((doc) => {
+        snap.forEach((doc) => {
             const item = doc.data();
-            const itemId = doc.id;
-            const price = Math.ceil(item.price); 
-            const stock = (item.stock !== undefined) ? item.stock : 99;
-            const userCoins = window.userData?.coins || 0;
-            const alreadyOwns = inventory.includes(itemId);
+            const already = inventory.includes(doc.id);
+            const canBuy = (window.userData.coins >= item.price);
+            const stock = item.stock || 0;
             
-            let btnHtml = '';
-            let stockBadge = stock < 5 ? `<span class="badge bg-danger mb-2">Restam ${stock}!</span>` : `<span class="badge bg-secondary mb-2">Estoque: ${stock}</span>`;
-
-            if (stock <= 0) {
-                 btnHtml = `<button class="btn btn-secondary w-100" disabled>Esgotado</button>`;
-                 stockBadge = `<span class="badge bg-dark mb-2">Esgotado</span>`;
-            } else if (alreadyOwns && item.type !== 'consumable') {
-                btnHtml = `<button class="btn btn-secondary w-100" disabled><i class="fas fa-check"></i> Comprado</button>`;
-            } else if (userCoins < price) {
-                btnHtml = `<button class="btn btn-outline-danger w-100" disabled>Faltam ${price - userCoins} 💰</button>`;
-            } else {
-                btnHtml = `<button class="btn btn-success w-100" onclick="buyItem('${itemId}', '${item.name}', ${price})">Comprar por ${price}</button>`;
-            }
+            let btn = '';
+            if(stock <= 0) btn = `<button class="btn btn-secondary w-100" disabled>Esgotado</button>`;
+            else if(already && item.type !== 'consumable') btn = `<button class="btn btn-secondary w-100" disabled>Comprado</button>`;
+            else if(!canBuy) btn = `<button class="btn btn-outline-secondary w-100" disabled>Falta Moeda</button>`;
+            else btn = `<button class="btn btn-success w-100 fw-bold" onclick="buyItem('${doc.id}', '${item.name}', ${item.price})">COMPRAR</button>`;
 
             html += `
                 <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm border-0 position-relative">
-                        <div class="card-body text-center">
-                            ${stockBadge}
-                            <div class="display-4 mb-3">${item.icon || '🎁'}</div>
-                            <h5 class="card-title">${item.name}</h5>
-                            <p class="card-text text-muted small">${item.description}</p>
-                            <h4 class="text-warning fw-bold my-3">${price} 💰</h4>
-                            ${btnHtml}
-                        </div>
+                    <div class="card h-100 shadow-sm border-0 text-center p-3 hover-effect">
+                        <div class="display-4 mb-2">${item.icon}</div>
+                        <h5 class="fw-bold text-mars-navy">${item.name}</h5>
+                        <h4 class="text-warning fw-bold my-3">${item.price} <small class="fs-6 text-muted">coins</small></h4>
+                        ${btn}
                     </div>
-                </div>
-            `;
+                </div>`;
         });
-        storeList.innerHTML = html;
-    } catch (e) { console.error("Erro loja:", e); }
+        list.innerHTML = html;
+    } catch(e) { console.error(e); }
 }
 
-window.buyItem = async function(itemId, itemName, currentPrice) {
-    if (!confirm(`Comprar "${itemName}" por ${currentPrice} moedas?`)) return;
-
+window.buyItem = async function(id, name, price) {
+    if(!confirm(`Comprar "${name}"?`)) return;
     try {
-        const userId = window.auth.currentUser.uid;
-        const userName = window.userData?.name || "Aluno";
-        const userRef = window.doc(window.db, "users", userId);
-        const itemRef = window.doc(window.db, "shop_items", itemId);
-
-        const itemSnap = await window.getDoc(itemRef);
-        const itemData = itemSnap.data();
+        const userRef = window.doc(window.db, "users", window.auth.currentUser.uid);
+        const itemRef = window.doc(window.db, "shop_items", id);
         
-        if (itemData.stock !== undefined && itemData.stock <= 0) return alert("Esgotado!");
-        
-        const realPrice = Math.ceil(itemData.price);
-        const userSnap = await window.getDoc(userRef);
-        const userCoins = userSnap.data().coins || 0;
+        // Transação ou verificação simples
+        const uSnap = await window.getDoc(userRef);
+        if(uSnap.data().coins < price) return alert("Saldo insuficiente.");
 
-        if (userCoins < realPrice) return alert("Saldo insuficiente!");
-
-        await window.updateDoc(userRef, {
-            coins: userCoins - realPrice,
-            inventory: window.arrayUnion(itemId)
-        });
-
+        await window.updateDoc(userRef, { coins: uSnap.data().coins - price, inventory: window.arrayUnion(id) });
         await window.addDoc(window.collection(window.db, "orders"), {
-            userId: userId, studentName: userName, itemId: itemId, itemName: itemName,
-            pricePaid: realPrice, status: "pending_delivery", purchasedAt: new Date().toISOString()
+            userId: window.auth.currentUser.uid, studentName: window.userData.name, itemId: id, itemName: name,
+            pricePaid: price, status: "pending_delivery", purchasedAt: new Date().toISOString()
         });
-
-        const inflationRate = itemData.inflation || 0; 
-        const newPrice = realPrice + (realPrice * inflationRate);
-        const newStock = (itemData.stock !== undefined) ? itemData.stock - 1 : 99;
-
-        await window.updateDoc(itemRef, { stock: newStock, price: newPrice });
-
-        alert(`🎉 Compra realizada!`);
         
-        // Atualiza localmente
-        if (window.userData) {
-            window.userData.coins = userCoins - realPrice;
-            if(!window.userData.inventory) window.userData.inventory = [];
-            window.userData.inventory.push(itemId);
-        }
-        loadStore();
-        if(window.updateUserInterface) window.updateUserInterface();
+        // Baixa estoque (simplificado, sem transaction para MVP)
+        const iSnap = await window.getDoc(itemRef);
+        if(iSnap.exists()) await window.updateDoc(itemRef, { stock: (iSnap.data().stock || 99) - 1 });
 
-    } catch (e) { alert("Erro na compra."); }
+        alert("Compra realizada!");
+        window.userData.coins -= price; 
+        loadStore(); updateUserInterface();
+    } catch(e) { alert("Erro na compra."); }
 }
 
 // =================================================================
-// 4. PERFIL AVANÇADO (FOTO, BIO, INVENTÁRIO)
+// 6. PERFIL, FOTOS & BIO
 // =================================================================
 
 window.loadProfile = async function() {
-    // Referências HTML
-    const avatarEl = document.getElementById('profileAvatarDisplay');
-    const nameEl = document.getElementById('profileName');
-    const classEl = document.getElementById('profileClass');
-    const roleEl = document.getElementById('profileRole');
-    const levelEl = document.getElementById('profileLevel');
-    const xpBar = document.getElementById('xpBar');
-    const xpRatio = document.getElementById('xpRatio');
-    const xpToNext = document.getElementById('xpToNext');
-    const bioDisplay = document.getElementById('profileBioDisplay');
-    const badgeDiv = document.getElementById('photoStatusBadge');
-
-    if(!window.userData || !window.db) return;
-
-    // Dados Básicos
-    nameEl.innerText = window.userData.name;
-    roleEl.innerText = window.userData.role === 'student' ? 'Aluno' : window.userData.role.toUpperCase();
-    levelEl.innerText = window.userData.level || 1;
-    if(bioDisplay) bioDisplay.innerText = window.userData.bio || "Sem bio definida.";
+    const u = window.userData;
+    document.getElementById('profileName').innerText = u.name;
+    document.getElementById('profileLevel').innerText = u.level || 1;
+    document.getElementById('xpRatio').innerText = `${(u.experience||0)%100} / 100 XP`;
+    document.getElementById('xpBar').style.width = `${(u.experience||0)%100}%`;
     
-    // Turma
-    if(window.userData.classId) {
-        try {
-            const classSnap = await window.getDoc(window.doc(window.db, "classes", window.userData.classId));
-            if(classSnap.exists()) classEl.innerText = classSnap.data().name;
-        } catch(e) { classEl.innerText = "Turma não encontrada"; }
-    } else {
-        classEl.innerText = "Sem Turma Vinculada";
-    }
-
-    // Barra de XP
-    const currentXP = window.userData.experience || 0;
-    const level = window.userData.level || 1;
-    const xpInThisLevel = currentXP % 100;
-    const progressPercent = (xpInThisLevel / 100) * 100;
-
-    xpBar.style.width = `${progressPercent}%`;
-    xpRatio.innerText = `${xpInThisLevel} / 100 XP`;
-    xpToNext.innerText = (100 - xpInThisLevel);
-
-    // Avatar / Foto (Lógica: Foto Real > Emoji)
-    const currentFrame = window.userData.equippedFrame || '';
+    // Bio
+    document.getElementById('profileBioDisplay').innerText = u.bio || "Sem bio definida.";
     
-    if (window.userData.photoURL) {
-        avatarEl.innerText = '';
-        avatarEl.style.backgroundImage = `url('${window.userData.photoURL}')`;
-    } else {
-        avatarEl.style.backgroundImage = '';
-        avatarEl.innerText = window.userData.equippedIcon || '👤';
-    }
-    // Aplica moldura
-    avatarEl.className = `display-1 bg-light rounded-circle border border-3 p-3 position-relative overflow-hidden ${currentFrame}`;
+    // Avatar
+    const av = document.getElementById('profileAvatarDisplay');
+    if(u.photoURL) { av.innerText = ''; av.style.backgroundImage = `url('${u.photoURL}')`; }
+    else { av.style.backgroundImage = ''; av.innerText = u.equippedIcon || '👤'; }
+    av.className = `display-1 bg-light rounded-circle border border-3 p-3 position-relative overflow-hidden ${u.equippedFrame||''}`;
 
-    // Badge de Foto Pendente
-    if (badgeDiv) {
-        if (window.userData.photoStatus === 'pending') {
-            badgeDiv.innerHTML = '<span class="badge bg-warning text-dark">Foto em análise ⏳</span>';
-        } else {
-            badgeDiv.innerHTML = '';
-        }
-    }
-    
+    // Foto Pendente Badge
+    const badge = document.getElementById('photoStatusBadge');
+    if(badge) badge.innerHTML = (u.photoStatus === 'pending') ? '<span class="badge bg-warning text-dark">Foto em Análise ⏳</span>' : '';
+
     loadInventory();
 }
 
-// Upload de Foto
 window.handlePhotoUpload = function(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.size > 1048576) return alert("⚠️ A imagem é muito grande! Máximo de 1MB.");
-
+        if (file.size > 1048576) return alert("Imagem muito grande (Max 1MB).");
+        
         const reader = new FileReader();
         reader.onload = async function(e) {
-            const base64Img = e.target.result;
+            const base64 = e.target.result;
+            const role = window.userData.role;
             try {
-                // Professores/Admins atualizam direto
-                if (['teacher', 'admin', 'developer'].includes(window.userData.role)) {
-                    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), { photoURL: base64Img });
-                    window.userData.photoURL = base64Img; // Atualiza local
-                    alert("Foto atualizada!");
-                } else {
-                    // Alunos precisam de aprovação
-                    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), {
-                        tempPhoto: base64Img,
-                        photoStatus: 'pending'
-                    });
+                if (role === 'student') {
+                    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), { tempPhoto: base64, photoStatus: 'pending' });
+                    alert("Foto enviada para aprovação!");
                     window.userData.photoStatus = 'pending';
-                    alert("📸 Foto enviada para aprovação!");
+                } else {
+                    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), { photoURL: base64 });
+                    alert("Foto atualizada!");
+                    window.userData.photoURL = base64;
                 }
                 loadProfile();
-            } catch (err) { alert("Erro ao salvar imagem."); }
+            } catch(e) { alert("Erro upload."); }
         }
         reader.readAsDataURL(file);
     }
 }
 
-// Bio
-window.editBio = function() {
-    document.getElementById('bioEditContainer').style.display = 'block';
-    document.getElementById('bioInput').value = window.userData.bio || '';
-}
-
+window.editBio = function() { document.getElementById('bioEditContainer').style.display='block'; document.getElementById('bioInput').value = window.userData.bio || ''; }
 window.saveBio = async function() {
-    const text = document.getElementById('bioInput').value;
-    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), { bio: text });
-    window.userData.bio = text;
-    document.getElementById('bioEditContainer').style.display = 'none';
+    const txt = document.getElementById('bioInput').value;
+    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), { bio: txt });
+    window.userData.bio = txt;
+    document.getElementById('bioEditContainer').style.display='none';
     loadProfile();
 }
 
-// Inventário
 window.loadInventory = async function() {
-    const listDiv = document.getElementById('inventoryList');
-    if(!listDiv) return;
-
+    const list = document.getElementById('inventoryList');
     try {
-        const inventoryIds = window.userData.inventory || [];
+        const inv = window.userData.inventory || [];
+        if(inv.length === 0) { list.innerHTML = '<div class="col-12 text-center p-4">Mochila vazia.</div>'; return; }
         
-        if (inventoryIds.length === 0) {
-            listDiv.innerHTML = `<div class="col-12 text-center py-5"><p class="text-muted">Mochila vazia.</p><button class="btn btn-primary btn-sm" onclick="showStore()">Ir para Loja</button></div>`;
-            return;
-        }
-
-        const q = window.query(window.collection(window.db, "shop_items"));
-        const snapshot = await window.getDocs(q);
+        const snap = await window.getDocs(window.query(window.collection(window.db, "shop_items")));
         let html = '';
-        
-        snapshot.forEach(doc => {
-            if (inventoryIds.includes(doc.id)) {
-                const item = doc.data();
-                const isEquipped = (window.userData.equippedIcon === item.icon) || (window.userData.equippedFrame === item.code);
-                
-                let actionBtn = '';
-                if (item.type === 'permanent') {
-                    if (isEquipped) {
-                        actionBtn = `<button class="btn btn-success btn-sm w-100" disabled><i class="fas fa-check"></i> Equipado</button>`;
-                    } else {
-                        const val = item.category === 'frame' ? (item.code || 'border-warning') : (item.icon || '😎');
-                        const cat = item.category || 'avatar';
-                        actionBtn = `<button class="btn btn-outline-primary btn-sm w-100" onclick="equipItem('${doc.id}', '${cat}', '${val}')">Equipar</button>`;
-                    }
-                } else {
-                    actionBtn = `<button class="btn btn-secondary btn-sm w-100" disabled>Consumível</button>`;
-                }
+        snap.forEach(doc => {
+            if(inv.includes(doc.id)) {
+                const i = doc.data();
+                const equipped = (window.userData.equippedIcon === i.icon);
+                let btn = `<button class="btn btn-outline-primary btn-sm w-100" onclick="equipItem('${doc.id}', '${i.category||'avatar'}', '${i.icon}')">Equipar</button>`;
+                if(equipped) btn = `<button class="btn btn-success btn-sm w-100" disabled>Equipado</button>`;
+                if(i.type !== 'permanent') btn = `<button class="btn btn-secondary btn-sm" disabled>Consumível</button>`;
 
-                html += `
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div class="card h-100 text-center p-2 ${isEquipped ? 'border-success shadow-sm' : ''}">
-                            <div class="display-4 mb-2">${item.icon || '📦'}</div>
-                            <h6 class="card-title text-truncate small">${item.name}</h6>
-                            <div class="mt-auto">${actionBtn}</div>
-                        </div>
-                    </div>`;
+                html += `<div class="col-6 col-md-4"><div class="card h-100 text-center p-2"><div class="fs-1">${i.icon}</div><div class="small fw-bold">${i.name}</div><div class="mt-auto pt-2">${btn}</div></div></div>`;
             }
         });
-        listDiv.innerHTML = html;
-    } catch (e) { console.error("Erro inventário:", e); }
+        list.innerHTML = html;
+    } catch(e) { console.error(e); }
 }
 
-window.equipItem = async function(itemId, category, value) {
+window.equipItem = async function(id, cat, val) {
     try {
-        const userId = window.auth.currentUser.uid;
-        const updates = {};
-        if (category === 'avatar') { updates.equippedIcon = value; window.userData.equippedIcon = value; }
-        else if (category === 'frame') { updates.equippedFrame = value; window.userData.equippedFrame = value; }
-
-        await window.updateDoc(window.doc(window.db, "users", userId), updates);
-        alert("Equipado!");
-        loadProfile();
-        if(window.updateUserInterface) window.updateUserInterface();
-    } catch (e) { alert("Erro ao equipar."); }
+        const up = {};
+        if(cat === 'avatar') { up.equippedIcon = val; window.userData.equippedIcon = val; }
+        await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), up);
+        alert("Equipado!"); loadProfile(); updateUserInterface();
+    } catch(e) { alert("Erro."); }
 }
 
 // =================================================================
-// 5. NOTIFICAÇÕES (ALUNO)
+// 7. ADMINISTRAÇÃO (PROFESSOR)
 // =================================================================
 
+window.createTask = async function() {
+    const title = document.getElementById('taskTitle').value;
+    const desc = document.getElementById('taskDesc').value;
+    const xp = parseInt(document.getElementById('taskXP').value);
+    const coins = parseInt(document.getElementById('taskCoins').value);
+    const date = document.getElementById('taskDate').value;
+    
+    if(!title) return;
+    try {
+        await window.addDoc(window.collection(window.db, "tasks"), { title, description: desc, xp, coins, dueDate: date, createdAt: new Date().toISOString() });
+        alert("Criada!");
+    } catch(e) { alert("Erro."); }
+}
+
+window.loadPendingSubmissions = async function() {
+    const list = document.getElementById('submissionsList');
+    if(!list) return;
+    try {
+        const snap = await window.getDocs(window.query(window.collection(window.db, "submissions"), window.where("status", "==", "pending")));
+        if(snap.empty) { list.innerHTML = '<div class="p-3 text-center text-muted">Nada pendente.</div>'; return; }
+        
+        let html = '';
+        snap.forEach(doc => {
+            const s = doc.data();
+            html += `<div class="list-group-item"><h6 class="fw-bold">${s.studentName}</h6><p class="mb-1 small">${s.taskTitle}</p><div class="bg-light p-2 mb-2 small text-muted">${s.justification}</div>
+            <button class="btn btn-success btn-sm me-1" onclick="approveSubmission('${doc.id}', '${s.taskId}', '${s.userId}')">Aprovar</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectSubmission('${doc.id}')">Rejeitar</button></div>`;
+        });
+        list.innerHTML = html;
+    } catch(e) { console.error(e); }
+}
+
+window.approveSubmission = async function(sid, tid, uid) {
+    try {
+        const tSnap = await window.getDoc(window.doc(window.db, "tasks", tid));
+        const uRef = window.doc(window.db, "users", uid);
+        const uSnap = await window.getDoc(uRef);
+        
+        const xp = tSnap.data().xp || 0;
+        const coins = tSnap.data().coins || 0;
+        
+        await window.updateDoc(uRef, { experience: (uSnap.data().experience||0) + xp, coins: (uSnap.data().coins||0) + coins });
+        await window.updateDoc(window.doc(window.db, "submissions", sid), { status: 'approved' });
+        loadPendingSubmissions();
+    } catch(e) { alert("Erro."); }
+}
+
+window.rejectSubmission = async function(sid) {
+    if(!confirm("Rejeitar?")) return;
+    await window.updateDoc(window.doc(window.db, "submissions", sid), { status: 'rejected' });
+    loadPendingSubmissions();
+}
+
+window.loadPendingOrders = async function() {
+    const list = document.getElementById('ordersList');
+    try {
+        const snap = await window.getDocs(window.query(window.collection(window.db, "orders"), window.where("status", "==", "pending_delivery")));
+        if(snap.empty) { list.innerHTML = '<div class="p-3 text-center text-muted">Nada.</div>'; return; }
+        let html = '';
+        snap.forEach(doc => {
+            const o = doc.data();
+            html += `<div class="list-group-item d-flex justify-content-between align-items-center"><div><div class="fw-bold">${o.studentName}</div><div class="small">${o.itemName} (${o.pricePaid})</div></div>
+            <button class="btn btn-success btn-sm" onclick="deliverOrder('${doc.id}')">Entregar</button></div>`;
+        });
+        list.innerHTML = html;
+    } catch(e) {}
+}
+
+window.deliverOrder = async function(oid) {
+    await window.updateDoc(window.doc(window.db, "orders", oid), { status: 'delivered', deliveredAt: new Date().toISOString() });
+    loadPendingOrders();
+}
+
+window.loadPendingPhotos = async function() {
+    const list = document.getElementById('pendingPhotosList');
+    try {
+        const snap = await window.getDocs(window.query(window.collection(window.db, "users"), window.where("photoStatus", "==", "pending")));
+        if(snap.empty) { list.innerHTML = '<div class="p-3 text-center text-muted">Nada.</div>'; return; }
+        let html = '';
+        snap.forEach(doc => {
+            const u = doc.data();
+            html += `<div class="list-group-item text-center"><img src="${u.tempPhoto}" class="rounded-circle mb-2" width="50" height="50"><div class="fw-bold small">${u.name}</div>
+            <button class="btn btn-success btn-sm py-0" onclick="decidePhoto('${doc.id}', true)">V</button> <button class="btn btn-danger btn-sm py-0" onclick="decidePhoto('${doc.id}', false)">X</button></div>`;
+        });
+        list.innerHTML = html;
+    } catch(e) {}
+}
+
+window.decidePhoto = async function(uid, ok) {
+    const ref = window.doc(window.db, "users", uid);
+    const u = (await window.getDoc(ref)).data();
+    if(ok) await window.updateDoc(ref, { photoURL: u.tempPhoto, tempPhoto: null, photoStatus: 'approved' });
+    else await window.updateDoc(ref, { tempPhoto: null, photoStatus: 'rejected' });
+    loadPendingPhotos();
+}
+
+window.loadRedemptionHistory = async function() {
+    const tbody = document.getElementById('redemptionHistoryBody');
+    try {
+        const q = window.query(window.collection(window.db, "orders"), window.where("status", "==", "delivered"), window.orderBy("deliveredAt", "desc"), window.limit(50));
+        const snap = await window.getDocs(q);
+        let html = '';
+        snap.forEach(doc => {
+            const o = doc.data();
+            html += `<tr><td>${new Date(o.deliveredAt).toLocaleDateString()}</td><td>${o.studentName}</td><td>${o.itemName}</td><td>${o.pricePaid}</td></tr>`;
+        });
+        tbody.innerHTML = html || '<tr><td colspan="4">Vazio.</td></tr>';
+    } catch(e) {}
+}
+
+window.loadTeacherClasses = async function() {
+    const list = document.getElementById('classList');
+    const select = document.getElementById('notifTarget');
+    try {
+        const snap = await window.getDocs(window.query(window.collection(window.db, "classes")));
+        let html = ''; let opts = '<option value="all">Todos</option>';
+        snap.forEach(doc => {
+            html += `<div class="list-group-item small"><strong>${doc.data().name}</strong></div>`;
+            opts += `<option value="${doc.id}">${doc.data().name}</option>`;
+        });
+        list.innerHTML = html;
+        if(select) select.innerHTML = opts;
+    } catch(e){}
+}
+
+window.createNewClassPrompt = async function() {
+    const name = prompt("Nome da Turma:");
+    if(name) {
+        await window.addDoc(window.collection(window.db, "classes"), { name, createdAt: new Date().toISOString() });
+        loadTeacherClasses();
+    }
+}
+
+window.sendNotification = async function() {
+    const title = document.getElementById('notifTitle').value;
+    const msg = document.getElementById('notifMessage').value;
+    const target = document.getElementById('notifTarget').value;
+    const type = document.getElementById('notifType').value;
+    const urg = document.getElementById('notifUrgency').value;
+    
+    if(!title) return;
+    try {
+        await window.addDoc(window.collection(window.db, "notifications"), {
+            title, content: msg, type, urgency: urg, targetId: target, 
+            senderName: window.userData.name, createdAt: new Date().toISOString(), readBy: []
+        });
+        alert("Enviado!");
+    } catch(e) { alert("Erro."); }
+}
+
+// Notificações (Cliente)
 window.checkNotifications = async function() {
     if (!window.db || !window.auth.currentUser) return;
     try {
@@ -504,7 +891,7 @@ window.loadNotificationsScreen = async function() {
             if (isForMe) {
                 window.currentNotifs[doc.id] = n;
                 const isUnread = !(n.readBy || []).includes(myId);
-                const bgClass = isUnread ? 'bg-light border-start border-5 border-primary' : '';
+                const bgClass = isUnread ? 'bg-white border-start border-4 border-danger fw-bold' : '';
                 const icon = {'homework':'📚', 'test':'📝', 'event':'🎉', 'dm':'💬'}[n.type] || '📢';
                 
                 html += `
@@ -513,7 +900,7 @@ window.loadNotificationsScreen = async function() {
                             <small class="text-muted">${n.senderName || 'Sistema'}</small>
                             <small class="text-muted">${new Date(n.createdAt).toLocaleDateString('pt-BR')}</small>
                         </div>
-                        <div class="mb-1 fw-bold text-truncate">${icon} ${n.title}</div>
+                        <div class="mb-1 text-truncate">${icon} ${n.title}</div>
                     </a>`;
             }
         });
@@ -529,11 +916,14 @@ window.openNotification = async function(docId) {
     const icon = {'homework':'📚', 'test':'📝', 'event':'🎉', 'dm':'💬'}[data.type] || '📢';
     
     detailDiv.innerHTML = `
-        <div class="border-bottom pb-3 mb-3">
-            <h3 class="mb-2">${icon} ${data.title}</h3>
-            <div class="text-muted small mb-3">Por <strong>${data.senderName}</strong></div>
+        <div class="text-start w-100">
+            <h3 class="mb-2 text-mars-navy fw-bold">${icon} ${data.title}</h3>
+            <div class="text-muted small mb-4 pb-2 border-bottom">
+                Por <strong>${data.senderName}</strong> em ${new Date(data.createdAt).toLocaleString()}
+                <span class="badge bg-warning text-dark float-end">${data.urgency || 'Info'}</span>
+            </div>
+            <div class="fs-6 text-dark" style="white-space: pre-wrap; line-height: 1.6;">${data.content}</div>
         </div>
-        <div class="fs-5 text-dark" style="white-space: pre-wrap;">${data.content}</div>
     `;
 
     const myId = window.auth.currentUser.uid;
@@ -544,355 +934,61 @@ window.openNotification = async function(docId) {
     }
 }
 
-// =================================================================
-// 6. ADMIN & PROFESSOR
-// =================================================================
-
-// Criar Tarefa
-window.createTask = async function() {
-    const title = document.getElementById('taskTitle').value;
-    const desc = document.getElementById('taskDesc').value;
-    const xp = parseInt(document.getElementById('taskXP').value);
-    const coins = parseInt(document.getElementById('taskCoins').value);
-    const date = document.getElementById('taskDate').value;
-
-    if(!title) return alert("Preencha o título!");
-
-    try {
-        await window.addDoc(window.collection(window.db, "tasks"), {
-            title, description: desc, xp, coins, dueDate: date, createdAt: new Date().toISOString()
-        });
-        alert("Missão criada!");
-        loadTasks(); 
-    } catch (e) { alert("Erro: " + e.message); }
-}
-
-// Entregas e Correções
-window.loadPendingSubmissions = async function() {
-    const list = document.getElementById('submissionsList');
-    if(!list) return;
-    try {
-        const q = window.query(window.collection(window.db, "submissions"), window.where("status", "==", "pending"));
-        const snapshot = await window.getDocs(q);
-        let html = '';
-        if (snapshot.empty) html = '<div class="p-4 text-center text-muted">Nenhuma entrega.</div>';
-        
-        snapshot.forEach(doc => {
-            const s = doc.data();
-            html += `
-                <div class="list-group-item p-3">
-                    <h6 class="fw-bold">${s.studentName}</h6>
-                    <p class="mb-1">Missão: ${s.taskTitle}</p>
-                    <div class="alert alert-secondary p-2 mb-2 small">${s.justification}</div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-success btn-sm flex-grow-1" onclick="approveSubmission('${doc.id}', '${s.taskId}', '${s.userId}')">Aprovar</button>
-                        <button class="btn btn-outline-danger btn-sm" onclick="rejectSubmission('${doc.id}')">Rejeitar</button>
-                    </div>
-                </div>`;
-        });
-        list.innerHTML = html;
-    } catch (e) { console.error(e); }
-}
-
-window.approveSubmission = async function(subId, taskId, userId) {
-    if(!confirm("Aprovar?")) return;
-    try {
-        const taskDoc = await window.getDoc(window.doc(window.db, "tasks", taskId));
-        const userRef = window.doc(window.db, "users", userId);
-        const userSnap = await window.getDoc(userRef);
-        const u = userSnap.data();
-        
-        await window.updateDoc(userRef, { 
-            experience: (u.experience||0) + taskDoc.data().xp, 
-            coins: (u.coins||0) + taskDoc.data().coins,
-            level: Math.floor(((u.experience||0) + taskDoc.data().xp)/100)+1
-        });
-        await window.updateDoc(window.doc(window.db, "submissions", subId), { status: 'approved' });
-        alert("Aprovado!"); loadPendingSubmissions();
-    } catch (e) { alert("Erro."); }
-}
-
-window.rejectSubmission = async function(subId) {
-    if(!confirm("Rejeitar?")) return;
-    try {
-        await window.updateDoc(window.doc(window.db, "submissions", subId), { status: 'rejected' });
-        loadPendingSubmissions();
-    } catch (e) { alert("Erro."); }
-}
-
-// Pedidos da Loja (Admin)
-window.loadPendingOrders = async function() {
-    const list = document.getElementById('ordersList');
-    if(!list) return;
-    try {
-        const q = window.query(window.collection(window.db, "orders"), window.where("status", "==", "pending_delivery"));
-        const snapshot = await window.getDocs(q);
-        let html = '';
-        if (snapshot.empty) html = '<div class="p-4 text-center text-muted">Nenhum pedido pendente.</div>';
-        
-        snapshot.forEach(doc => {
-            const o = doc.data();
-            html += `
-                <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="fw-bold">${o.studentName}</div>
-                        <div class="small">Item: ${o.itemName} (${o.pricePaid}💰)</div>
-                    </div>
-                    <div>
-                        <button class="btn btn-outline-danger btn-sm me-1" onclick="cancelOrder('${doc.id}', '${o.userId}', ${o.pricePaid}, '${o.itemName}', '${o.itemId}')">↩️</button>
-                        <button class="btn btn-success btn-sm" onclick="deliverOrder('${doc.id}', '${o.itemName}')">✅</button>
-                    </div>
-                </div>`;
-        });
-        list.innerHTML = html;
-    } catch (e) { console.error(e); }
-}
-
-window.deliverOrder = async function(orderId, itemName) {
-    if(!confirm(`Confirmar entrega de "${itemName}"?`)) return;
-    await window.updateDoc(window.doc(window.db, "orders", orderId), { status: 'delivered', deliveredAt: new Date().toISOString() });
-    loadPendingOrders();
-}
-
-window.cancelOrder = async function(orderId, userId, price, itemName, itemId) {
-    if(!confirm("Cancelar e devolver moedas?")) return;
-    const userRef = window.doc(window.db, "users", userId);
-    const u = (await window.getDoc(userRef)).data();
-    await window.updateDoc(userRef, { coins: (u.coins||0) + price, inventory: window.arrayRemove(itemId) });
-    await window.updateDoc(window.doc(window.db, "orders", orderId), { status: 'cancelled' });
-    loadPendingOrders();
-}
-
-// Gestão de Alunos e Regras
-window.loadStudentsForAdmin = async function() {
-    const select = document.getElementById('studentSelect');
-    if (!select) return;
-    const q = window.query(window.collection(window.db, "users"), window.orderBy("name"));
-    const snapshot = await window.getDocs(q);
-    let html = '<option value="" selected disabled>Selecione...</option>';
-    snapshot.forEach(doc => { html += `<option value="${doc.id}">${doc.data().name}</option>`; });
-    select.innerHTML = html;
-}
-
+// Comportamento (Regras)
 window.createRule = async function() {
     const name = document.getElementById('ruleName').value;
     const xp = parseInt(document.getElementById('ruleXP').value)||0;
     const coins = parseInt(document.getElementById('ruleCoins').value)||0;
     const type = document.getElementById('ruleType').value;
-    await window.addDoc(window.collection(window.db, "rules"), { name, xp, coins, type, createdAt: new Date().toISOString() });
-    alert("Regra criada!"); loadRules();
+    if(!name) return;
+    await window.addDoc(window.collection(window.db, "rules"), { name, xp, coins, type });
+    loadRules();
 }
 
 window.loadRules = async function() {
     const list = document.getElementById('rulesList');
-    if (!list) return;
-    const q = window.query(window.collection(window.db, "rules"), window.orderBy("createdAt", "desc"));
-    const snapshot = await window.getDocs(q);
-    let html = '';
-    snapshot.forEach(doc => {
-        const r = doc.data();
-        const cls = r.type === 'positive' ? 'btn-outline-success' : 'btn-outline-danger';
-        html += `<button class="btn ${cls} btn-sm mb-2" onclick="applyRuleToStudent('${r.name}', ${r.xp}, ${r.coins})">${r.name}</button> `;
-    });
-    list.innerHTML = html || 'Sem regras.';
-}
-
-window.applyRuleToStudent = async function(ruleName, xp, coins) {
-    const studentId = document.getElementById('studentSelect').value;
-    if (!studentId) return alert("Selecione um aluno!");
-    if (!confirm(`Aplicar "${ruleName}"?`)) return;
-    await updateUserStats(studentId, xp, coins);
-}
-
-window.applyManualAdjustment = async function() {
-    const studentId = document.getElementById('studentSelect').value;
-    const xp = parseInt(document.getElementById('manualXP').value)||0;
-    const coins = parseInt(document.getElementById('manualCoins').value)||0;
-    if (!studentId) return alert("Selecione um aluno!");
-    await updateUserStats(studentId, xp, coins);
-}
-
-async function updateUserStats(userId, xpDelta, coinsDelta) {
-    const userRef = window.doc(window.db, "users", userId);
-    const u = (await window.getDoc(userRef)).data();
-    await window.updateDoc(userRef, { 
-        experience: (u.experience||0) + xpDelta, 
-        coins: (u.coins||0) + coinsDelta 
-    });
-    alert("Aplicado!");
-}
-
-// Turmas e Notificações (Professor)
-window.loadTeacherClasses = async function() {
-    const listDiv = document.getElementById('classList');
-    const selectTarget = document.getElementById('notifTarget');
-    if (!listDiv) return;
-    
-    // Mostra todas para admin/dev, só as suas para professor
-    let q = window.userData.role === 'teacher' 
-        ? window.query(window.collection(window.db, "classes"), window.where("teacherId", "==", window.auth.currentUser.uid))
-        : window.query(window.collection(window.db, "classes"));
-        
-    const snapshot = await window.getDocs(q);
-    let htmlList = '';
-    let htmlSelect = '<option value="all">Todas as Minhas Turmas</option>';
-    
-    if (snapshot.empty) htmlList = '<div class="p-3 text-center text-muted">Sem turmas.</div>';
-    
-    snapshot.forEach(doc => {
-        const c = doc.data();
-        htmlList += `<div class="list-group-item"><strong>${c.name}</strong> <span class="badge bg-primary">${(c.studentIds||[]).length} alunos</span></div>`;
-        htmlSelect += `<option value="${doc.id}">${c.name}</option>`;
-    });
-    
-    listDiv.innerHTML = htmlList;
-    if(selectTarget) selectTarget.innerHTML = htmlSelect;
-}
-
-window.createNewClassPrompt = async function() {
-    const name = prompt("Nome da Turma:");
-    if(!name) return;
-    const ref = await window.addDoc(window.collection(window.db, "classes"), {
-        name, teacherId: window.auth.currentUser.uid, studentIds: [], createdAt: new Date().toISOString()
-    });
-    // Atualiza professor
-    await window.updateDoc(window.doc(window.db, "users", window.auth.currentUser.uid), {
-        myClasses: window.arrayUnion(ref.id)
-    });
-    alert("Turma Criada!"); loadTeacherClasses();
-}
-
-window.sendNotification = async function() {
-    const title = document.getElementById('notifTitle').value;
-    const msg = document.getElementById('notifMessage').value;
-    const target = document.getElementById('notifTarget').value;
-    const type = document.getElementById('notifType').value;
-    const urgency = document.getElementById('notifUrgency').value;
-
-    if (!title || !msg) return alert("Preencha tudo!");
-
-    await window.addDoc(window.collection(window.db, "notifications"), {
-        title, content: msg, type, urgency, targetId: target,
-        senderId: window.auth.currentUser.uid, senderName: window.userData.name,
-        readBy: [], createdAt: new Date().toISOString()
-    });
-    alert("Enviado!");
-}
-
-// Aprovação de Fotos
-window.loadPendingPhotos = async function() {
-    const list = document.getElementById('pendingPhotosList');
     if(!list) return;
-    const q = window.query(window.collection(window.db, "users"), window.where("photoStatus", "==", "pending"));
-    const snap = await window.getDocs(q);
-    if(snap.empty) { list.innerHTML = '<div class="text-center p-3 text-muted small">Nenhuma foto pendente.</div>'; return; }
-    
+    const snap = await window.getDocs(window.collection(window.db, "rules"));
     let html = '';
     snap.forEach(doc => {
-        const u = doc.data();
-        html += `
-            <div class="list-group-item text-center">
-                <small class="fw-bold">${u.name}</small><br>
-                <img src="${u.tempPhoto}" class="rounded-circle my-2 border" width="60" height="60" style="object-fit: cover;">
-                <div class="d-flex gap-1 justify-content-center">
-                    <button class="btn btn-success btn-sm py-0" onclick="decidePhoto('${doc.id}', true)">✅</button>
-                    <button class="btn btn-danger btn-sm py-0" onclick="decidePhoto('${doc.id}', false)">❌</button>
-                </div>
-            </div>`;
+        const r = doc.data();
+        const cls = r.type === 'positive' ? 'btn-outline-success' : 'btn-outline-danger';
+        html += `<button class="btn ${cls} btn-sm" onclick="applyRuleToStudent('${r.name}', ${r.xp}, ${r.coins})">${r.name}</button>`;
     });
     list.innerHTML = html;
 }
 
-window.decidePhoto = async function(uid, approved) {
-    const ref = window.doc(window.db, "users", uid);
+window.loadStudentsForAdmin = async function() {
+    const sel = document.getElementById('studentSelect');
+    if(!sel) return;
+    const snap = await window.getDocs(window.query(window.collection(window.db, "users"), window.orderBy("name")));
+    let html = '<option value="">Selecione...</option>';
+    snap.forEach(doc => { html += `<option value="${doc.id}">${doc.data().name}</option>`; });
+    sel.innerHTML = html;
+}
+
+window.applyRuleToStudent = async function(rName, xp, coins) {
+    const sid = document.getElementById('studentSelect').value;
+    if(!sid) return alert("Selecione aluno.");
+    if(!confirm(`Aplicar ${rName}?`)) return;
+    const ref = window.doc(window.db, "users", sid);
     const u = (await window.getDoc(ref)).data();
-    if(approved) await window.updateDoc(ref, { photoURL: u.tempPhoto, tempPhoto: null, photoStatus: 'approved' });
-    else await window.updateDoc(ref, { tempPhoto: null, photoStatus: 'rejected' });
-    loadPendingPhotos();
+    await window.updateDoc(ref, { experience: (u.experience||0)+xp, coins: (u.coins||0)+coins });
+    alert("Aplicado!");
 }
 
-// Histórico de Resgates
-window.loadRedemptionHistory = async function() {
-    const tbody = document.getElementById('redemptionHistoryBody');
-    if(!tbody) return;
-    const q = window.query(window.collection(window.db, "orders"), window.where("status", "==", "delivered"), window.orderBy("deliveredAt", "desc"), window.limit(50));
-    const snap = await window.getDocs(q);
-    let html = '';
-    snap.forEach(doc => {
-        const o = doc.data();
-        html += `<tr><td>${new Date(o.deliveredAt).toLocaleDateString()}</td><td class="text-start">${o.studentName}</td><td>${o.itemName}</td><td class="text-warning">${o.pricePaid}💰</td></tr>`;
-    });
-    tbody.innerHTML = html || '<tr><td colspan="4">Vazio.</td></tr>';
+window.applyManualAdjustment = async function() {
+    const sid = document.getElementById('studentSelect').value;
+    const xp = parseInt(document.getElementById('manualXP').value)||0;
+    const coins = parseInt(document.getElementById('manualCoins').value)||0;
+    if(!sid) return alert("Selecione aluno.");
+    const ref = window.doc(window.db, "users", sid);
+    const u = (await window.getDoc(ref)).data();
+    await window.updateDoc(ref, { experience: (u.experience||0)+xp, coins: (u.coins||0)+coins });
+    alert("Ajustado!");
 }
 
-
-// =================================================================
-// 7. DESENVOLVEDOR (USER FACTORY)
-// =================================================================
-
-window.showDev = function() {
-    if (window.auth.currentUser.email !== 'fmartimr@gmail.com') return alert("Acesso Negado.");
-    hideAllSections();
-    document.getElementById('devContent').style.display = 'block';
-    loadDevDropdowns();
-}
-
-window.loadDevDropdowns = async function() {
-    // Carregar Turmas
-    const qClasses = window.query(window.collection(window.db, "classes"));
-    const snapClasses = await window.getDocs(qClasses);
-    let opts = '<option value="">Selecione...</option>';
-    let optsMulti = '';
-    snapClasses.forEach(doc => {
-        const opt = `<option value="${doc.id}">${doc.data().name}</option>`;
-        opts += opt; optsMulti += opt;
-    });
-    
-    if(document.getElementById('devUserClass')) document.getElementById('devUserClass').innerHTML = opts;
-    if(document.getElementById('devUserClasses')) document.getElementById('devUserClasses').innerHTML = optsMulti;
-    if(document.getElementById('historyFilterClass')) document.getElementById('historyFilterClass').innerHTML = '<option value="all">Todas</option>' + optsMulti;
-
-    // Carregar Alunos (para pais)
-    const qStudents = window.query(window.collection(window.db, "users"), window.where("role", "==", "student"));
-    const snapStudents = await window.getDocs(qStudents);
-    let stuOpts = '';
-    snapStudents.forEach(doc => { stuOpts += `<option value="${doc.id}">${doc.data().name} (${doc.data().email})</option>`; });
-    if(document.getElementById('devUserChildren')) document.getElementById('devUserChildren').innerHTML = stuOpts;
-}
-
-window.toggleDevFields = function() {
-    const role = document.getElementById('devUserRole').value;
-    document.getElementById('devStudentFields').style.display = role === 'student' ? 'block' : 'none';
-    document.getElementById('devTeacherFields').style.display = role === 'teacher' ? 'block' : 'none';
-    document.getElementById('devParentFields').style.display = role === 'parent' ? 'block' : 'none';
-}
-
-window.createPreRegistry = async function() {
-    const role = document.getElementById('devUserRole').value;
-    const name = document.getElementById('devUserName').value;
-    const email = document.getElementById('devUserEmail').value.trim().toLowerCase();
-    
-    if(!email || !name) return alert("Dados incompletos.");
-
-    const data = { name, email, role, createdAt: new Date().toISOString(), isPreRegistered: true };
-
-    if (role === 'student') {
-        data.birthDate = document.getElementById('devUserDOB').value;
-        data.classId = document.getElementById('devUserClass').value;
-        data.level = 1; data.coins = 50; data.experience = 0;
-    } else if (role === 'teacher') {
-        data.myClasses = Array.from(document.getElementById('devUserClasses').selectedOptions).map(o => o.value);
-    } else if (role === 'parent') {
-        data.childrenIds = Array.from(document.getElementById('devUserChildren').selectedOptions).map(o => o.value);
-    }
-
-    try {
-        await window.setDoc(window.doc(window.db, "pre_registers", email), data);
-        alert(`✅ Pré-cadastro criado para ${email}!`);
-    } catch (e) { alert("Erro: " + e.message); }
-}
-
-// Exportações Globais
+// Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
 window.createTask = createTask;
@@ -903,7 +999,6 @@ window.loadStore = loadStore;
 window.buyItem = buyItem;
 window.loadPendingOrders = loadPendingOrders;
 window.deliverOrder = deliverOrder;
-window.cancelOrder = cancelOrder;
 window.loadStudentsForAdmin = loadStudentsForAdmin;
 window.createRule = createRule;
 window.loadRules = loadRules;
@@ -922,10 +1017,24 @@ window.equipItem = equipItem;
 window.handlePhotoUpload = handlePhotoUpload;
 window.editBio = editBio;
 window.saveBio = saveBio;
-window.showDev = showDev;
+window.showAdminTab = showAdminTab;
+window.showDevTab = showDevTab;
+window.createPreRegistry = createPreRegistry;
 window.loadDevDropdowns = loadDevDropdowns;
 window.toggleDevFields = toggleDevFields;
-window.createPreRegistry = createPreRegistry;
+window.loadStoreManagement = loadStoreManagement;
+window.saveStoreItem = saveStoreItem;
+window.editStoreItem = editStoreItem;
+window.deleteStoreItem = deleteStoreItem;
+window.activateSimulation = activateSimulation;
+window.loadStudentDashboard = loadStudentDashboard;
+window.loadTeacherDashboard = loadTeacherDashboard;
+window.loadParentDashboard = loadParentDashboard;
+window.loadDevStats = loadDevStats;
+window.sendMessage = sendMessage;
+window.loadMyMessages = loadMyMessages;
+window.loadInbox = loadInbox;
+window.replyToMessage = replyToMessage;
 window.loadPendingPhotos = loadPendingPhotos;
 window.decidePhoto = decidePhoto;
 window.loadRedemptionHistory = loadRedemptionHistory;
