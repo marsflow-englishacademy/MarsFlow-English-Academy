@@ -679,6 +679,77 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-info">
+                            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-chalkboard me-2"></i>Minhas Turmas</h5>
+                                <button class="btn btn-sm btn-light text-info fw-bold" onclick="createNewClassPrompt()">
+                                    <i class="fas fa-plus"></i> Nova
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="classList" class="list-group list-group-flush">
+                                    <div class="text-center p-3 text-muted small">Nenhuma turma encontrada.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Enviar Comunicado</h5>
+                            </div>
+                            <div class="card-body">
+                                <form onsubmit="event.preventDefault(); sendNotification();">
+                                    <div class="row mb-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-bold">Título</label>
+                                            <input type="text" id="notifTitle" class="form-control" placeholder="Ex: Prova de Inglês" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Destino</label>
+                                            <select id="notifTarget" class="form-select">
+                                                <option value="all">Todas as Minhas Turmas</option>
+                                                </select>
+                                        </div>
+                                    </div>
+                
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Mensagem</label>
+                                        <textarea id="notifMessage" class="form-control" rows="3" placeholder="Escreva o aviso aqui..." required></textarea>
+                                    </div>
+                
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo</label>
+                                            <select id="notifType" class="form-select">
+                                                <option value="homework">📚 Homework (Tarefa)</option>
+                                                <option value="test">📝 Test (Prova)</option>
+                                                <option value="event">🎉 Event (Evento)</option>
+                                                <option value="dm">💬 DM (Mensagem Direta)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nível de Urgência</label>
+                                            <select id="notifUrgency" class="form-select">
+                                                <option value="chill" class="text-success">😎 Tranquila (Chill)</option>
+                                                <option value="attention" class="text-warning">⚠️ Atenção (Attention)</option>
+                                                <option value="urgent" class="text-danger">🔥 Urgente (Panic Mode)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                
+                                    <button type="submit" class="btn btn-warning w-100 fw-bold">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar Notificação
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
             </div> 
 
             <div id="storeContent" class="content-section" style="display: none;">
@@ -1111,6 +1182,7 @@
             if(window.loadPendingOrders) window.loadPendingOrders();  // Carregar Pedidos da Loja
             if(window.loadStudentsForAdmin) window.loadStudentsForAdmin();     // Carregar Alunos
             if(window.loadRules) window.loadRules();                           // Carregar Regras
+            if(window.loadTeacherClasses) window.loadTeacherClasses(); // Carregar Turmas
         };
 
         function hideAllSections() {
