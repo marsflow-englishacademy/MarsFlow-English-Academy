@@ -624,6 +624,7 @@ window.rejectSubmission = rejectSubmission;
 window.loadStore = loadStore;
 window.loadPendingOrders = loadPendingOrders;
 window.deliverOrder = deliverOrder;
+window.cancelOrder = cancelOrder;
 window.loadStudentsForAdmin = loadStudentsForAdmin;
 window.createRule = createRule;
 window.loadRules = loadRules;
