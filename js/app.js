@@ -810,6 +810,212 @@ window.sendNotification = async function() {
     }
 }
 
+// === ETAPA 3: INTERFACE DO ALUNO (Notificações e Ranking Avançado) ===
+
+// 1. RANKING: Alternar entre Geral e Turma
+window.currentRankingMode = 'general';
+
+window.switchRanking = function(mode) {
+    window.currentRankingMode = mode;
+    
+    // Atualiza visual das abas
+    document.getElementById('tabGeneral').className = mode === 'general' ? 'nav-link active fw-bold' : 'nav-link text-dark';
+    document.getElementById('tabClass').className = mode === 'class' ? 'nav-link active fw-bold' : 'nav-link text-dark';
+    
+    // Recarrega dados
+    loadRealRanking();
+}
+
+// Substituição da função loadRealRanking original para suportar filtro
+window.loadRealRanking = async function() {
+    const tbody = document.getElementById('tabelaRankingCompleta');
+    if(!tbody || !window.db) return;
+    
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4"><div class="spinner-border text-primary"></div></td></tr>';
+
+    try {
+        let q;
+        const usersRef = window.collection(window.db, "users");
+
+        // Atualiza badge da turma
+        const classBadge = document.getElementById('myClassBadge');
+        if(classBadge) classBadge.innerText = window.userData.classId ? "Turma Vinculada" : "Sem Turma";
+
+        if (window.currentRankingMode === 'class') {
+            if (!window.userData.classId) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">Você não está em nenhuma turma.</td></tr>';
+                return;
+            }
+            // Filtra apenas alunos da mesma turma
+            q = window.query(usersRef, window.where("classId", "==", window.userData.classId), window.orderBy("experience", "desc"), window.limit(50));
+        } else {
+            // Ranking Geral
+            q = window.query(usersRef, window.orderBy("experience", "desc"), window.limit(50));
+        }
+
+        const snapshot = await window.getDocs(q);
+        let html = '';
+        let posicao = 1;
+
+        snapshot.forEach(doc => {
+            const u = doc.data();
+            const isMe = (window.auth.currentUser.uid === doc.id);
+            const rowClass = isMe ? 'table-primary fw-bold' : '';
+            
+            // Ícones de medalha
+            let posDisplay = posicao;
+            if (posicao === 1) posDisplay = '🥇';
+            if (posicao === 2) posDisplay = '🥈';
+            if (posicao === 3) posDisplay = '🥉';
+
+            html += `
+                <tr class="${rowClass}" style="cursor: pointer">
+                    <td class="text-center">${posDisplay}</td>
+                    <td>${u.name} ${isMe ? '(Você)' : ''}</td>
+                    <td class="text-center"><span class="badge bg-light text-dark border">Lvl ${u.level || 1}</span></td>
+                    <td class="text-end text-warning fw-bold">${u.experience || 0} XP</td>
+                </tr>
+            `;
+            posicao++;
+        });
+
+        tbody.innerHTML = html;
+
+    } catch (e) { console.error("Erro ranking:", e); tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar.</td></tr>'; }
+}
+
+// 2. NOTIFICAÇÕES: Checar Sino (Bolinha Vermelha)
+window.checkNotifications = async function() {
+    if (!window.db || !window.auth.currentUser) return;
+    
+    try {
+        // Busca notificações onde eu sou o alvo (ou minha turma, ou todos)
+        // Nota: Firestore tem limites de 'OR' queries, então faremos uma busca ampla e filtraremos no cliente por simplicidade
+        // Em produção, ideal seria duplicar notifs ou usar índices compostos avançados
+        
+        const q = window.query(window.collection(window.db, "notifications"), window.orderBy("createdAt", "desc"), window.limit(20));
+        const snapshot = await window.getDocs(q);
+        
+        let unreadCount = 0;
+        const myId = window.auth.currentUser.uid;
+        const myClass = window.userData.classId;
+
+        snapshot.forEach(doc => {
+            const n = doc.data();
+            
+            // Verifica se é pra mim
+            const isForMe = (n.targetId === 'all') || (n.targetId === myId) || (n.targetId === myClass);
+            
+            if (isForMe) {
+                const readBy = n.readBy || [];
+                if (!readBy.includes(myId)) {
+                    unreadCount++;
+                }
+            }
+        });
+
+        // Atualiza a bolinha
+        const badge = document.getElementById('notifBadge');
+        if (badge) {
+            badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        }
+
+    } catch (e) { console.error("Erro check notifs:", e); }
+}
+
+// 3. CARREGAR TELA DE NOTIFICAÇÕES (Lista e Detalhe)
+window.loadNotificationsScreen = async function() {
+    const listDiv = document.getElementById('notifList');
+    if(!listDiv) return;
+
+    try {
+        const q = window.query(window.collection(window.db, "notifications"), window.orderBy("createdAt", "desc"), window.limit(15));
+        const snapshot = await window.getDocs(q);
+        
+        const myId = window.auth.currentUser.uid;
+        const myClass = window.userData.classId;
+        let html = '';
+        let hasItems = false;
+
+        // Armazenar dados em memória para clicar e abrir
+        window.currentNotifs = {}; 
+
+        snapshot.forEach(doc => {
+            const n = doc.data();
+            const isForMe = (n.targetId === 'all') || (n.targetId === myId) || (n.targetId === myClass);
+            
+            if (isForMe) {
+                hasItems = true;
+                window.currentNotifs[doc.id] = n; // Salva para abrir depois
+                
+                const isUnread = !(n.readBy || []).includes(myId);
+                const bgClass = isUnread ? 'bg-light border-start border-5 border-primary' : '';
+                const icon = getIconByType(n.type);
+                const date = new Date(n.createdAt).toLocaleDateString('pt-BR');
+
+                html += `
+                    <a href="#" class="list-group-item list-group-item-action ${bgClass} py-3" onclick="openNotification('${doc.id}')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">${n.senderName}</small>
+                            <small class="text-muted">${date}</small>
+                        </div>
+                        <div class="mb-1 fw-bold text-truncate">
+                            ${icon} ${n.title}
+                        </div>
+                        <small class="${getUrgencyClass(n.urgency)}">${getUrgencyLabel(n.urgency)}</small>
+                    </a>
+                `;
+            }
+        });
+
+        if (!hasItems) html = '<div class="text-center p-4">Nada por aqui.</div>';
+        listDiv.innerHTML = html;
+
+    } catch (e) { console.error("Erro lista notifs:", e); }
+}
+
+// 4. ABRIR NOTIFICAÇÃO (Marcar como lida)
+window.openNotification = async function(docId) {
+    const data = window.currentNotifs[docId];
+    if (!data) return;
+
+    // Renderizar Detalhe (Lado Direito)
+    const detailDiv = document.getElementById('notifDetail');
+    detailDiv.innerHTML = `
+        <div class="border-bottom pb-3 mb-3">
+            <h3 class="mb-2">${getIconByType(data.type)} ${data.title}</h3>
+            <div class="text-muted small mb-3">
+                Por <strong>${data.senderName}</strong> em ${new Date(data.createdAt).toLocaleString()}
+                <span class="badge ${getUrgencyClass(data.urgency)} ms-2">${getUrgencyLabel(data.urgency)}</span>
+            </div>
+        </div>
+        <div class="fs-5 text-dark" style="white-space: pre-wrap;">${data.content}</div>
+    `;
+
+    // Marcar como lida no Banco
+    const myId = window.auth.currentUser.uid;
+    if (!(data.readBy || []).includes(myId)) {
+        await window.updateDoc(window.doc(window.db, "notifications", docId), {
+            readBy: window.arrayUnion(myId)
+        });
+        // Atualiza a bolinha e a lista visualmente
+        checkNotifications();
+        loadNotificationsScreen();
+    }
+}
+
+// Helpers Visuais
+function getIconByType(type) {
+    const icons = { 'homework': '📚', 'test': '📝', 'event': '🎉', 'dm': '💬' };
+    return icons[type] || '📢';
+}
+function getUrgencyClass(u) {
+    return u === 'urgent' ? 'text-danger fw-bold' : u === 'attention' ? 'text-warning fw-bold' : 'text-success';
+}
+function getUrgencyLabel(u) {
+    return u === 'urgent' ? 'Urgente' : u === 'attention' ? 'Atenção' : 'Informativo';
+}
+
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
@@ -829,3 +1035,7 @@ window.applyManualAdjustment = applyManualAdjustment;
 window.loadTeacherClasses = loadTeacherClasses;
 window.createNewClassPrompt = createNewClassPrompt;
 window.sendNotification = sendNotification;
+window.switchRanking = switchRanking;
+window.checkNotifications = checkNotifications;
+window.loadNotificationsScreen = loadNotificationsScreen;
+window.openNotification = openNotification;
