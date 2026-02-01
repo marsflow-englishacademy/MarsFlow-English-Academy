@@ -520,15 +520,16 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Expor auth e db para o escopo global (para o app.js usar)
+        // --- ADICIONE ISTO ---
+        // Permitir que o app.js acesse o banco de dados
         window.db = db;
         window.auth = auth;
-        window.getDocs = getDocs;
         window.collection = collection;
         window.query = query;
         window.orderBy = orderBy;
         window.limit = limit;
-        // --------------------------
+        window.getDocs = getDocs;
+        // ---------------------
         
         // Global variables
         let currentUser = null;
@@ -540,6 +541,11 @@
                 currentUser = user;
                 await loadUserData();
                 showAppScreen();
+
+            if (window.initializeApp) {
+                window.initializeApp();
+            }
+            // ---------------------
             } else {
                 showLoginScreen();
             }
