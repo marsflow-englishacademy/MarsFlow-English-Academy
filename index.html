@@ -449,18 +449,20 @@
 
             <!-- Seções placeholder -->
             <div id="storeContent" class="content-section" style="display: none;">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-store me-2"></i>Loja Virtual
-                        </h5>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-store text-success me-2"></i>Loja de Recompensas</h2>
+                    <div class="bg-white p-2 rounded shadow-sm border">
+                        <small class="text-muted d-block">Seu Saldo</small>
+                        <span class="h4 text-warning fw-bold" id="storeBalance">
+                            <i class="fas fa-coins"></i> Carregando...
+                        </span>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-store fa-3x text-muted mb-3"></i>
-                            <h5>Loja em desenvolvimento</h5>
-                            <p class="text-muted">Em breve você poderá personalizar seu avatar!</p>
-                        </div>
+                </div>
+            
+                <div class="row" id="storeList">
+                    <div class="col-12 text-center p-5">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="mt-2 text-muted">Carregando ofertas...</p>
                     </div>
                 </div>
             </div>
@@ -893,7 +895,9 @@
             }
             
             // Carrega os produtos
-            if(window.loadStore) window.loadStore();
+            if(window.loadStore) {
+                window.loadStore();
+            }
         };
 
         window.showTasks = function() {
