@@ -1018,6 +1018,158 @@ function getUrgencyLabel(u) {
     return u === 'urgent' ? 'Urgente' : u === 'attention' ? 'Atenção' : 'Informativo';
 }
 
+// === ETAPA 4: PERFIL E INVENTÁRIO ===
+
+// 1. Carregar Dados do Perfil
+window.loadProfile = async function() {
+    // Referências HTML
+    const avatarEl = document.getElementById('profileAvatarDisplay');
+    const nameEl = document.getElementById('profileName');
+    const classEl = document.getElementById('profileClass');
+    const roleEl = document.getElementById('profileRole');
+    const levelEl = document.getElementById('profileLevel');
+    const xpBar = document.getElementById('xpBar');
+    const xpRatio = document.getElementById('xpRatio');
+    const xpToNext = document.getElementById('xpToNext');
+
+    if(!window.userData || !window.db) return;
+
+    // Atualiza Textos Básicos
+    nameEl.innerText = window.userData.name;
+    roleEl.innerText = window.userData.role === 'student' ? 'Aluno' : window.userData.role.toUpperCase();
+    levelEl.innerText = window.userData.level || 1;
+    
+    // Atualiza Turma (busca nome se tiver ID)
+    if(window.userData.classId) {
+        try {
+            const classSnap = await window.getDoc(window.doc(window.db, "classes", window.userData.classId));
+            if(classSnap.exists()) classEl.innerText = classSnap.data().name;
+        } catch(e) { classEl.innerText = "Turma não encontrada"; }
+    } else {
+        classEl.innerText = "Sem Turma Vinculada";
+    }
+
+    // Atualiza Barra de XP (Cálculo base: Nível * 100 XP)
+    const currentXP = window.userData.experience || 0;
+    const nextLevelXP = (window.userData.level || 1) * 100;
+    const prevLevelXP = ((window.userData.level || 1) - 1) * 100;
+    
+    // XP acumulado no nível atual
+    const xpInThisLevel = currentXP - prevLevelXP;
+    const xpNeeded = 100; // Simplificado: cada nível custa 100 XP a mais que o anterior
+    const progressPercent = Math.min(100, Math.max(0, (xpInThisLevel / xpNeeded) * 100));
+
+    xpBar.style.width = `${progressPercent}%`;
+    xpRatio.innerText = `${xpInThisLevel} / ${xpNeeded} XP`;
+    xpToNext.innerText = (xpNeeded - xpInThisLevel);
+
+    // Atualiza Avatar e Moldura
+    const currentIcon = window.userData.equippedIcon || '👤';
+    const currentFrame = window.userData.equippedFrame || 'border-light'; // Classe CSS ou estilo
+    
+    avatarEl.innerText = currentIcon;
+    // Resetar classes de borda e aplicar a nova (se for classe bootstrap)
+    avatarEl.className = `display-1 bg-light rounded-circle border border-3 p-3 ${currentFrame}`;
+    
+    // Carregar Inventário
+    loadInventory();
+}
+
+// 2. Carregar Inventário (Itens Comprados)
+window.loadInventory = async function() {
+    const listDiv = document.getElementById('inventoryList');
+    if(!listDiv) return;
+
+    try {
+        const inventoryIds = window.userData.inventory || [];
+        
+        if (inventoryIds.length === 0) {
+            listDiv.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Você ainda não comprou nada.</p>
+                    <button class="btn btn-primary btn-sm" onclick="showStore()">Ir para a Loja</button>
+                </div>`;
+            return;
+        }
+
+        // Buscar detalhes dos itens no banco
+        // Nota: O ideal seria buscar 'where documentId in [...]', mas o Firestore limita a 10.
+        // Vamos buscar todos os itens da loja e filtrar localmente para este exemplo simples.
+        const q = window.query(window.collection(window.db, "shop_items"));
+        const snapshot = await window.getDocs(q);
+        
+        let html = '';
+        
+        snapshot.forEach(doc => {
+            if (inventoryIds.includes(doc.id)) {
+                const item = doc.data();
+                const isEquipped = (window.userData.equippedIcon === item.icon) || (window.userData.equippedFrame === item.code);
+                
+                let actionBtn = '';
+                
+                // Lógica de Equipar (Apenas se for permanente)
+                if (item.type === 'permanent') {
+                    if (isEquipped) {
+                        actionBtn = `<button class="btn btn-success btn-sm w-100" disabled><i class="fas fa-check"></i> Equipado</button>`;
+                    } else {
+                        // Passamos o ícone (para avatar) ou código (para moldura)
+                        const valueToEquip = item.icon || item.code || ''; 
+                        const category = item.category || 'avatar'; // 'avatar' ou 'frame'
+                        actionBtn = `<button class="btn btn-outline-primary btn-sm w-100" onclick="equipItem('${doc.id}', '${category}', '${valueToEquip}')">Equipar</button>`;
+                    }
+                } else {
+                    actionBtn = `<button class="btn btn-secondary btn-sm w-100" disabled>Consumível</button>`;
+                }
+
+                html += `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card h-100 text-center p-2 ${isEquipped ? 'border-success shadow-sm' : ''}">
+                            <div class="display-4 mb-2">${item.icon || '📦'}</div>
+                            <h6 class="card-title text-truncate" style="font-size: 0.9rem;">${item.name}</h6>
+                            <div class="mt-auto">${actionBtn}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        listDiv.innerHTML = html;
+
+    } catch (e) { console.error("Erro inventário:", e); }
+}
+
+// 3. Equipar Item
+window.equipItem = async function(itemId, category, value) {
+    try {
+        const userId = window.auth.currentUser.uid;
+        const updates = {};
+
+        // Define qual campo atualizar baseado na categoria do item
+        if (category === 'avatar') {
+            updates.equippedIcon = value; // Ex: '👑'
+            window.userData.equippedIcon = value;
+        } else if (category === 'frame') {
+            updates.equippedFrame = value; // Ex: 'border-warning'
+            window.userData.equippedFrame = value;
+        } else {
+            return alert("Este item não pode ser equipado.");
+        }
+
+        // Atualiza no Firebase
+        await window.updateDoc(window.doc(window.db, "users", userId), updates);
+        
+        // Atualiza visualmente agora
+        loadProfile(); 
+        updateUserInterface(); // Atualiza o ícone no menu superior também
+        
+        alert("Item equipado com sucesso!");
+
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao equipar item.");
+    }
+}
+
 // Exportações Finais
 window.switchRanking = switchRanking;
 window.checkNotifications = checkNotifications;
@@ -1046,3 +1198,6 @@ window.switchRanking = switchRanking;
 window.checkNotifications = checkNotifications;
 window.loadNotificationsScreen = loadNotificationsScreen;
 window.openNotification = openNotification;
+window.loadProfile = loadProfile;
+window.loadInventory = loadInventory;
+window.equipItem = equipItem;
