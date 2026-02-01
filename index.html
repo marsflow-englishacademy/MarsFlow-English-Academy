@@ -532,7 +532,8 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // ATENÇÃO: Adicionei 'where', 'updateDoc', 'arrayUnion' na linha abaixo
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration - ATUALIZE COM SEUS DADOS
         const firebaseConfig = {
@@ -554,14 +555,17 @@
         // Permitir que o app.js acesse o banco de dados
         window.db = db;
         window.auth = auth;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.updateDoc = updateDoc;
+        window.arrayUnion = arrayUnion;
         window.collection = collection;
         window.query = query;
         window.orderBy = orderBy;
         window.limit = limit;
         window.getDocs = getDocs;
-        window.where = where;       
-        window.doc = doc;         
-        window.setDoc = setDoc;   
+        window.where = where;  
         // ---------------------
         
         // Global variables
@@ -578,6 +582,11 @@
             if (window.initializeApp) {
                 window.initializeApp();
             }
+
+            if(window.initializeApp) {
+                window.initializeApp();
+            }
+                
             // ---------------------
             } else {
                 showLoginScreen();
@@ -805,6 +814,10 @@
         window.showTasks = function() {
             hideAllSections();
             document.getElementById('tasksContent').style.display = 'block';
+           
+            if(window.loadTasks) {
+                window.loadTasks();
+            }
         };
 
         window.showRanking = async function() {
