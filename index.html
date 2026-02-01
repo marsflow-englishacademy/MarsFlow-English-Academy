@@ -261,6 +261,12 @@
                                 <i class="fas fa-trophy me-1"></i>Ranking
                             </a>
                         </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showAdmin()">
+                                <i class="fas fa-trophy me-1"></i>Professor
+                            </a>
+                        </li>
                     </ul>
                     
                     <ul class="navbar-nav">
@@ -522,6 +528,59 @@
                     </div>
                 </div>
             </div>
+
+            <div id="adminContent" class="content-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-user-shield text-danger"></i> Painel do Professor</h2>
+                
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-danger text-white">Criar Nova Missão</div>
+                            <div class="card-body">
+                                <form onsubmit="event.preventDefault(); createTask();">
+                                    <div class="mb-3">
+                                        <label class="form-label">Título da Missão</label>
+                                        <input type="text" id="taskTitle" class="form-control" required placeholder="Ex: Ler Cap. 3">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Descrição</label>
+                                        <textarea id="taskDesc" class="form-control" rows="2" required placeholder="Instruções..."></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">XP Reward</label>
+                                            <input type="number" id="taskXP" class="form-control" value="100">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Coins Reward</label>
+                                            <input type="number" id="taskCoins" class="form-control" value="50">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Data de Entrega</label>
+                                        <input type="date" id="taskDate" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100">Publicar Missão</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="col-md-7">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                                <span>Entregas Pendentes</span>
+                                <button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Atualizar</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="submissionsList" class="list-group list-group-flush">
+                                    <div class="text-center p-4 text-muted">Carregando...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>          
         </div>
     </div>
 
@@ -533,7 +592,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         // ATENÇÃO: Adicionei 'where', 'updateDoc', 'arrayUnion' na linha abaixo
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, arrayUnion, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration - ATUALIZE COM SEUS DADOS
         const firebaseConfig = {
@@ -565,7 +624,8 @@
         window.orderBy = orderBy;
         window.limit = limit;
         window.getDocs = getDocs;
-        window.where = where;  
+        window.where = where;
+        window.addDoc = addDoc;
         // ---------------------
         
         // Global variables
@@ -889,6 +949,12 @@
         window.playQuiz = function() {
             // Abrir o quiz em uma nova página
             window.location.href = 'quiz.html';
+        };
+
+        window.showAdmin = function() {
+            hideAllSections();
+            document.getElementById('adminContent').style.display = 'block';
+            if(window.loadPendingSubmissions) window.loadPendingSubmissions();
         };
 
         function hideAllSections() {
