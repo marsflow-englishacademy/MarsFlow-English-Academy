@@ -4,94 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mars Flow English Academy</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --mars-navy: #00205B;  /* Azul Marinho Oficial */
-            --mars-red: #C8102E;   /* Vermelho Oficial */
-            --mars-white: #FFFFFF;
+            /* Paleta Oficial Mars Flow */
+            --mars-navy: #00205B;      /* Azul Marinho Profundo */
+            --mars-navy-hover: #001540;
+            --mars-red: #C8102E;       /* Vermelho Carmesim */
+            --mars-red-hover: #a50b23;
+            --mars-gold: #FFD700;      /* Dourado para Moedas/Rank */
+            --mars-bg: #f4f7f6;        /* Fundo claro para áreas de conteúdo */
+            --text-dark: #1a1a1a;
+            --text-muted: #666666;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            /* Fundo Gradiente Premium */
-            background: linear-gradient(135deg, var(--mars-navy) 0%, #000c24 100%);
+            /* Fundo Gradiente Premium Escuro */
+            background: linear-gradient(135deg, var(--mars-navy) 0%, #000814 100%);
             min-height: 100vh;
-            color: #333;
+            color: var(--text-dark);
+            margin: 0;
+            padding-bottom: 60px;
         }
         
-        /* Estilos Globais de Cards */
+        /* --- ESTILOS DE TEXTO & CORES --- */
+        .text-mars-navy { color: var(--mars-navy) !important; }
+        .text-mars-red { color: var(--mars-red) !important; }
+        .text-mars-gold { color: #d4af37 !important; } /* Ouro escuro para leitura em fundo branco */
+        
+        /* --- CARTÕES (CARDS) --- */
         .card {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            background-color: #ffffff;
+            margin-bottom: 24px;
+            overflow: hidden;
         }
         
         .card-header {
-            border-radius: 12px 12px 0 0 !important;
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 18px 24px;
+            font-weight: 700;
+            color: var(--mars-navy);
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        /* Headers coloridos específicos */
+        .card-header.bg-mars-navy { background-color: var(--mars-navy) !important; color: white !important; }
+        .card-header.bg-mars-red { background-color: var(--mars-red) !important; color: white !important; }
+
+        /* --- BOTÕES PERSONALIZADOS --- */
+        /* Primário = Navy (Padrão) */
+        .btn-primary { 
+            background-color: var(--mars-navy); 
+            border-color: var(--mars-navy);
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .btn-primary:hover { background-color: var(--mars-navy-hover); border-color: var(--mars-navy-hover); transform: translateY(-1px); }
+        
+        /* Perigo/Ação Forte = Red (Comprar/Login) */
+        .btn-danger { 
+            background-color: var(--mars-red); 
+            border-color: var(--mars-red);
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .btn-danger:hover { background-color: var(--mars-red-hover); border-color: var(--mars-red-hover); transform: translateY(-1px); }
+
+        /* Secundário */
+        .btn-outline-primary {
+            color: var(--mars-navy);
+            border-color: var(--mars-navy);
             font-weight: 600;
         }
+        .btn-outline-primary:hover { background-color: var(--mars-navy); color: white; }
 
-        /* Botões Personalizados */
-        .btn-primary { background-color: var(--mars-navy); border-color: var(--mars-navy); }
-        .btn-primary:hover { background-color: #001540; }
-        
-        .btn-danger { background-color: var(--mars-red); border-color: var(--mars-red); }
-        .btn-danger:hover { background-color: #a50b23; }
+        /* --- INPUTS --- */
+        .form-control, .form-select {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--mars-navy);
+            font-weight: 500;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #fff;
+            border-color: var(--mars-navy);
+            box-shadow: 0 0 0 4px rgba(0, 32, 91, 0.1);
+        }
+        .form-label {
+            color: var(--mars-navy);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        /* Tela de Login Especial */
+        /* --- LOGIN --- */
         .login-container {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 20px;
+            background: #ffffff;
+            border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
             padding: 40px;
             margin-top: 60px;
-            border-top: 5px solid var(--mars-red); /* Detalhe vermelho no topo */
+            border-top: 8px solid var(--mars-red);
         }
         
         .brand-text {
             color: var(--mars-navy);
             font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            line-height: 1;
         }
-        
         .brand-subtext {
             color: var(--mars-red);
             font-weight: 600;
-            letter-spacing: 4px;
             font-size: 0.9rem;
+            letter-spacing: 3px;
             text-transform: uppercase;
         }
 
-        /* Navbar Premium */
+        /* --- NAVBAR --- */
         .navbar {
             background-color: var(--mars-navy) !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            padding: 14px 0;
         }
-        .navbar-brand {
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .nav-link { color: rgba(255,255,255,0.85) !important; }
-        .nav-link:hover { color: #fff !important; }
-        .nav-link.active { color: #fff !important; font-weight: 600; border-bottom: 2px solid var(--mars-red); }
-
-        /* Badges */
-        .badge-mars { background-color: var(--mars-red); color: white; }
-
-        .content-section { display: none; }
-        .loading-spinner { display: none; text-align: center; margin-top: 20px; }
+        .navbar-brand { font-weight: 800; letter-spacing: 1px; font-size: 1.4rem; }
+        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; transition: 0.3s; margin: 0 8px; }
+        .nav-link:hover, .nav-link.active { color: #fff !important; transform: translateY(-2px); text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         
-        /* Simulação Bar */
+        /* Dropdown */
+        .dropdown-menu { border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; margin-top: 10px; }
+        .dropdown-item { padding: 10px 20px; color: var(--mars-navy); font-weight: 500; }
+        .dropdown-item:hover { background-color: #f0f4f8; color: var(--mars-red); }
+
+        /* --- TABELAS --- */
+        .table { --bs-table-bg: transparent; }
+        .table thead th {
+            background-color: var(--mars-navy);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px;
+        }
+        .table tbody td {
+            vertical-align: middle;
+            color: var(--text-dark);
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .table-hover tbody tr:hover { background-color: rgba(0, 32, 91, 0.03); }
+
+        /* --- MISC --- */
+        .badge-mars { background-color: var(--mars-red); color: white; border: 2px solid white; }
+        .hover-effect { cursor: pointer; transition: transform 0.2s; }
+        .hover-effect:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        
+        .content-section { display: none; }
+        .loading-spinner { display: none; text-align: center; margin-top: 20px; color: white; }
+        
+        /* Barra de Simulação */
         #simulationBar {
-            background: repeating-linear-gradient(45deg, #ffc107, #ffc107 10px, #ffca2c 10px, #ffca2c 20px);
-            color: #000;
+            background-color: var(--mars-gold);
+            color: var(--mars-navy);
+            border-top: 4px solid var(--mars-navy);
         }
     </style>
 </head>
@@ -99,50 +190,46 @@
 
     <div id="loginScreen" class="container">
         <div class="row justify-content-center">
-            <div class="col-md-5">
+            <div class="col-md-5 col-lg-4">
                 <div class="login-container text-center">
                     
                     <div class="mb-4">
-                        <i class="fas fa-shield-alt fa-5x text-mars-navy mb-2"></i>
-                        
-                        <h1 class="brand-text mb-0">MARS FLOW</h1>
+                        <img src="img/logo.png" alt="Logo" style="max-height: 100px; width: auto;" class="mb-3">
+                        <h1 class="brand-text">MARS FLOW</h1>
                         <p class="brand-subtext">English Academy</p>
                     </div>
                     
                     <form id="loginForm" class="text-start mt-4">
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-mars-navy small">USUÁRIO DO ALUNO</label>
+                            <label class="form-label">Usuário</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="loginUser" required placeholder="Ex: pedro.h" style="background: #f8f9fa;">
+                                <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+                                <input type="text" class="form-control" id="loginUser" required placeholder="Ex: pedro.h">
                             </div>
                         </div>
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-mars-navy small">SENHA</label>
+                            <label class="form-label">Senha</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
-                                <input type="password" class="form-control border-start-0 ps-0" id="password" required style="background: #f8f9fa;">
+                                <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control" id="password" required>
                             </div>
                         </div>
                         
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-danger btn-lg fw-bold shadow-sm">
+                            <button type="submit" class="btn btn-danger btn-lg shadow">
                                 <i class="fas fa-sign-in-alt me-2"></i>ENTRAR
                             </button>
                         </div>
                         
                         <div class="loading-spinner" id="loadingSpinner">
                             <div class="spinner-border text-mars-navy" role="status"></div>
-                            <p class="mt-2 text-muted small">Acessando Portal...</p>
+                            <p class="mt-2 text-muted small">Carregando...</p>
                         </div>
-                        <div id="loginError" class="alert alert-danger mt-3 py-2 small border-0 shadow-sm" style="display: none;">
+                        <div id="loginError" class="alert alert-danger mt-3 small border-0 shadow-sm" style="display: none;">
                             <i class="fas fa-exclamation-circle me-1"></i> <span id="errorMessage"></span>
                         </div>
                     </form>
-                </div>
-                <div class="text-center mt-3 text-white opacity-50 small">
-                    &copy; 2026 Mars Flow English Academy
                 </div>
             </div>
         </div>
@@ -153,8 +240,8 @@
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="#" onclick="showHome()">
-                    <i class="fas fa-shield-alt fa-lg me-2 text-mars-red"></i>
-                    <span style="font-weight: 800; letter-spacing: 1px;">MARS FLOW</span>
+                    <img src="img/logo.png" alt="MF" height="35" class="me-2 d-inline-block align-text-top bg-white rounded-circle p-1">
+                    <span>MARS FLOW</span>
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -162,57 +249,35 @@
                 </button>
                 
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto ms-lg-4">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="showHome()">Home</a>
-                        </li>
-
-                        <li class="nav-item nav-student" style="display:none;">
-                            <a class="nav-link" href="#" onclick="showGames()">Jogos</a>
-                        </li>
-                        <li class="nav-item nav-student" style="display:none;">
-                            <a class="nav-link" href="#" onclick="showStore()">Loja</a>
-                        </li>
-                        <li class="nav-item nav-student" style="display:none;">
-                            <a class="nav-link" href="#" onclick="showTasks()">Tarefas</a>
-                        </li>
-                        <li class="nav-item nav-student" style="display:none;">
-                            <a class="nav-link" href="#" onclick="showRanking()">Ranking</a>
-                        </li>
-
-                        <li class="nav-item nav-parent" style="display:none;">
-                            <a class="nav-link" href="#" onclick="showMessages()">Falar com Escola</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-bold" href="#" onclick="showAdmin()" id="navAdminBtn" style="display: none;">
-                                <i class="fas fa-chalkboard-teacher me-1"></i>Painel
-                            </a>
-                        </li>
+                    <ul class="navbar-nav me-auto ms-lg-3">
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showHome()">Home</a></li>
                         
-                        <li class="nav-item">
-                            <a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn" style="display: none;">
-                                <i class="fas fa-code me-1"></i>DEV
-                            </a>
-                        </li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showGames()">Jogos</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showStore()">Loja</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showTasks()">Tarefas</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showRanking()">Ranking</a></li>
+
+                        <li class="nav-item nav-parent"><a class="nav-link" href="#" onclick="showMessages()">Falar com Escola</a></li>
+
+                        <li class="nav-item"><a class="nav-link text-warning fw-bold" href="#" onclick="showAdmin()" id="navAdminBtn">Professor</a></li>
+                        <li class="nav-item"><a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn">DEV</a></li>
                     </ul>
                     
                     <ul class="navbar-nav align-items-center">
                         <li class="nav-item me-3 position-relative">
                             <a class="nav-link" href="#" onclick="showNotifications()">
                                 <i class="fas fa-bell"></i>
-                                <span id="notifBadge" class="position-absolute badge-mars border border-light rounded-circle" 
-                                      style="display: none; width: 10px; height: 10px; bottom: 12px; right: 4px;"></span>
+                                <span id="notifBadge" class="position-absolute badge-mars rounded-circle" 
+                                      style="display: none; width: 12px; height: 12px; bottom: 10px; right: 0px;"></span>
                             </a>
                         </li>
-                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <span id="userName" class="fw-bold text-white small">Aluno</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()"><i class="fas fa-id-card me-2 text-mars-navy"></i>Meu Perfil</a></li>
-                                <li><a class="dropdown-item nav-parent" href="#" onclick="showMessages()" style="display:none;"><i class="fas fa-envelope me-2 text-mars-navy"></i>Mensagens</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end mt-2">
+                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()"><i class="fas fa-id-card me-2"></i>Meu Perfil</a></li>
+                                <li><a class="dropdown-item nav-parent" href="#" onclick="showMessages()"><i class="fas fa-envelope me-2"></i>Mensagens</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                             </ul>
@@ -225,545 +290,119 @@
         <div class="container mt-4">
             
             <div id="homeContent" class="content-section">
-                
-                <div id="dash-student" class="role-dashboard" style="display: none;">
+                <div id="dash-student" class="role-dashboard">
                     <div class="row">
-                        <div class="col-md-8">
-                            <div class="card mb-4 border-0 shadow-sm text-white" style="background: linear-gradient(135deg, var(--mars-navy) 0%, #001030 100%);">
+                        <div class="col-lg-8">
+                            <div class="card mb-4 border-0 text-white" style="background: linear-gradient(135deg, var(--mars-navy) 0%, #001030 100%);">
                                 <div class="card-body p-4 d-flex align-items-center">
                                     <div class="me-4 position-relative">
-                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-3 border-danger p-2" style="width: 100px; height: 100px; background-size: cover; background-position: center; color: #333; line-height: 1.3;">👤</div>
-                                        <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-danger border border-light">
-                                            Lvl <span id="homeStudentLevel">1</span>
-                                        </span>
+                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-4 border-danger p-1" style="width: 100px; height: 100px; background-size: cover; background-position: center; line-height: 1.3;">👤</div>
+                                        <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-danger border border-2 border-white">Lvl <span id="homeStudentLevel">1</span></span>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h2 class="fw-bold mb-0">Hello, <span id="homeStudentName">Student</span>! 🚀</h2>
-                                        <p class="text-light opacity-75 mb-2">Ready for today?</p>
-                                        <div class="progress" style="height: 10px; background-color: rgba(255,255,255,0.2);">
+                                        <h2 class="fw-bold mb-0">Hi, <span id="homeStudentName">Student</span>!</h2>
+                                        <div class="progress mt-3" style="height: 10px; background-color: rgba(255,255,255,0.2);">
                                             <div id="homeStudentXPBar" class="progress-bar bg-warning" style="width: 0%"></div>
                                         </div>
-                                        <small class="text-warning fw-bold"><span id="homeStudentXP">0</span> XP acumulado</small>
+                                        <small class="text-white-50 fw-bold"><span id="homeStudentXP">0</span> XP Total</small>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="row g-3 mb-4">
                                 <div class="col-md-6">
-                                    <div class="card shadow-sm h-100 border-start border-4 border-warning">
+                                    <div class="card h-100 border-start border-4 border-warning">
                                         <div class="card-body d-flex align-items-center">
                                             <i class="fas fa-coins fa-3x text-warning me-3"></i>
-                                            <div>
-                                                <h3 class="mb-0 fw-bold" id="homeStudentCoins">0</h3>
-                                                <small class="text-muted">Mars Coins</small>
-                                            </div>
+                                            <div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentCoins">0</h3><small class="text-muted fw-bold">MARS COINS</small></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="card shadow-sm h-100 border-start border-4 border-success hover-effect" onclick="showTasks()" style="cursor: pointer;">
+                                    <div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showTasks()">
                                         <div class="card-body d-flex align-items-center">
-                                            <i class="fas fa-clipboard-list fa-3x text-success me-3"></i>
-                                            <div>
-                                                <h3 class="mb-0 fw-bold" id="homeStudentTasks">0</h3>
-                                                <small class="text-muted">Missões Pendentes</small>
-                                            </div>
+                                            <i class="fas fa-clipboard-list fa-3x text-primary me-3"></i>
+                                            <div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentTasks">0</h3><small class="text-muted fw-bold">MISSÕES ATIVAS</small></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-white"><i class="fas fa-star text-warning me-2"></i>Destaque</div>
-                                <div class="card-body text-center p-4">
-                                    <h5>Ganhe moedas extras agora!</h5>
-                                    <p class="text-muted">Responda ao Quiz diário e suba no ranking.</p>
-                                    <button class="btn btn-primary px-5 rounded-pill fw-bold" onclick="window.location.href='quiz.html'">JOGAR QUIZ</button>
-                                </div>
-                            </div>
                         </div>
-
-                        <div class="col-md-4">
-                            <div class="card shadow-sm h-100">
-                                <div class="card-header bg-danger text-white fw-bold"><i class="fas fa-trophy me-2"></i>Top Alunos</div>
-                                <div class="card-body p-0">
-                                    <div id="homeTopStudents" class="list-group list-group-flush">Carregando...</div>
-                                </div>
-                                <div class="card-footer bg-white text-center">
-                                    <a href="#" onclick="showRanking()" class="text-decoration-none small text-danger fw-bold">Ver Ranking Completo</a>
-                                </div>
+                        <div class="col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-mars-red">TOP 5 ALUNOS</div>
+                                <div class="card-body p-0"><div id="homeTopStudents" class="list-group list-group-flush">Carregando...</div></div>
+                                <div class="card-footer bg-white text-center"><a href="#" onclick="showRanking()" class="text-decoration-none fw-bold text-mars-red">VER RANKING</a></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="dash-teacher" class="role-dashboard" style="display: none;">
-                    <h2 class="text-mars-navy mb-4"><i class="fas fa-chalkboard-teacher me-2"></i>Painel de Controle</h2>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <div class="card shadow-sm border-start border-5 border-warning h-100" onclick="showAdminTab('tasks'); showAdmin();" style="cursor: pointer;">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div><h6 class="text-muted text-uppercase small fw-bold">Correções</h6><h2 class="mb-0 fw-bold text-dark" id="dashTeacherSubs">0</h2></div>
-                                    <i class="fas fa-pen-alt fa-2x text-warning opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card shadow-sm border-start border-5 border-success h-100" onclick="showAdminTab('store'); showAdmin();" style="cursor: pointer;">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div><h6 class="text-muted text-uppercase small fw-bold">Pedidos Loja</h6><h2 class="mb-0 fw-bold text-dark" id="dashTeacherOrders">0</h2></div>
-                                    <i class="fas fa-shopping-bag fa-2x text-success opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card shadow-sm border-start border-5 border-info h-100" onclick="showAdminTab('classes'); showAdmin();" style="cursor: pointer;">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div><h6 class="text-muted text-uppercase small fw-bold">Fotos Pendentes</h6><h2 class="mb-0 fw-bold text-dark" id="dashTeacherPhotos">0</h2></div>
-                                    <i class="fas fa-camera fa-2x text-info opacity-50"></i>
-                                </div>
-                            </div>
-                        </div>
+                <div id="dash-teacher" class="role-dashboard" style="display:none;">
+                    <h2 class="text-white mb-4"><i class="fas fa-chalkboard-teacher me-2"></i>Painel do Professor</h2>
+                    <div class="row g-3">
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-warning hover-effect" onclick="showAdminTab('tasks'); showAdmin();"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted fw-bold small">CORREÇÕES</h6><h2 class="mb-0 fw-bold text-mars-navy" id="dashTeacherSubs">0</h2></div><i class="fas fa-pen-alt fa-2x text-warning opacity-25"></i></div></div></div>
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-success hover-effect" onclick="showAdminTab('store'); showAdmin();"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted fw-bold small">LOJA / PEDIDOS</h6><h2 class="mb-0 fw-bold text-mars-navy" id="dashTeacherOrders">0</h2></div><i class="fas fa-shopping-bag fa-2x text-success opacity-25"></i></div></div></div>
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showAdminTab('classes'); showAdmin();"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted fw-bold small">FOTOS PENDENTES</h6><h2 class="mb-0 fw-bold text-mars-navy" id="dashTeacherPhotos">0</h2></div><i class="fas fa-camera fa-2x text-primary opacity-25"></i></div></div></div>
                     </div>
                 </div>
 
-                <div id="dash-parent" class="role-dashboard" style="display: none;">
-                    <div class="alert alert-primary border-0 shadow-sm d-flex align-items-center bg-mars-navy text-white">
+                <div id="dash-parent" class="role-dashboard" style="display:none;">
+                    <div class="alert bg-mars-navy text-white border-0 shadow-sm d-flex align-items-center mb-4">
                         <i class="fas fa-user-shield fa-2x me-3"></i>
-                        <div>
-                            <strong>Área do Responsável</strong>
-                            <p class="mb-0 small opacity-75">Acompanhe o progresso e as conquistas do seu filho na Mars Flow.</p>
-                        </div>
+                        <div><strong>Área do Responsável</strong><p class="mb-0 small opacity-75">Acompanhe o progresso do seu filho.</p></div>
                     </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mx-auto">
-                             <div class="card shadow border-0">
-                                 <div class="card-header bg-white text-center py-3">
-                                     <h5 class="mb-0 text-mars-navy">Desempenho Escolar</h5>
-                                 </div>
-                                 <div class="card-body text-center">
-                                     <div class="display-1 mb-3">🎓</div>
-                                     <h3 id="dashParentChildName" class="fw-bold">Filho</h3>
-                                     <span class="badge bg-success mb-3">Nível <span id="dashParentChildLevel">1</span></span>
-                                     
-                                     <div class="row text-center mt-3">
-                                         <div class="col-6 border-end">
-                                             <h4 class="text-primary fw-bold" id="dashParentChildXP">0</h4>
-                                             <small class="text-muted">XP Total</small>
-                                         </div>
-                                         <div class="col-6">
-                                             <h4 class="text-warning fw-bold" id="dashParentChildCoins">0</h4>
-                                             <small class="text-muted">Coins</small>
-                                         </div>
-                                     </div>
-                                     <hr>
-                                     <button class="btn btn-outline-primary w-100 rounded-pill" onclick="showMessages()">
-                                         <i class="fas fa-comment-dots me-2"></i>Falar com Professor
-                                     </button>
-                                 </div>
-                             </div>
-                        </div>
-                    </div>
+                    <div class="row"><div class="col-md-6 mx-auto"><div class="card shadow text-center"><div class="card-header bg-white"><h5 class="mb-0 text-mars-navy">Desempenho</h5></div><div class="card-body"><div class="display-1 mb-3">🎓</div><h3 id="dashParentChildName" class="fw-bold text-mars-navy">Filho</h3><span class="badge bg-success mb-3">Nível <span id="dashParentChildLevel">1</span></span><div class="row mt-3"><div class="col-6 border-end"><h4 class="text-primary fw-bold" id="dashParentChildXP">0</h4><small class="text-muted">XP</small></div><div class="col-6"><h4 class="text-warning fw-bold" id="dashParentChildCoins">0</h4><small class="text-muted">Coins</small></div></div><hr><button class="btn btn-outline-primary w-100" onclick="showMessages()">Falar com Professor</button></div></div></div></div>
                 </div>
 
-                <div id="dash-dev" class="role-dashboard" style="display: none;">
+                <div id="dash-dev" class="role-dashboard" style="display:none;">
                     <h2 class="text-danger font-monospace mb-4">>_ SYSTEM.ROOT</h2>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-dark text-white h-100">
-                                <div class="card-body text-center">
-                                    <h1 class="font-monospace text-success" id="devStatUsers">0</h1>
-                                    <small>Total Usuários</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-9">
-                            <div class="card border-danger h-100">
-                                <div class="card-body d-flex align-items-center justify-content-around">
-                                    <button class="btn btn-outline-danger" onclick="showDev()">
-                                        <i class="fas fa-users-cog fa-2x d-block mb-2"></i> User Factory
-                                    </button>
-                                    <button class="btn btn-outline-dark" onclick="showDevTab('simulator'); showDev();">
-                                        <i class="fas fa-glasses fa-2x d-block mb-2"></i> Simulador
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="row g-3"><div class="col-md-3"><div class="card bg-dark text-white h-100"><div class="card-body text-center"><h1 class="font-monospace text-success" id="devStatUsers">0</h1><small>Usuários</small></div></div></div><div class="col-md-9"><div class="card border-danger h-100"><div class="card-body d-flex align-items-center justify-content-around"><button class="btn btn-outline-danger" onclick="showDev()"><i class="fas fa-users-cog fa-2x d-block mb-2"></i> User Factory</button><button class="btn btn-outline-dark" onclick="showDevTab('simulator'); showDev();"><i class="fas fa-glasses fa-2x d-block mb-2"></i> Simulador</button></div></div></div></div>
                 </div>
             </div>
 
             <div id="gamesContent" class="content-section">
-                <div class="card">
-                    <div class="card-header bg-mars-navy text-white"><h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Jogos Educativos</h5></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect">
-                                    <i class="fas fa-question-circle fa-4x text-primary mb-3"></i>
-                                    <h5>Quiz Mars Flow</h5>
-                                    <button class="btn btn-primary rounded-pill w-100" onclick="window.location.href='quiz.html'">JOGAR</button>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100 text-center p-4 border-0 shadow-sm opacity-50">
-                                    <i class="fas fa-puzzle-piece fa-4x text-secondary mb-3"></i>
-                                    <h5>Quebra-cabeça</h5><button class="btn btn-secondary w-100 rounded-pill" disabled>Em breve</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="card"><div class="card-header bg-mars-navy"><i class="fas fa-gamepad me-2"></i>Central de Jogos</div><div class="card-body"><div class="row"><div class="col-md-4"><div class="card h-100 text-center p-4 shadow-sm hover-effect border-0"><i class="fas fa-question-circle fa-4x text-primary mb-3"></i><h5 class="fw-bold text-mars-navy">Quiz Mars Flow</h5><button class="btn btn-primary rounded-pill w-100 mt-3" onclick="window.location.href='quiz.html'">JOGAR AGORA</button></div></div><div class="col-md-4"><div class="card h-100 text-center p-4 border-0 opacity-50"><i class="fas fa-puzzle-piece fa-4x text-muted mb-3"></i><h5>Quebra-cabeça</h5><button class="btn btn-secondary w-100 rounded-pill mt-3" disabled>Em breve</button></div></div></div></div></div>
             </div>
 
             <div id="storeContent" class="content-section">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="text-mars-navy"><i class="fas fa-shopping-bag me-2 text-danger"></i>Loja</h2>
-                    <div class="bg-white p-2 px-4 rounded-pill shadow-sm border">
-                        <small class="text-muted d-block small fw-bold">SEU SALDO</small>
-                        <span class="h4 text-warning fw-bold mb-0" id="storeBalance">...</span>
-                    </div>
-                </div>
-                <div class="row" id="storeList"><div class="col-12 text-center p-5">Carregando loja...</div></div>
+                <div class="d-flex justify-content-between align-items-center mb-4"><h2 class="text-white fw-bold"><i class="fas fa-store me-2"></i>Loja</h2><div class="bg-white p-2 px-4 rounded-pill shadow-sm"><small class="text-muted fw-bold d-block" style="font-size:0.7rem">SEU SALDO</small><span class="h4 text-mars-gold fw-bold mb-0" id="storeBalance">...</span></div></div>
+                <div class="row" id="storeList"><div class="col-12 text-center p-5 text-white">Carregando loja...</div></div>
             </div>
 
             <div id="tasksContent" class="content-section">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-primary text-white d-flex justify-content-between">
-                                <h5>Quadro de Missões</h5><span class="badge bg-white text-primary" id="taskCount">0</span>
-                            </div>
-                            <div class="card-body p-0"><div id="taskList" class="list-group list-group-flush">Carregando...</div></div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-warning text-dark border-0 shadow-sm"><div class="card-body text-center"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><p>Complete as missões para ganhar XP e subir de nível!</p></div></div>
-                    </div>
-                </div>
+                <div class="row"><div class="col-md-8"><div class="card shadow-sm"><div class="card-header bg-primary text-white d-flex justify-content-between"><h5>Missões</h5><span class="badge bg-white text-primary" id="taskCount">0</span></div><div class="card-body p-0"><div id="taskList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-4"><div class="card bg-warning border-0 shadow-sm"><div class="card-body text-center"><i class="fas fa-star fa-3x text-white mb-3"></i><h5 class="fw-bold">Ganhe XP!</h5><p class="small mb-0">Complete tarefas para subir de nível.</p></div></div></div></div>
             </div>
 
             <div id="rankingContent" class="content-section">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-mars-navy text-white">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="mb-0"><i class="fas fa-trophy me-2 text-warning"></i>Classificação</h5>
-                            <span class="badge bg-light text-dark" id="myClassBadge">...</span>
-                        </div>
-                        <ul class="nav nav-tabs card-header-tabs border-bottom-0">
-                            <li class="nav-item"><a class="nav-link active fw-bold" id="tabGeneral" href="#" onclick="switchRanking('general')">🏆 Geral</a></li>
-                            <li class="nav-item"><a class="nav-link text-white opacity-75" id="tabClass" href="#" onclick="switchRanking('class')">🏫 Minha Turma</a></li>
-                        </ul>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped mb-0 align-middle">
-                                <thead class="table-light"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Nível</th><th class="text-end pe-4">XP</th></tr></thead>
-                                <tbody id="tabelaRankingCompleta"><tr><td colspan="4" class="text-center p-4">Carregando...</td></tr></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <div class="card"><div class="card-header bg-mars-navy"><div class="d-flex justify-content-between align-items-center mb-2"><h5 class="mb-0"><i class="fas fa-trophy me-2 text-warning"></i>Classificação</h5><span class="badge bg-white text-mars-navy" id="myClassBadge">...</span></div><ul class="nav nav-tabs card-header-tabs border-bottom-0"><li class="nav-item"><a class="nav-link active fw-bold" id="tabGeneral" href="#" onclick="switchRanking('general')">Geral</a></li><li class="nav-item"><a class="nav-link text-white-50" id="tabClass" href="#" onclick="switchRanking('class')">Minha Turma</a></li></ul></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover table-striped mb-0"><thead class="table-light"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Lvl</th><th class="text-end pe-4">XP</th></tr></thead><tbody id="tabelaRankingCompleta"><tr><td colspan="4" class="text-center p-4">Carregando...</td></tr></tbody></table></div></div></div>
             </div>
 
             <div id="notificationsContent" class="content-section">
-                <div class="row h-100" style="min-height: 500px;">
-                    <div class="col-md-4 border-end pe-0">
-                        <div class="list-group list-group-flush h-100 overflow-auto" id="notifList">
-                            <div class="text-center p-4 text-muted">Carregando avisos...</div>
-                        </div>
-                    </div>
-                    <div class="col-md-8 ps-0">
-                        <div id="notifDetail" class="p-4 h-100 bg-light d-flex flex-column justify-content-center align-items-center text-center">
-                            <i class="far fa-envelope-open fa-3x mb-3 text-muted"></i>
-                            <p class="text-muted">Selecione uma mensagem para ler.</p>
-                        </div>
-                    </div>
-                </div>
+                <div class="row h-100" style="min-height: 500px;"><div class="col-md-4 border-end pe-0"><div class="list-group list-group-flush h-100 overflow-auto" id="notifList"></div></div><div class="col-md-8 ps-0"><div id="notifDetail" class="p-5 h-100 bg-light d-flex flex-column justify-content-center align-items-center text-center"><i class="far fa-envelope-open fa-3x mb-3 text-muted"></i><p class="text-muted">Selecione uma mensagem.</p></div></div></div>
             </div>
 
             <div id="messagesContent" class="content-section">
-                <div class="row">
-                    <div class="col-md-5 mb-4">
-                        <div class="card shadow-sm border-primary h-100">
-                            <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Nova Mensagem</h5></div>
-                            <div class="card-body">
-                                <form onsubmit="event.preventDefault(); sendMessage();">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold small text-muted">ASSUNTO</label>
-                                        <select id="msgSubject" class="form-select" required>
-                                            <option value="Dúvida">❓ Dúvida de Matéria</option>
-                                            <option value="Problema">⚠️ Problema Técnico</option>
-                                            <option value="Financeiro">💰 Financeiro/Secretaria</option>
-                                            <option value="Outros">💬 Outros</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold small text-muted">MENSAGEM</label>
-                                        <textarea id="msgContent" class="form-control" rows="5" placeholder="Olá professor..." required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100 fw-bold">ENVIAR</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-7">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header bg-white text-mars-navy"><h5 class="mb-0"><i class="fas fa-history me-2"></i>Histórico</h5></div>
-                            <div class="card-body p-0"><div id="myMessagesList" class="list-group list-group-flush"><div class="text-center p-5 text-muted">Carregando...</div></div></div>
-                        </div>
-                    </div>
-                </div>
+                <div class="row"><div class="col-md-5 mb-4"><div class="card shadow-sm border-primary h-100"><div class="card-header bg-primary text-white">Nova Mensagem</div><div class="card-body"><form onsubmit="event.preventDefault(); sendMessage();"><div class="mb-3"><label class="form-label">Assunto</label><select id="msgSubject" class="form-select"><option>Dúvida</option><option>Problema</option><option>Financeiro</option><option>Outros</option></select></div><div class="mb-3"><label class="form-label">Mensagem</label><textarea id="msgContent" class="form-control" rows="5"></textarea></div><button type="submit" class="btn btn-primary w-100">ENVIAR</button></form></div></div></div><div class="col-md-7"><div class="card h-100"><div class="card-header">Histórico</div><div class="card-body p-0"><div id="myMessagesList" class="list-group list-group-flush"></div></div></div></div></div>
             </div>
 
             <div id="profileContent" class="content-section">
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card shadow border-0" id="profileCard">
-                            <div class="card-body text-center pt-5 pb-4">
-                                <div class="mb-3 position-relative d-inline-block">
-                                    <div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-3 p-3 position-relative overflow-hidden" 
-                                         style="width: 120px; height: 120px; line-height: 1.2; background-size: cover; background-position: center; border-color: var(--mars-navy) !important;">👤</div>
-                                    <label for="photoUpload" class="position-absolute bottom-0 end-0 btn btn-sm btn-danger rounded-circle" style="cursor: pointer;" title="Alterar Foto">
-                                        <i class="fas fa-camera"></i>
-                                    </label>
-                                    <input type="file" id="photoUpload" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)">
-                                    <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-primary border border-2 border-white">Lvl <span id="profileLevel">1</span></span>
-                                </div>
-                                <div id="photoStatusBadge" class="mb-2"></div>
-                                <h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3>
-                                <div class="px-4 mb-3">
-                                    <p class="text-muted small mb-1 fst-italic" id="profileBioDisplay">"..."</p>
-                                    <button class="btn btn-link btn-sm text-decoration-none p-0 text-danger" onclick="editBio()"><i class="fas fa-pen small"></i> Editar</button>
-                                    <div id="bioEditContainer" style="display: none;" class="mt-2">
-                                        <textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2" maxlength="150"></textarea>
-                                        <button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button>
-                                    </div>
-                                </div>
-                                <p class="text-muted mb-2 fw-bold" id="profileClass">...</p>
-                                <p class="badge bg-light text-dark border" id="profileRole">Aluno</p>
-                                <div class="mt-4 px-3">
-                                    <div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div>
-                                    <div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-success" style="width: 0%"></div></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header bg-white py-3"><h5 class="mb-0 text-mars-navy"><i class="fas fa-backpack me-2"></i>Inventário</h5></div>
-                            <div class="card-body bg-light">
-                                <div class="row g-3" id="inventoryList"><div class="col-12 text-center p-5 text-muted">Carregando...</div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="row"><div class="col-md-4 mb-4"><div class="card shadow border-0" id="profileCard"><div class="card-body text-center pt-5 pb-4"><div class="mb-3 position-relative d-inline-block"><div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-3 border-danger p-3 position-relative overflow-hidden" style="width: 120px; height: 120px; background-size: cover; background-position: center;">👤</div><label for="photoUpload" class="position-absolute bottom-0 end-0 btn btn-sm btn-danger rounded-circle" style="cursor: pointer;"><i class="fas fa-camera"></i></label><input type="file" id="photoUpload" style="display: none;" onchange="handlePhotoUpload(this)"><span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-mars-navy border border-2 border-white">Lvl <span id="profileLevel">1</span></span></div><div id="photoStatusBadge" class="mb-2"></div><h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3><div class="px-4 mb-3"><p class="text-muted small fst-italic" id="profileBioDisplay">"..."</p><button class="btn btn-link btn-sm text-danger text-decoration-none" onclick="editBio()">Editar Bio</button><div id="bioEditContainer" style="display: none;" class="mt-2"><textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2"></textarea><button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button></div></div><p class="text-muted mb-2 fw-bold" id="profileClass">...</p><p class="badge bg-light text-dark border">Aluno</p><div class="mt-4 px-3"><div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div><div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-success" style="width: 0%"></div></div></div></div></div></div><div class="col-md-8"><div class="card shadow-sm h-100"><div class="card-header bg-white text-mars-navy">Inventário</div><div class="card-body bg-light"><div class="row g-3" id="inventoryList"><div class="col-12 text-center p-5 text-muted">Carregando...</div></div></div></div></div></div>
             </div>
 
             <div id="adminContent" class="content-section">
-                <div class="row h-100">
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm h-100 border-0">
-                            <div class="card-header bg-mars-navy text-white text-center py-4">
-                                <i class="fas fa-chalkboard-teacher fa-3x mb-2"></i>
-                                <h5 class="mb-0">Professor</h5>
-                            </div>
-                            <div class="list-group list-group-flush" id="adminSidebar">
-                                <button class="list-group-item list-group-item-action active fw-bold py-3 border-0" onclick="showAdminTab('tasks')"><i class="fas fa-clipboard-list me-2 text-primary"></i> Atividades</button>
-                                <button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('store')"><i class="fas fa-store me-2 text-success"></i> Loja & Pedidos</button>
-                                <button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('classes')"><i class="fas fa-users me-2 text-info"></i> Turmas & Alunos</button>
-                                <button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('comms')"><i class="fas fa-bullhorn me-2 text-warning"></i> Comunicados</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-9">
-                        <div id="adminTab-tasks" class="admin-tab">
-                            <h3 class="text-mars-navy mb-3"><i class="fas fa-clipboard-list me-2"></i>Gestão de Missões</h3>
-                            <div class="row">
-                                <div class="col-md-5">
-                                    <div class="card shadow-sm mb-4">
-                                        <div class="card-header bg-danger text-white">Criar Nova Missão</div>
-                                        <div class="card-body">
-                                            <form onsubmit="event.preventDefault(); createTask();">
-                                                <input type="text" id="taskTitle" class="form-control mb-2" required placeholder="Título">
-                                                <textarea id="taskDesc" class="form-control mb-2" required placeholder="Descrição..."></textarea>
-                                                <div class="row mb-2">
-                                                    <div class="col"><input type="number" id="taskXP" class="form-control" placeholder="XP" value="100"></div>
-                                                    <div class="col"><input type="number" id="taskCoins" class="form-control" placeholder="$" value="50"></div>
-                                                </div>
-                                                <input type="date" id="taskDate" class="form-control mb-2">
-                                                <button type="submit" class="btn btn-danger w-100 fw-bold">PUBLICAR</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-7">
-                                    <div class="card shadow-sm">
-                                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center"><span>Entregas Pendentes</span><button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Atualizar</button></div>
-                                        <div class="card-body p-0"><div id="submissionsList" class="list-group list-group-flush"><div class="p-3 text-center text-muted">Vazio</div></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="adminTab-store" class="admin-tab" style="display: none;">
-                            <h3 class="text-mars-navy mb-3"><i class="fas fa-store me-2"></i>Gestão da Loja</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card shadow-sm border-success h-100">
-                                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center"><span>Pedidos Pendentes</span><button class="btn btn-sm btn-light text-success" onclick="loadPendingOrders()">Sync</button></div>
-                                        <div class="card-body p-0"><div id="ordersList" class="list-group list-group-flush"></div></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card shadow-sm">
-                                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center"><span>Histórico</span><div class="d-flex gap-2"><select id="historyFilterClass" class="form-select form-select-sm" style="width:120px;" onchange="loadRedemptionHistory()"><option value="all">Todas</option></select><button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()">Sync</button></div></div>
-                                        <div class="card-body p-0"><div class="table-responsive" style="max-height: 400px;"><table class="table table-striped mb-0 text-center small"><thead><tr><th>Data</th><th>Aluno</th><th>Item</th><th>$</th></tr></thead><tbody id="redemptionHistoryBody"></tbody></table></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="adminTab-classes" class="admin-tab" style="display: none;">
-                            <h3 class="text-mars-navy mb-3"><i class="fas fa-users me-2"></i>Turmas e Alunos</h3>
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <div class="card shadow-sm border-info h-100">
-                                        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center"><span>Aprovar Fotos</span><button class="btn btn-sm btn-light text-info" onclick="loadPendingPhotos()">Sync</button></div>
-                                        <div class="card-body p-0"><div id="pendingPhotosList" class="list-group list-group-flush"></div></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card shadow-sm border-primary h-100">
-                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center"><span>Minhas Turmas</span><button class="btn btn-sm btn-light text-primary fw-bold" onclick="createNewClassPrompt()">Nova</button></div>
-                                        <div class="card-body p-0"><div id="classList" class="list-group list-group-flush"></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card shadow-sm border-dark">
-                                <div class="card-header bg-dark text-white">Comportamento e Regras</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <label class="small text-muted">Aluno:</label><select id="studentSelect" class="form-select mb-3"><option>Carregando...</option></select>
-                                            <form onsubmit="event.preventDefault(); applyManualAdjustment();"><div class="input-group mb-2"><span class="input-group-text">XP</span><input type="number" id="manualXP" class="form-control"></div><div class="input-group mb-2"><span class="input-group-text">$</span><input type="number" id="manualCoins" class="form-control"></div><button type="submit" class="btn btn-outline-primary w-100 btn-sm">Aplicar</button></form>
-                                        </div>
-                                        <div class="col-md-4"><label class="small text-muted">Regras Rápidas:</label><div id="rulesList" class="d-flex flex-wrap gap-2 mt-2"></div></div>
-                                        <div class="col-md-4 border-start"><label class="small text-muted">Nova Regra:</label><form onsubmit="event.preventDefault(); createRule();"><input type="text" id="ruleName" class="form-control form-control-sm mb-2" placeholder="Nome" required><div class="row mb-2"><div class="col"><input type="number" id="ruleXP" class="form-control form-control-sm" placeholder="XP"></div><div class="col"><input type="number" id="ruleCoins" class="form-control form-control-sm" placeholder="$"></div></div><select id="ruleType" class="form-select form-select-sm mb-2"><option value="positive">Positiva</option><option value="negative">Negativa</option></select><button type="submit" class="btn btn-secondary btn-sm w-100">Salvar</button></form></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="adminTab-comms" class="admin-tab" style="display: none;">
-                            <h3 class="text-mars-navy mb-3"><i class="fas fa-bullhorn me-2"></i>Comunicação</h3>
-                            <div class="card shadow-sm border-danger mb-4">
-                                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center"><h5 class="mb-0">Caixa de Entrada (DMs)</h5><button class="btn btn-sm btn-light text-danger fw-bold" onclick="loadInbox()">Sync</button></div>
-                                <div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle"><thead class="table-light"><tr><th>Data</th><th>Remetente</th><th>Assunto</th><th>Mensagem</th><th class="text-end">Ação</th></tr></thead><tbody id="inboxTableBody"><tr><td colspan="5" class="text-center p-4">Carregando...</td></tr></tbody></table></div></div>
-                            </div>
-                            <div class="card shadow-sm border-warning">
-                                <div class="card-header bg-warning text-dark">Enviar Comunicado</div>
-                                <div class="card-body">
-                                    <form onsubmit="event.preventDefault(); sendNotification();">
-                                        <div class="row mb-3"><div class="col-8"><label class="form-label fw-bold">Título</label><input type="text" id="notifTitle" class="form-control" required></div><div class="col-4"><label class="form-label fw-bold">Destino</label><select id="notifTarget" class="form-select"></select></div></div>
-                                        <div class="mb-3"><label class="form-label fw-bold">Mensagem</label><textarea id="notifMessage" class="form-control" rows="3"></textarea></div>
-                                        <div class="row mb-3"><div class="col"><label class="form-label">Tipo</label><select id="notifType" class="form-select"><option value="homework">Homework</option><option value="test">Prova</option><option value="event">Evento</option><option value="dm">DM</option></select></div><div class="col"><label class="form-label">Urgência</label><select id="notifUrgency" class="form-select"><option value="chill">Tranquilo</option><option value="attention">Atenção</option><option value="urgent">Urgente</option></select></div></div>
-                                        <button type="submit" class="btn btn-warning w-100 fw-bold">ENVIAR</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card shadow-sm h-100 border-0"><div class="card-header bg-mars-navy text-white text-center py-4"><i class="fas fa-chalkboard-teacher fa-3x mb-2"></i><h5 class="mb-0">Professor</h5></div><div class="list-group list-group-flush" id="adminSidebar"><button class="list-group-item list-group-item-action active fw-bold py-3 border-0" onclick="showAdminTab('tasks')">Atividades</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('store')">Loja</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('classes')">Turmas</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('comms')">Comunicação</button></div></div></div><div class="col-md-9"><div id="adminTab-tasks" class="admin-tab"><div class="row"><div class="col-md-5"><div class="card shadow-sm mb-4"><div class="card-header bg-mars-red">Criar Missão</div><div class="card-body"><form onsubmit="event.preventDefault(); createTask();"><input type="text" id="taskTitle" class="form-control mb-2" required placeholder="Título"><textarea id="taskDesc" class="form-control mb-2" required placeholder="Descrição"></textarea><div class="row mb-2"><div class="col"><input type="number" id="taskXP" class="form-control" placeholder="XP" value="100"></div><div class="col"><input type="number" id="taskCoins" class="form-control" placeholder="$" value="50"></div></div><input type="date" id="taskDate" class="form-control mb-2"><button type="submit" class="btn btn-danger w-100">PUBLICAR</button></form></div></div></div><div class="col-md-7"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Entregas</span><button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Sync</button></div><div class="card-body p-0"><div id="submissionsList" class="list-group list-group-flush"></div></div></div></div></div></div><div id="adminTab-store" class="admin-tab" style="display:none;"><div class="row"><div class="col-md-6"><div class="card shadow-sm border-success h-100"><div class="card-header bg-success text-white d-flex justify-content-between"><span>Pedidos</span><button class="btn btn-sm btn-light text-success" onclick="loadPendingOrders()">Sync</button></div><div class="card-body p-0"><div id="ordersList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Histórico</span><div class="d-flex gap-2"><select id="historyFilterClass" class="form-select form-select-sm" style="width:100px;" onchange="loadRedemptionHistory()"><option value="all">Todos</option></select><button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()">Sync</button></div></div><div class="card-body p-0"><div class="table-responsive" style="max-height:400px;"><table class="table table-striped mb-0 text-center small"><thead><tr><th>Data</th><th>Aluno</th><th>Item</th><th>$</th></tr></thead><tbody id="redemptionHistoryBody"></tbody></table></div></div></div></div></div></div><div id="adminTab-classes" class="admin-tab" style="display:none;"><div class="row mb-4"><div class="col-md-6"><div class="card shadow-sm border-info h-100"><div class="card-header bg-info text-white d-flex justify-content-between"><span>Aprovar Fotos</span><button class="btn btn-sm btn-light text-info" onclick="loadPendingPhotos()">Sync</button></div><div class="card-body p-0"><div id="pendingPhotosList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm border-primary h-100"><div class="card-header bg-primary text-white d-flex justify-content-between"><span>Minhas Turmas</span><button class="btn btn-sm btn-light text-primary fw-bold" onclick="createNewClassPrompt()">Nova</button></div><div class="card-body p-0"><div id="classList" class="list-group list-group-flush"></div></div></div></div></div><div class="card shadow-sm border-dark"><div class="card-header bg-dark text-white">Regras</div><div class="card-body"><div class="row"><div class="col-md-4"><select id="studentSelect" class="form-select mb-3"><option>Carregando...</option></select><form onsubmit="event.preventDefault(); applyManualAdjustment();"><div class="input-group mb-2"><span class="input-group-text">XP</span><input type="number" id="manualXP" class="form-control"></div><div class="input-group mb-2"><span class="input-group-text">$</span><input type="number" id="manualCoins" class="form-control"></div><button type="submit" class="btn btn-outline-primary w-100 btn-sm">Aplicar</button></form></div><div class="col-md-4"><div id="rulesList" class="d-flex flex-wrap gap-2 mt-2"></div></div><div class="col-md-4 border-start"><form onsubmit="event.preventDefault(); createRule();"><input type="text" id="ruleName" class="form-control form-control-sm mb-2" placeholder="Nome" required><div class="row mb-2"><div class="col"><input type="number" id="ruleXP" class="form-control form-control-sm" placeholder="XP"></div><div class="col"><input type="number" id="ruleCoins" class="form-control form-control-sm" placeholder="$"></div></div><select id="ruleType" class="form-select form-select-sm mb-2"><option value="positive">Positiva</option><option value="negative">Negativa</option></select><button type="submit" class="btn btn-secondary btn-sm w-100">Salvar</button></form></div></div></div></div></div><div id="adminTab-comms" class="admin-tab" style="display:none;"><div class="card shadow-sm border-danger mb-4"><div class="card-header bg-danger text-white d-flex justify-content-between"><h5 class="mb-0">Inbox (DMs)</h5><button class="btn btn-sm btn-light text-danger fw-bold" onclick="loadInbox()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle"><thead class="table-light"><tr><th>Data</th><th>De</th><th>Assunto</th><th>Msg</th><th>Ação</th></tr></thead><tbody id="inboxTableBody"></tbody></table></div></div></div><div class="card shadow-sm border-warning"><div class="card-header bg-warning text-dark">Enviar Comunicado</div><div class="card-body"><form onsubmit="event.preventDefault(); sendNotification();"><div class="row mb-3"><div class="col-8"><input type="text" id="notifTitle" class="form-control" placeholder="Título" required></div><div class="col-4"><select id="notifTarget" class="form-select"></select></div></div><textarea id="notifMessage" class="form-control mb-3" rows="3" placeholder="Mensagem"></textarea><div class="row mb-3"><div class="col"><select id="notifType" class="form-select"><option value="homework">Homework</option><option value="test">Prova</option><option value="event">Evento</option><option value="dm">DM</option></select></div><div class="col"><select id="notifUrgency" class="form-select"><option value="chill">Tranquilo</option><option value="attention">Atenção</option><option value="urgent">Urgente</option></select></div></div><button type="submit" class="btn btn-warning w-100 fw-bold">ENVIAR</button></form></div></div></div></div></div>
             </div>
 
             <div id="devContent" class="content-section">
-                <div class="row h-100">
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm h-100 border-danger">
-                            <div class="card-header bg-danger text-white text-center py-4">
-                                <i class="fas fa-code fa-3x mb-2"></i>
-                                <h5 class="mb-0">DEV CONSOLE</h5>
-                            </div>
-                            <div class="list-group list-group-flush" id="devSidebar">
-                                <button class="list-group-item list-group-item-action active fw-bold py-3" onclick="showDevTab('users')"><i class="fas fa-user-plus me-2"></i> Usuários (Pré-Cadastro)</button>
-                                <button class="list-group-item list-group-item-action fw-bold py-3" onclick="showDevTab('store')"><i class="fas fa-tags me-2"></i> Gestão da Loja</button>
-                                <button class="list-group-item list-group-item-action fw-bold py-3 text-primary" onclick="showDevTab('simulator')"><i class="fas fa-glasses me-2"></i> Simulador de Visão</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-9">
-                        <div id="devTab-users" class="dev-tab">
-                            <h3 class="text-danger mb-3">Cadastro de Usuários</h3>
-                            <div class="card shadow-sm border-danger">
-                                <div class="card-body">
-                                    <form onsubmit="event.preventDefault(); createPreRegistry();">
-                                        <div class="row mb-3">
-                                            <div class="col-md-4"><label class="form-label">Função</label><select id="devUserRole" class="form-select" onchange="toggleDevFields()"><option value="student">Aluno</option><option value="teacher">Professor</option><option value="parent">Responsável</option></select></div>
-                                            <div class="col-md-8"><label class="form-label">Nome Completo</label><input type="text" id="devUserName" class="form-control" required></div>
-                                        </div>
-                                        <label class="form-label">Login (ex: pedro.h) ou Email</label><input type="text" id="devUserEmail" class="form-control mb-3" required>
-                                        <div id="devStudentFields" class="p-3 bg-light rounded mb-3"><label class="form-label small fw-bold">Aluno:</label><div class="row"><div class="col"><input type="date" id="devUserDOB" class="form-control mb-2"></div><div class="col"><select id="devUserClass" class="form-select mb-2"></select></div></div></div>
-                                        <div id="devTeacherFields" style="display: none;" class="p-3 bg-light rounded mb-3"><label class="form-label small fw-bold">Turmas:</label><select id="devUserClasses" class="form-select" multiple></select></div>
-                                        <div id="devParentFields" style="display: none;" class="p-3 bg-light rounded mb-3"><label class="form-label small fw-bold">Filhos:</label><select id="devUserChildren" class="form-select" multiple></select></div>
-                                        <button type="submit" class="btn btn-danger w-100 fw-bold">CRIAR PRÉ-CADASTRO</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="devTab-store" class="dev-tab" style="display: none;">
-                            <h3 class="text-danger mb-3">Catálogo da Loja</h3>
-                            <div class="card shadow-sm mb-4 border-dark">
-                                <div class="card-header bg-dark text-white">Adicionar / Editar Item</div>
-                                <div class="card-body">
-                                    <form onsubmit="event.preventDefault(); saveStoreItem();">
-                                        <input type="hidden" id="devItemId">
-                                        <div class="row mb-2">
-                                            <div class="col-md-2"><label class="small">Ícone</label><input type="text" id="devItemIcon" class="form-control text-center fs-4" placeholder="🎁" required></div>
-                                            <div class="col-md-7"><label class="small">Nome</label><input type="text" id="devItemName" class="form-control" required></div>
-                                            <div class="col-md-3"><label class="small">Preço</label><input type="number" id="devItemPrice" class="form-control" required value="100"></div>
-                                        </div>
-                                        <div class="mb-2"><label class="small">Descrição</label><input type="text" id="devItemDesc" class="form-control"></div>
-                                        <div class="row mb-3">
-                                            <div class="col-md-4"><label class="small">Tipo</label><select id="devItemType" class="form-select"><option value="permanent">Permanente</option><option value="consumable">Consumível</option></select></div>
-                                            <div class="col-md-4"><label class="small">Cat.</label><select id="devItemCat" class="form-select"><option value="avatar">Avatar</option><option value="frame">Moldura</option></select></div>
-                                            <div class="col-md-2"><label class="small">Estoque</label><input type="number" id="devItemStock" class="form-control" value="99"></div>
-                                            <div class="col-md-2"><label class="small">&nbsp;</label><button type="submit" class="btn btn-success w-100">Salvar</button></div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                            <div class="card shadow-sm"><div class="card-header d-flex justify-content-between"><span>Itens Ativos</span><button class="btn btn-sm btn-outline-secondary" onclick="loadStoreManagement()">Atualizar</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle text-center"><thead class="table-light"><tr><th>Icon</th><th>Nome</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead><tbody id="devStoreList"><tr><td colspan="5" class="p-4">Carregando...</td></tr></tbody></table></div></div></div>
-                        </div>
-
-                        <div id="devTab-simulator" class="dev-tab" style="display: none;">
-                            <h3 class="text-primary mb-3">Simular Experiência</h3>
-                            <div class="card shadow-sm border-primary">
-                                <div class="card-body text-center">
-                                    <p class="text-muted">Veja como outros usuários enxergam o sistema.</p>
-                                    <div class="row g-3">
-                                        <div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('student')" style="cursor: pointer;"><div class="card-body"><i class="fas fa-user-graduate fa-3x text-primary mb-3"></i><h5>Aluno</h5></div></div></div>
-                                        <div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('teacher')" style="cursor: pointer;"><div class="card-body"><i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i><h5>Professor</h5></div></div></div>
-                                        <div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('parent')" style="cursor: pointer;"><div class="card-body"><i class="fas fa-user-friends fa-3x text-success mb-3"></i><h5>Pai</h5></div></div></div>
-                                    </div>
-                                    <div class="mt-4 pt-3 border-top"><button class="btn btn-outline-danger" onclick="activateSimulation('dev')"><i class="fas fa-undo me-2"></i> Resetar Simulação</button></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card shadow-sm h-100 border-danger"><div class="card-header bg-danger text-white text-center py-4"><i class="fas fa-code fa-3x mb-2"></i><h5 class="mb-0">DEV CONSOLE</h5></div><div class="list-group list-group-flush" id="devSidebar"><button class="list-group-item list-group-item-action active fw-bold py-3" onclick="showDevTab('users')">Usuários</button><button class="list-group-item list-group-item-action fw-bold py-3" onclick="showDevTab('store')">Loja</button><button class="list-group-item list-group-item-action fw-bold py-3 text-primary" onclick="showDevTab('simulator')">Simulador</button></div></div></div><div class="col-md-9"><div id="devTab-users" class="dev-tab"><h3 class="text-white mb-3">Cadastro de Usuários</h3><div class="card shadow-sm border-danger"><div class="card-body"><form onsubmit="event.preventDefault(); createPreRegistry();"><div class="row mb-3"><div class="col-md-4"><label class="form-label">Função</label><select id="devUserRole" class="form-select" onchange="toggleDevFields()"><option value="student">Aluno</option><option value="teacher">Professor</option><option value="parent">Responsável</option></select></div><div class="col-md-8"><label class="form-label">Nome</label><input type="text" id="devUserName" class="form-control" required></div></div><label class="form-label">Login/Email</label><input type="text" id="devUserEmail" class="form-control mb-3" required><div id="devStudentFields" class="p-3 bg-light rounded mb-3"><div class="row"><div class="col"><input type="date" id="devUserDOB" class="form-control"></div><div class="col"><select id="devUserClass" class="form-select"></select></div></div></div><div id="devTeacherFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserClasses" class="form-select" multiple></select></div><div id="devParentFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserChildren" class="form-select" multiple></select></div><button type="submit" class="btn btn-danger w-100 fw-bold">CRIAR</button></form></div></div></div><div id="devTab-store" class="dev-tab" style="display:none;"><h3 class="text-white mb-3">Catálogo</h3><div class="card shadow-sm mb-4 border-dark"><div class="card-header bg-dark text-white">Item</div><div class="card-body"><form onsubmit="event.preventDefault(); saveStoreItem();"><input type="hidden" id="devItemId"><div class="row mb-2"><div class="col-md-2"><input type="text" id="devItemIcon" class="form-control text-center fs-4" placeholder="🎁" required></div><div class="col-md-7"><input type="text" id="devItemName" class="form-control" required placeholder="Nome"></div><div class="col-md-3"><input type="number" id="devItemPrice" class="form-control" value="100"></div></div><input type="text" id="devItemDesc" class="form-control mb-2" placeholder="Desc"><div class="row mb-3"><div class="col-md-4"><select id="devItemType" class="form-select"><option value="permanent">Permanente</option><option value="consumable">Consumível</option></select></div><div class="col-md-4"><select id="devItemCat" class="form-select"><option value="avatar">Avatar</option><option value="frame">Moldura</option></select></div><div class="col-md-2"><input type="number" id="devItemStock" class="form-control" value="99"></div><div class="col-md-2"><button type="submit" class="btn btn-success w-100">Salvar</button></div></div></form></div></div><div class="card shadow-sm"><div class="card-header d-flex justify-content-between"><span>Itens</span><button class="btn btn-sm btn-outline-secondary" onclick="loadStoreManagement()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle text-center"><thead class="table-light"><tr><th>Icon</th><th>Nome</th><th>$</th><th>Est</th><th>Ações</th></tr></thead><tbody id="devStoreList"></tbody></table></div></div></div></div><div id="devTab-simulator" class="dev-tab" style="display:none;"><h3 class="text-white mb-3">Simulador</h3><div class="card shadow-sm border-primary"><div class="card-body text-center"><div class="row g-3"><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('student')"><div class="card-body"><i class="fas fa-user-graduate fa-3x text-primary mb-3"></i><h5>Aluno</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('teacher')"><div class="card-body"><i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i><h5>Professor</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('parent')"><div class="card-body"><i class="fas fa-user-friends fa-3x text-success mb-3"></i><h5>Pai</h5></div></div></div></div><div class="mt-4 pt-3 border-top"><button class="btn btn-outline-danger" onclick="activateSimulation('dev')">Reset</button></div></div></div></div></div></div>
             </div>
 
         </div>
     </div>
 
-    <div id="simulationBar" class="fixed-bottom bg-warning text-dark text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;">
-        <i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO ATIVO: <span id="simRoleName">ALUNO</span>
-        <button class="btn btn-sm btn-dark ms-3" onclick="activateSimulation('dev')">SAIR</button>
+    <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;">
+        <i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO: <span id="simRoleName"></span>
+        <button class="btn btn-sm btn-light ms-3 fw-bold border-0" onclick="activateSimulation('dev')">SAIR</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -773,7 +412,7 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO DO FIREBASE
+        // Configuração
         const firebaseConfig = {
           apiKey: "AIzaSyBYe4oRa-uS1hTodVAsa7Zer1fOAU9-kcA",
           authDomain: "marsflow-english-academy.firebaseapp.com",
@@ -797,7 +436,6 @@
         let currentUser = null;
         let userData = null;
 
-        // AUTH LISTENER
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -810,16 +448,12 @@
             }
         });
 
-        // LOGIN (Lógica do "Sem Email")
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             let loginUser = document.getElementById('loginUser').value.trim();
             const password = document.getElementById('password').value;
             
-            // Adiciona sufixo se não for email completo
-            if (!loginUser.includes('@')) {
-                loginUser += '@aluno.marsflow';
-            }
+            if (!loginUser.includes('@')) loginUser += '@aluno.marsflow';
 
             try {
                 document.getElementById('loadingSpinner').style.display = 'block';
@@ -835,7 +469,6 @@
             }
         });
 
-        // CARREGAR DADOS
         async function loadUserData() {
             if (!currentUser) return;
             try {
@@ -844,31 +477,20 @@
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                 } else {
-                    // PRÉ-CADASTRO CHECK
                     const emailKey = currentUser.email.toLowerCase();
                     const preRegDoc = await getDoc(doc(db, "pre_registers", emailKey));
-                    
                     let initialData = {};
                     if (preRegDoc.exists()) {
-                        console.log("Pré-cadastro ativado!");
                         initialData = preRegDoc.data();
                         delete initialData.isPreRegistered;
                     } else {
                         initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 };
                     }
-
-                    userData = {
-                        ...initialData,
-                        uid: currentUser.uid,
-                        email: currentUser.email,
-                        inventory: [],
-                        createdAt: new Date().toISOString()
-                    };
+                    userData = { ...initialData, uid: currentUser.uid, email: currentUser.email, inventory: [], createdAt: new Date().toISOString() };
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
                 window.userData = userData;
                 updateUserInterface();
-                
             } catch (error) { console.error('Erro load user:', error); }
         }
 
@@ -877,11 +499,9 @@
             const icon = userData.equippedIcon || '';
             document.getElementById('userName').innerHTML = `${icon} ${userData.name}`;
             
-            // Identifica Perfil
             const role = userData.role; 
             const isDev = (currentUser.email === 'fmartimr@gmail.com');
             
-            // --- LÓGICA DE NAVBAR ---
             document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'none');
             document.getElementById('navAdminBtn').style.display = 'none';
@@ -903,7 +523,6 @@
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
             }
 
-            // Carregamentos
             if (role === 'teacher' || role === 'admin' || isDev) {
                 if(window.loadPendingPhotos) window.loadPendingPhotos();
             }
@@ -911,7 +530,6 @@
 
         window.logout = async function() { await signOut(auth); window.location.reload(); };
 
-        // Navegação
         window.showLoginScreen = () => { document.getElementById('loginScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
         window.showAppScreen = () => { document.getElementById('loginScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; window.showHome(); }
         window.hideAllSections = () => { document.querySelectorAll('.content-section').forEach(s => s.style.display='none'); }
@@ -920,13 +538,12 @@
             hideAllSections(); 
             document.getElementById('homeContent').style.display='block'; 
             
-            // Lógica de Dashboard (Redirecionamento)
             const role = window.userData.role;
             const isDev = (window.auth.currentUser.email === 'fmartimr@gmail.com');
 
             document.querySelectorAll('.role-dashboard').forEach(el => el.style.display = 'none');
 
-            if (isDev) {
+            if (isDev && !window.originalRole) { // Se for dev e não estiver simulando
                 document.getElementById('dash-dev').style.display = 'block';
                 if(window.loadDevStats) window.loadDevStats();
             } else if (role === 'teacher') {
@@ -951,7 +568,6 @@
         window.showAdmin = () => {
             hideAllSections();
             document.getElementById('adminContent').style.display = 'block';
-            // Default tab: tasks
             if(window.showAdminTab) window.showAdminTab('tasks');
         };
 
