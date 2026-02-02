@@ -12,13 +12,14 @@
     
     <style>
         :root {
-            /* Paleta MarsFlow */
-            --mars-navy: #00205B;
+            /* Paleta Oficial MarsFlow */
+            --mars-navy: #00205B;      /* Azul Marinho Profundo */
             --mars-navy-hover: #001540;
-            --mars-red: #C8102E;
+            --mars-red: #C8102E;       /* Vermelho Carmesim */
             --mars-red-hover: #a50b23;
-            --mars-gold: #D4AF37;
+            --mars-gold: #D4AF37;      /* Dourado Metálico */
             --text-dark: #1a1a1a;
+            --text-muted: #666666;
         }
 
         body {
@@ -30,9 +31,10 @@
             padding-bottom: 60px;
         }
         
-        /* --- UTILITÁRIOS --- */
+        /* --- UTILITÁRIOS DE COR --- */
         .text-mars-navy { color: var(--mars-navy) !important; }
         .text-mars-red { color: var(--mars-red) !important; }
+        .text-mars-gold { color: var(--mars-gold) !important; }
         .bg-mars-navy { background-color: var(--mars-navy) !important; color: white; }
         .bg-mars-red { background-color: var(--mars-red) !important; color: white; }
 
@@ -51,25 +53,100 @@
             padding: 18px 24px;
             font-weight: 700;
             color: var(--mars-navy);
+            border-radius: 16px 16px 0 0 !important;
         }
 
-        /* --- BOTÕES --- */
-        .btn-primary { background-color: var(--mars-navy); border-color: var(--mars-navy); font-weight: 600; }
-        .btn-primary:hover { background-color: var(--mars-navy-hover); transform: translateY(-2px); }
-        .btn-danger { background-color: var(--mars-red); border-color: var(--mars-red); font-weight: 700; }
-        .btn-danger:hover { background-color: var(--mars-red-hover); transform: translateY(-2px); }
-        .btn-outline-primary { color: var(--mars-navy); border-color: var(--mars-navy); font-weight: 600; }
-        .btn-outline-primary:hover { background-color: var(--mars-navy); color: white; }
-
-        /* --- NAVBAR --- */
+        /* --- NAVBAR MELHORADA --- */
         .navbar {
             background-color: var(--mars-navy) !important;
             box-shadow: 0 4px 20px rgba(0,0,0,0.25);
             padding: 12px 0;
         }
-        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; transition: 0.3s; margin: 0 5px; border-radius: 8px; padding: 8px 16px !important; }
-        .nav-link:hover { background-color: rgba(255,255,255,0.1); color: white !important; transform: translateY(-2px); }
-        .nav-link.active { background-color: var(--mars-red); color: white !important; font-weight: 700; box-shadow: 0 4px 10px rgba(200, 16, 46, 0.4); }
+        .navbar-brand { font-weight: 800; letter-spacing: 1px; font-size: 1.4rem; }
+        
+        .nav-link { 
+            color: rgba(255,255,255,0.8) !important; 
+            font-weight: 500; 
+            transition: all 0.3s ease; 
+            margin: 0 5px;
+            border-radius: 8px;
+            padding: 8px 16px !important;
+        }
+        /* Hover e Active na Navbar */
+        .nav-link:hover { 
+            background-color: rgba(255,255,255,0.1); 
+            color: white !important; 
+            transform: translateY(-2px);
+        }
+        .nav-link.active { 
+            background-color: var(--mars-red); /* Destaque Vermelho */
+            color: white !important; 
+            font-weight: 700; 
+            box-shadow: 0 4px 10px rgba(200, 16, 46, 0.4);
+        }
+
+        /* --- ABAS DO RANKING (CORRIGIDO) --- */
+        .nav-tabs .nav-link {
+            color: rgba(255,255,255,0.6) !important; /* Texto inativo claro */
+            border: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+        .nav-tabs .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .nav-tabs .nav-link.active {
+            background-color: var(--mars-red) !important; /* Aba ativa Vermelha */
+            color: white !important;
+            border: none;
+        }
+
+        /* --- PERFIL (LEVEL CORRIGIDO) --- */
+        .level-badge {
+            position: absolute;
+            bottom: -10px; /* Posiciona bem no limite */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--mars-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 3px solid white; /* Borda branca para destacar da foto */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        /* --- BADGES GERAIS --- */
+        .badge-role {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-left: 8px;
+            vertical-align: middle;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- INPUTS & FORMS --- */
+        .form-control, .form-select {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--mars-navy);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #fff;
+            border-color: var(--mars-navy);
+            box-shadow: 0 0 0 4px rgba(0, 32, 91, 0.1);
+        }
 
         /* --- LOGIN --- */
         .login-container {
@@ -80,33 +157,12 @@
             margin-top: 60px;
             border-top: 8px solid var(--mars-red);
         }
-
-        /* --- SPACE SHOOTER (ARCADE CSS) --- */
-        #gameSpaceShooter {
-            position: relative;
-            width: 100%;
-            height: 600px;
-            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-            overflow: hidden;
-            border-radius: 16px;
-            box-shadow: inset 0 0 50px #000;
-            border: 4px solid var(--mars-navy);
-        }
-        /* Animação de estrelas via CSS */
-        #gameSpaceShooter::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 200%;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
-            background-repeat: repeat; background-size: 200px 200px;
-            animation: spaceScroll 15s linear infinite; opacity: 0.6;
-        }
-        @keyframes spaceScroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
         
-        .arcade-text { text-shadow: 3px 3px 0px #000; font-family: 'Courier New', monospace; letter-spacing: -1px; }
-        .pointer-events-none { pointer-events: none; }
+        /* Botões */
+        .btn-primary { background-color: var(--mars-navy); border-color: var(--mars-navy); }
+        .btn-primary:hover { background-color: var(--mars-navy-hover); transform: translateY(-2px); }
+        .btn-danger { background-color: var(--mars-red); border-color: var(--mars-red); }
+        .btn-danger:hover { background-color: var(--mars-red-hover); transform: translateY(-2px); }
 
         .content-section { display: none; }
         .hover-effect { cursor: pointer; transition: transform 0.2s; }
@@ -124,13 +180,23 @@
                     <div class="mb-4">
                         <img src="img/logo.png" alt="Logo" style="max-height: 100px; width: auto;" class="mb-3">
                         <h1 class="text-mars-navy fw-bold" style="letter-spacing: 1px;">MarsFlow</h1>
-                        <p class="text-mars-red fw-bold small text-uppercase">English Academy</p>
+                        <p class="text-mars-red fw-bold small text-uppercase" style="letter-spacing: 2px;">English Academy</p>
                     </div>
                     <form id="loginForm" class="text-start mt-4">
-                        <div class="mb-3"><label class="form-label small fw-bold">USUÁRIO</label><input type="text" class="form-control" id="loginUser" required placeholder="Ex: pedro.h"></div>
-                        <div class="mb-4"><label class="form-label small fw-bold">SENHA</label><input type="password" class="form-control" id="password" required></div>
-                        <div class="d-grid"><button type="submit" class="btn btn-danger btn-lg fw-bold shadow">ACESSAR</button></div>
-                        <div class="text-center mt-3" style="display:none;" id="loadingSpinner"><div class="spinner-border text-mars-navy"></div></div>
+                        <div class="mb-3">
+                            <label class="form-label text-mars-navy fw-bold small">USUÁRIO</label>
+                            <input type="text" class="form-control" id="loginUser" required placeholder="Ex: pedro.h">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-mars-navy fw-bold small">SENHA</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold shadow">ACESSAR</button>
+                        </div>
+                        <div class="text-center mt-3" style="display:none;" id="loadingSpinner">
+                            <div class="spinner-border text-mars-navy" role="status"></div>
+                        </div>
                         <div id="loginError" class="alert alert-danger mt-3 small border-0" style="display: none;"></div>
                     </form>
                 </div>
@@ -139,31 +205,49 @@
     </div>
 
     <div id="appScreen" style="display: none;">
+        
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="#" onclick="showHome()">
                     <img src="img/logo.png" alt="MF" height="35" class="me-2 d-inline-block align-text-top bg-white rounded-circle p-1">
                     <span>MarsFlow</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto ms-lg-3">
                         <li class="nav-item"><a class="nav-link" href="#" onclick="showHome()" id="linkHome">Home</a></li>
+                        
                         <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showGames()" id="linkGames">Jogos</a></li>
                         <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showStore()" id="linkStore">Loja</a></li>
                         <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showTasks()" id="linkTasks">Tarefas</a></li>
                         <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showRanking()" id="linkRanking">Ranking</a></li>
+
                         <li class="nav-item nav-parent"><a class="nav-link" href="#" onclick="showMessages()" id="linkMessages">Falar com Escola</a></li>
+
                         <li class="nav-item"><a class="nav-link text-warning fw-bold" href="#" onclick="showAdmin()" id="navAdminBtn">Professor</a></li>
                         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn">DEV</a></li>
                     </ul>
+                    
                     <ul class="navbar-nav align-items-center">
-                        <li class="nav-item me-3 position-relative"><a class="nav-link" href="#" onclick="showNotifications()"><i class="fas fa-bell"></i><span id="notifBadge" class="position-absolute badge bg-danger rounded-circle" style="display:none; width:10px; height:10px; top:10px; right:5px;"></span></a></li>
+                        <li class="nav-item me-3 position-relative">
+                            <a class="nav-link" href="#" onclick="showNotifications()">
+                                <i class="fas fa-bell"></i>
+                                <span id="notifBadge" class="position-absolute badge-mars rounded-circle" style="display: none; width: 10px; height: 10px; bottom: 12px; right: 4px;"></span>
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"><span id="userName" class="fw-bold text-white small">Aluno</span></a>
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <span id="userName" class="fw-bold text-white small">Aluno</span>
+                            </a>
                             <ul class="dropdown-menu dropdown-menu-end mt-2 shadow border-0">
-                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()">Perfil</a></li>
-                                <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Sair</a></li>
+                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()"><i class="fas fa-id-card me-2 text-mars-navy"></i>Meu Perfil</a></li>
+                                <li><a class="dropdown-item nav-parent" href="#" onclick="showMessages()"><i class="fas fa-envelope me-2 text-mars-navy"></i>Mensagens</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -180,123 +264,139 @@
                             <div class="card mb-4 border-0 text-white" style="background: linear-gradient(135deg, var(--mars-navy) 0%, #001030 100%);">
                                 <div class="card-body p-4 d-flex align-items-center">
                                     <div class="me-4 position-relative">
-                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-4 border-white p-1" style="width:100px; height:100px; background-size:cover; background-position:center;">👤</div>
+                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-4 border-white p-1" style="width: 100px; height: 100px; background-size: cover; background-position: center;">👤</div>
+                                        <div class="level-badge bg-mars-red shadow">Lvl <span id="homeStudentLevel">1</span></div>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <h2 class="fw-bold mb-0">Hi, <span id="homeStudentName">Student</span>!</h2>
-                                        <div class="progress mt-3" style="height:10px; background:rgba(255,255,255,0.2);"><div id="homeStudentXPBar" class="progress-bar bg-danger" style="width:0%"></div></div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h2 class="fw-bold mb-0">Hi, <span id="homeStudentName">Student</span>! 🚀</h2>
+                                        <div class="progress mt-3" style="height: 10px; background-color: rgba(255,255,255,0.2);">
+                                            <div id="homeStudentXPBar" class="progress-bar bg-danger" style="width: 0%"></div>
+                                        </div>
                                         <small class="text-white-50 fw-bold"><span id="homeStudentXP">0</span> XP Total</small>
                                     </div>
                                 </div>
                             </div>
                             <div class="row g-3 mb-4">
-                                <div class="col-md-6"><div class="card h-100 border-start border-4 border-danger"><div class="card-body d-flex align-items-center"><i class="fas fa-coins fa-3x text-mars-red me-3"></i><div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentCoins">0</h3><small class="text-muted fw-bold">COINS</small></div></div></div></div>
-                                <div class="col-md-6"><div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showTasks()"><div class="card-body d-flex align-items-center"><i class="fas fa-star fa-3x text-primary me-3"></i><div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentTasks">0</h3><small class="text-muted fw-bold">MISSÕES</small></div></div></div></div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-start border-4 border-danger"> <div class="card-body d-flex align-items-center">
+                                            <i class="fas fa-coins fa-3x text-mars-red me-3"></i>
+                                            <div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentCoins">0</h3><small class="text-muted fw-bold">MARS COINS</small></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-start border-4 border-danger bg-light hover-effect" onclick="showTasks()">
+                                        <div class="card-body d-flex align-items-center">
+                                            <i class="fas fa-star fa-3x text-mars-red me-3"></i>
+                                            <div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentTasks">0</h3><small class="text-muted fw-bold">MISSÕES PENDENTES</small></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-lg-4">
                             <div class="card h-100">
-                                <div class="card-header bg-mars-navy text-white fw-bold">Top Alunos</div>
+                                <div class="card-header bg-mars-navy text-white fw-bold"><i class="fas fa-trophy me-2"></i>Top Alunos</div>
                                 <div class="card-body p-0"><div id="homeTopStudents" class="list-group list-group-flush"></div></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div id="dash-teacher" class="role-dashboard" style="display:none;"><h2 class="text-white mb-4">Painel Professor</h2><div class="row g-3"><div class="col-md-4"><div class="card h-100 border-start border-4 border-danger" onclick="showAdminTab('tasks'); showAdmin();"><div class="card-body"><h6>CORREÇÕES</h6><h2 id="dashTeacherSubs">0</h2></div></div></div><div class="col-md-4"><div class="card h-100 border-start border-4 border-primary" onclick="showAdminTab('gamebank'); showAdmin();"><div class="card-body"><h6>JOGOS</h6><h2 class="text-mars-navy"><i class="fas fa-gamepad"></i></h2></div></div></div><div class="col-md-4"><div class="card h-100 border-start border-4 border-info" onclick="showAdminTab('classes'); showAdmin();"><div class="card-body"><h6>FOTOS</h6><h2 id="dashTeacherPhotos">0</h2></div></div></div></div></div>
-                <div id="dash-parent" class="role-dashboard" style="display:none;"><div class="alert bg-mars-navy text-white">Área do Responsável</div><div class="card text-center"><div class="card-body"><h3 id="dashParentChildName">Filho</h3></div></div></div>
-                <div id="dash-dev" class="role-dashboard" style="display:none;"><h2 class="text-danger">>_ ROOT</h2><div class="row"><div class="col-6"><button class="btn btn-outline-danger w-100 py-4" onclick="showDev()">Factory</button></div><div class="col-6"><button class="btn btn-outline-light w-100 py-4" onclick="showDevTab('simulator'); showDev();">Simulador</button></div></div></div>
+                <div id="dash-teacher" class="role-dashboard" style="display:none;">
+                    <h2 class="text-white mb-4">Painel Professor</h2>
+                    <div class="row g-3">
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-danger" onclick="showAdminTab('tasks'); showAdmin();"><div class="card-body"><h6>CORREÇÕES</h6><h2 id="dashTeacherSubs">0</h2></div></div></div>
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-primary" onclick="showAdminTab('store'); showAdmin();"><div class="card-body"><h6>PEDIDOS</h6><h2 id="dashTeacherOrders">0</h2></div></div></div>
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-info" onclick="showAdminTab('classes'); showAdmin();"><div class="card-body"><h6>FOTOS</h6><h2 id="dashTeacherPhotos">0</h2></div></div></div>
+                    </div>
+                </div>
+                <div id="dash-parent" class="role-dashboard" style="display:none;"><div class="alert bg-mars-navy text-white">Área do Responsável</div><div class="card text-center"><div class="card-body"><h3 id="dashParentChildName">Filho</h3><button class="btn btn-primary mt-3" onclick="showMessages()">Falar com Escola</button></div></div></div>
+                <div id="dash-dev" class="role-dashboard" style="display:none;"><h2 class="text-danger">>_ ROOT</h2><div class="row"><div class="col-md-6"><button class="btn btn-outline-danger w-100 py-4" onclick="showDev()">User Factory</button></div><div class="col-md-6"><button class="btn btn-outline-light w-100 py-4" onclick="showDevTab('simulator'); showDev();">Simulador</button></div></div></div>
             </div>
 
             <div id="gamesContent" class="content-section">
-                <div id="gamesMenu">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-mars-navy text-white"><i class="fas fa-gamepad me-2"></i>Arcade MarsFlow</div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="showQuizSelector()">
-                                        <i class="fas fa-brain fa-4x text-mars-navy mb-3"></i>
-                                        <h4 class="fw-bold text-mars-navy">Quiz</h4>
-                                        <p class="text-muted small">Teste seu conhecimento.</p>
-                                        <button class="btn btn-outline-primary rounded-pill w-100 mt-2">JOGAR</button>
-                                    </div>
+                <div class="card"><div class="card-header bg-mars-navy">Jogos</div><div class="card-body text-center"><div class="row"><div class="col-md-4"><div class="card p-4 hover-effect"><i class="fas fa-brain fa-3x text-mars-red mb-3"></i><h5>Quiz</h5><button class="btn btn-primary rounded-pill w-100" onclick="window.location.href='quiz.html'">JOGAR</button></div></div></div></div></div>
+            </div>
+
+            <div id="storeContent" class="content-section">
+                <div class="d-flex justify-content-between mb-4"><h2 class="text-white">Loja</h2><div class="bg-white p-2 px-4 rounded-pill"><span class="h4 text-mars-gold fw-bold" id="storeBalance">0</span></div></div>
+                <div class="row" id="storeList"></div>
+            </div>
+
+            <div id="tasksContent" class="content-section">
+                <div class="row"><div class="col-md-8"><div class="card"><div class="card-header bg-mars-navy text-white d-flex justify-content-between"><span>Missões</span><span class="badge bg-white text-mars-navy" id="taskCount">0</span></div><div class="card-body p-0"><div id="taskList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-4"><div class="card bg-mars-red text-white"><div class="card-body text-center"><h5>Ganhe XP!</h5><p>Faça as tarefas.</p></div></div></div></div>
+            </div>
+
+            <div id="rankingContent" class="content-section">
+                <div class="card">
+                    <div class="card-header bg-mars-navy pt-3 pb-0">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 text-white"><i class="fas fa-trophy text-mars-gold me-2"></i>Classificação</h5>
+                            <span class="badge bg-light text-mars-navy" id="myClassBadge">...</span>
+                        </div>
+                        <ul class="nav nav-tabs border-bottom-0">
+                            <li class="nav-item"><a class="nav-link active" id="tabGeneral" href="#" onclick="switchRanking('general')">Geral</a></li>
+                            <li class="nav-item"><a class="nav-link" id="tabClass" href="#" onclick="switchRanking('class')">Minha Turma</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="bg-light text-mars-navy"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Lvl</th><th class="text-end pe-4">XP</th></tr></thead>
+                                <tbody id="tabelaRankingCompleta"><tr><td colspan="4" class="text-center p-4">Carregando...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="profileContent" class="content-section">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow border-0" id="profileCard">
+                            <div class="card-body text-center pt-5 pb-4">
+                                <div class="mb-4 position-relative d-inline-block">
+                                    <div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-4 border-white shadow-sm p-1 position-relative overflow-hidden" 
+                                         style="width: 140px; height: 140px; background-size: cover; background-position: center;">👤</div>
+                                    <label for="photoUpload" class="position-absolute top-0 end-0 btn btn-sm btn-light rounded-circle border shadow-sm" style="cursor: pointer;"><i class="fas fa-camera text-mars-navy"></i></label>
+                                    <input type="file" id="photoUpload" style="display: none;" onchange="handlePhotoUpload(this)">
+                                    
+                                    <div class="level-badge">Lvl <span id="profileLevel">1</span></div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="startUnscrambleGame()">
-                                        <i class="fas fa-sort-alpha-down fa-4x text-mars-red mb-3"></i>
-                                        <h4 class="fw-bold text-mars-navy">Unscramble</h4>
-                                        <p class="text-muted small">Ordene as frases corretamente.</p>
-                                        <button class="btn btn-outline-danger rounded-pill w-100 mt-2">JOGAR</button>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="startSpaceShooterGame()">
-                                        <i class="fas fa-rocket fa-4x text-warning mb-3" style="transform: rotate(-45deg);"></i>
-                                        <h4 class="fw-bold text-mars-navy">Galaxy Defender</h4>
-                                        <p class="text-muted small">Atire na resposta certa!</p>
-                                        <button class="btn btn-warning text-dark fw-bold rounded-pill w-100 mt-2">JOGAR</button>
-                                    </div>
-                                </div>
+                                
+                                <div id="photoStatusBadge" class="mb-2"></div>
+                                <h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3>
+                                <div class="px-4 mb-3"><p class="text-muted small fst-italic" id="profileBioDisplay">"..."</p><button class="btn btn-link btn-sm text-danger" onclick="editBio()">Editar Bio</button><div id="bioEditContainer" style="display:none;" class="mt-2"><textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2"></textarea><button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button></div></div>
+                                <p class="text-muted mb-2 fw-bold" id="profileClass">...</p>
+                                <div class="mt-4 px-3"><div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div><div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-mars-red" style="width: 0%"></div></div></div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="quizSelector" style="display:none;"><button class="btn btn-link fw-bold text-mars-navy mb-3" onclick="backToGamesMenu()"><i class="fas fa-arrow-left"></i> Voltar</button><h3 class="text-mars-navy">Escolha</h3><div id="quizListContainer" class="row"></div></div>
-                <div id="quizPlayer" style="display:none;"><div class="row justify-content-center"><div class="col-md-8"><div class="card shadow-lg border-0"><div class="card-header bg-mars-navy text-white d-flex justify-content-between"><span>Quiz</span><span class="badge bg-danger">Score: <span id="quizScore">0</span></span></div><div class="card-body p-5 text-center"><div id="quizQuestionArea"><div class="progress mb-4" style="height:5px;"><div id="quizProgressBar" class="progress-bar bg-success" style="width:0%"></div></div><h4 id="qText" class="mb-4 fw-bold text-mars-navy">...</h4><div id="qOptions" class="d-grid gap-3"></div></div><div id="quizResultArea" style="display:none;"><i class="fas fa-trophy fa-5x text-mars-gold mb-3"></i><h2>Fim!</h2><p>Acertos: <span id="finalScore" class="fw-bold text-success"></span></p><button class="btn btn-primary rounded-pill px-4" onclick="showQuizSelector()">Voltar</button></div></div></div></div></div></div>
-                
-                <div id="gameUnscramble" style="display:none;"><button class="btn btn-link fw-bold text-mars-navy mb-3" onclick="backToGamesMenu()"><i class="fas fa-arrow-left"></i> Voltar</button><div class="row justify-content-center"><div class="col-md-8"><div class="card shadow-lg border-0"><div class="card-header bg-mars-navy text-white d-flex justify-content-between"><span>Sentence Builder</span><span class="badge bg-light text-dark" id="unscrambleLevelBadge">Level 1</span></div><div class="card-body p-4 text-center"><h5 class="text-muted mb-4 fst-italic">"<span id="unscrambleTranslation">...</span>"</h5><div id="unscrambleAnswerArea" class="p-3 mb-4 rounded border-bottom border-2 border-primary d-flex flex-wrap gap-2 justify-content-center bg-light" style="min-height:80px;"></div><div id="unscramblePoolArea" class="d-flex flex-wrap gap-2 justify-content-center mb-4"></div><div id="unscrambleSuccessMsg" style="display:none;"><div class="alert alert-success fw-bold">CORRECT!</div><button class="btn btn-primary rounded-pill px-5" onclick="nextUnscrambleLevel()">NEXT <i class="fas fa-arrow-right"></i></button></div></div></div></div></div></div>
-
-                <div id="gameSpaceShooter" style="display: none;">
-                    <button class="btn btn-sm btn-light position-absolute top-0 start-0 m-3 fw-bold" style="z-index: 10;" onclick="stopSpaceShooter(); backToGamesMenu();"><i class="fas fa-arrow-left"></i> Sair</button>
-                    <div id="shooterOverlay" class="position-absolute w-100 p-3 text-center pointer-events-none" style="z-index: 5; top: 40px;">
-                        <h4 class="text-white fw-bold arcade-text" id="shooterQuestion">Ready?</h4>
-                        <div class="badge bg-danger fs-6 mt-2 border border-white">Score: <span id="shooterScore">0</span></div>
-                    </div>
-                    <canvas id="spaceCanvas" width="800" height="600" style="width: 100%; height: 100%; display: block;"></canvas>
-                    <div id="shooterGameOver" class="position-absolute w-100 h-100 flex-column justify-content-center align-items-center bg-dark bg-opacity-75 text-white" style="z-index: 20; display: none; top:0; left:0;">
-                        <h1 class="fw-bold text-mars-gold mb-3 arcade-text">GAME OVER</h1>
-                        <p class="fs-4">Final Score: <span id="shooterFinalScore" class="fw-bold text-success">0</span></p>
-                        <button class="btn btn-primary btn-lg rounded-pill mt-3 px-5 border border-white" onclick="startSpaceShooterGame()">TRY AGAIN</button>
-                    </div>
+                    <div class="col-md-8"><div class="card shadow-sm h-100"><div class="card-header bg-white text-mars-navy">Inventário</div><div class="card-body bg-light"><div class="row g-3" id="inventoryList"></div></div></div></div>
                 </div>
             </div>
 
-            <div id="storeContent" class="content-section"><div class="d-flex justify-content-between mb-4"><h2 class="text-white">Loja</h2><div class="bg-white p-2 px-4 rounded-pill"><span class="h4 text-mars-gold fw-bold" id="storeBalance">...</span></div></div><div class="row" id="storeList"></div></div>
-            <div id="tasksContent" class="content-section"><div class="row"><div class="col-md-8"><div class="card"><div class="card-header bg-primary text-white d-flex justify-content-between"><h5>Missões</h5><span class="badge bg-white text-primary" id="taskCount">0</span></div><div class="card-body p-0"><div id="taskList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-4"><div class="card bg-mars-red text-white"><div class="card-body text-center"><h5>XP Boost</h5><p>Complete as tarefas.</p></div></div></div></div></div>
-            <div id="rankingContent" class="content-section"><div class="card"><div class="card-header bg-mars-navy"><div class="d-flex justify-content-between mb-2"><h5 class="mb-0 text-white"><i class="fas fa-trophy text-mars-gold me-2"></i>Ranking</h5><span class="badge bg-light text-mars-navy" id="myClassBadge">...</span></div><ul class="nav nav-tabs border-bottom-0"><li class="nav-item"><a class="nav-link active" id="tabGeneral" href="#" onclick="switchRanking('general')">Geral</a></li><li class="nav-item"><a class="nav-link" id="tabClass" href="#" onclick="switchRanking('class')">Turma</a></li></ul></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover table-striped mb-0"><thead class="bg-light text-mars-navy"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Lvl</th><th class="text-end pe-4">XP</th></tr></thead><tbody id="tabelaRankingCompleta"></tbody></table></div></div></div></div>
-            <div id="profileContent" class="content-section"><div class="row"><div class="col-md-4 mb-4"><div class="card shadow border-0" id="profileCard"><div class="card-body text-center pt-5 pb-4"><div class="mb-4 position-relative d-inline-block"><div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-4 border-white shadow-sm p-1 position-relative overflow-hidden" style="width: 140px; height: 140px; background-size: cover; background-position: center;">👤</div><label for="photoUpload" class="position-absolute top-0 end-0 btn btn-sm btn-light rounded-circle border shadow-sm" style="cursor: pointer;"><i class="fas fa-camera text-mars-navy"></i></label><input type="file" id="photoUpload" style="display: none;" onchange="handlePhotoUpload(this)"><div class="level-badge bg-mars-red shadow">Lvl <span id="profileLevel">1</span></div></div><div id="photoStatusBadge" class="mb-2"></div><h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3><div class="px-4 mb-3"><button class="btn btn-link btn-sm text-danger" onclick="editBio()">Editar Bio</button><div id="bioEditContainer" style="display:none;" class="mt-2"><textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2"></textarea><button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button></div></div><p class="text-muted mb-2 fw-bold" id="profileClass">...</p><div class="mt-4 px-3"><div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div><div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-mars-red" style="width: 0%"></div></div></div></div></div></div><div class="col-md-8"><div class="card shadow-sm h-100"><div class="card-header bg-white text-mars-navy">Inventário</div><div class="card-body bg-light"><div class="row g-3" id="inventoryList"></div></div></div></div></div></div>
+            <div id="adminContent" class="content-section"><div class="row h-100"><div class="col-md-3 mb-4"><div class="card h-100 border-0"><div class="card-header bg-mars-navy text-white text-center py-4"><h5 class="mb-0">Professor</h5></div><div class="list-group list-group-flush" id="adminSidebar"><button class="list-group-item list-group-item-action fw-bold py-3" onclick="showAdminTab('tasks')">Atividades</button><button class="list-group-item list-group-item-action fw-bold py-3" onclick="showAdminTab('store')">Loja</button><button class="list-group-item list-group-item-action fw-bold py-3" onclick="showAdminTab('classes')">Turmas</button><button class="list-group-item list-group-item-action fw-bold py-3" onclick="showAdminTab('comms')">Comunicação</button></div></div></div><div class="col-md-9"><div id="adminTab-tasks" class="admin-tab"></div><div id="adminTab-store" class="admin-tab" style="display:none;"></div><div id="adminTab-classes" class="admin-tab" style="display:none;"></div><div id="adminTab-comms" class="admin-tab" style="display:none;"></div></div></div></div>
+            <div id="devContent" class="content-section"><div class="row h-100"><div class="col-md-3"><div class="card border-danger h-100"><div class="card-header bg-danger text-white text-center"><h5>DEV</h5></div><div class="list-group list-group-flush" id="devSidebar"><button class="list-group-item active" onclick="showDevTab('users')">Users</button><button class="list-group-item" onclick="showDevTab('store')">Loja</button><button class="list-group-item text-primary" onclick="showDevTab('simulator')">Simular</button></div></div></div><div class="col-md-9"><div id="devTab-users" class="dev-tab"></div><div id="devTab-store" class="dev-tab" style="display:none;"></div><div id="devTab-simulator" class="dev-tab" style="display:none;"></div></div></div></div>
             <div id="messagesContent" class="content-section"><div class="row"><div class="col-md-5"><div class="card"><div class="card-header bg-mars-navy text-white">Nova Mensagem</div><div class="card-body"><form onsubmit="event.preventDefault(); sendMessage();"><select id="msgSubject" class="form-select mb-3"><option>Dúvida</option><option>Outros</option></select><textarea id="msgContent" class="form-control mb-3" rows="5"></textarea><button class="btn btn-primary w-100">ENVIAR</button></form></div></div></div><div class="col-md-7"><div class="card"><div class="card-header">Histórico</div><div class="card-body p-0"><div id="myMessagesList"></div></div></div></div></div></div>
             <div id="notificationsContent" class="content-section"><div class="row h-100"><div class="col-md-4 border-end"><div class="list-group list-group-flush" id="notifList"></div></div><div class="col-md-8"><div id="notifDetail" class="p-5 text-center text-muted">Selecione...</div></div></div></div>
-
-            <div id="adminContent" class="content-section">
-                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card h-100 border-0"><div class="card-header bg-mars-navy text-white text-center py-4"><h5 class="mb-0">Professor</h5></div><div class="list-group list-group-flush" id="adminSidebar"><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('tasks')">Atividades</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('gamebank')"><i class="fas fa-gamepad text-primary me-2"></i> Banco de Jogos</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('classes')">Turmas</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('attendance')">Chamada</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('comms')">Comunicação</button></div></div></div>
-                <div class="col-md-9">
-                    <div id="adminTab-gamebank" class="admin-tab" style="display:none;">
-                        <h3 class="text-mars-navy mb-4"><i class="fas fa-gamepad me-2"></i>Banco de Jogos</h3>
-                        <div class="row g-4">
-                            <div class="col-md-6"><div class="card h-100 text-center p-4 hover-effect" onclick="showAdminTab('quiz')"><i class="fas fa-brain fa-4x text-mars-navy mb-3"></i><h4>Quiz Manager</h4><button class="btn btn-outline-primary rounded-pill w-100">Gerenciar</button></div></div>
-                            <div class="col-md-6"><div class="card h-100 text-center p-4 hover-effect" onclick="showAdminTab('unscramble')"><i class="fas fa-sort-alpha-down fa-4x text-mars-red mb-3"></i><h4>Unscramble Manager</h4><button class="btn btn-outline-danger rounded-pill w-100">Gerenciar</button></div></div>
-                        </div>
-                    </div>
-                    <div id="adminTab-tasks" class="admin-tab"></div><div id="adminTab-store" class="admin-tab" style="display:none;"></div><div id="adminTab-classes" class="admin-tab" style="display:none;"></div><div id="adminTab-comms" class="admin-tab" style="display:none;"></div><div id="adminTab-attendance" class="admin-tab" style="display:none;"></div>
-                    <div id="adminTab-quiz" class="admin-tab" style="display:none;"><button class="btn btn-link" onclick="showAdminTab('gamebank')">Voltar</button> <div class="row"><div class="col-md-4"><div id="quizLibraryList"></div><button onclick="resetQuizForm()">Novo</button></div><div class="col-md-8"><form onsubmit="event.preventDefault(); saveQuiz();"><input type="hidden" id="quizId"><input id="quizUnit" placeholder="U"><input id="quizLesson" placeholder="L"><input id="quizTitle" placeholder="T"><div id="questionsContainer"></div><button type="button" onclick="addQuestionField()">+Q</button><button>Salvar</button></form></div></div></div>
-                    <div id="adminTab-unscramble" class="admin-tab" style="display:none;"><button class="btn btn-link" onclick="showAdminTab('gamebank')">Voltar</button> <div class="row"><div class="col-md-5"><div id="unscrambleLibraryList"></div><button onclick="resetUnscrambleForm()">Novo</button></div><div class="col-md-7"><form onsubmit="event.preventDefault(); saveUnscrambleActivity();"><input type="hidden" id="unscrambleId"><input id="unscrambleUnit"><input id="unscrambleLesson"><input id="unscrambleSentence"><input id="unscrambleTranslation"><button>Salvar</button></form></div></div></div>
-                </div></div>
-            </div>
-            <div id="devContent" class="content-section"><div class="row h-100"><div class="col-md-3"><div class="card border-danger h-100"><div class="card-header bg-danger text-white"><h5>DEV</h5></div><div class="list-group list-group-flush" id="devSidebar"><button class="list-group-item" onclick="showDevTab('users')">Users</button><button class="list-group-item" onclick="showDevTab('store')">Loja</button><button class="list-group-item" onclick="showDevTab('simulator')">Simular</button></div></div></div><div class="col-md-9"><div id="devTab-users" class="dev-tab"></div><div id="devTab-store" class="dev-tab" style="display:none;"></div><div id="devTab-simulator" class="dev-tab" style="display:none;"></div></div></div></div>
 
         </div>
     </div>
 
-    <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;"><i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO<button class="btn btn-sm btn-light ms-3 fw-bold border-0 text-mars-navy" onclick="activateSimulation('dev')">SAIR</button></div>
+    <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;">
+        <i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO: <span id="simRoleName"></span>
+        <button class="btn btn-sm btn-light ms-3 fw-bold border-0 text-mars-navy" onclick="activateSimulation('dev')">SAIR</button>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where, getCountFromServer, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configuração
         const firebaseConfig = {
           apiKey: "AIzaSyBYe4oRa-uS1hTodVAsa7Zer1fOAU9-kcA",
           authDomain: "marsflow-english-academy.firebaseapp.com",
@@ -314,7 +414,7 @@
         window.db = db; window.auth = auth;
         window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.addDoc = addDoc; window.deleteDoc = deleteDoc;
         window.arrayUnion = arrayUnion; window.arrayRemove = arrayRemove;
-        window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where; window.getCountFromServer = getCountFromServer; window.increment = increment;
+        window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where; window.getCountFromServer = getCountFromServer;
 
         let currentUser = null;
         let userData = null;
@@ -351,13 +451,18 @@
             if (!currentUser) return;
             try {
                 const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-                if (userDoc.exists()) { userData = userDoc.data(); } 
-                else {
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                } else {
                     const emailKey = currentUser.email.toLowerCase();
                     const preRegDoc = await getDoc(doc(db, "pre_registers", emailKey));
                     let initialData = {};
-                    if (preRegDoc.exists()) { initialData = preRegDoc.data(); delete initialData.isPreRegistered; } 
-                    else { initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 }; }
+                    if (preRegDoc.exists()) {
+                        initialData = preRegDoc.data();
+                        delete initialData.isPreRegistered;
+                    } else {
+                        initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 };
+                    }
                     userData = { ...initialData, uid: currentUser.uid, email: currentUser.email, inventory: [], createdAt: new Date().toISOString() };
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
@@ -369,8 +474,11 @@
         function updateUserInterface() {
             if (!userData) return;
             const icon = userData.equippedIcon || '';
+            // --- TAG DE PERFIL NA NAVBAR ---
             const roleLabels = {'student': 'Aluno', 'teacher': 'Professor', 'parent': 'Responsável', 'admin': 'Admin'};
-            document.getElementById('userName').innerHTML = `${icon} ${userData.name} <span class="badge bg-white text-mars-navy ms-2" style="font-size:0.7em">${roleLabels[userData.role]||'User'}</span>`;
+            const roleName = roleLabels[userData.role] || 'Usuário';
+            
+            document.getElementById('userName').innerHTML = `${icon} ${userData.name} <span class="badge-role">${roleName}</span>`;
             
             const role = userData.role; 
             const isDev = (currentUser.email === 'fmartimr@gmail.com');
@@ -384,14 +492,18 @@
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
                 document.getElementById('navAdminBtn').style.display = 'block';
                 document.getElementById('navDevBtn').style.display = 'block';
-            } else if (role === 'teacher' || role === 'admin') {
+            } 
+            else if (role === 'teacher' || role === 'admin') {
                 document.getElementById('navAdminBtn').style.display = 'block';
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
-            } else if (role === 'parent') {
+            } 
+            else if (role === 'parent') {
                 document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'block');
-            } else {
+            } 
+            else {
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
             }
+
             if (role === 'teacher' || role === 'admin' || isDev) {
                 if(window.loadPendingPhotos) window.loadPendingPhotos();
             }
@@ -401,17 +513,36 @@
         window.showLoginScreen = () => { document.getElementById('loginScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
         window.showAppScreen = () => { document.getElementById('loginScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; window.showHome(); }
         window.hideAllSections = () => { document.querySelectorAll('.content-section').forEach(s => s.style.display='none'); }
-        function setActiveNav(id) { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
+
+        // Função Helper para marcar Navbar
+        function setActiveNav(id) {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const el = document.getElementById(id);
+            if(el) el.classList.add('active');
+        }
 
         window.showHome = () => { 
-            hideAllSections(); document.getElementById('homeContent').style.display='block'; setActiveNav('linkHome');
+            hideAllSections(); 
+            document.getElementById('homeContent').style.display='block'; 
+            setActiveNav('linkHome');
+            
             const role = window.userData.role;
             const isDev = (window.auth.currentUser.email === 'fmartimr@gmail.com');
             document.querySelectorAll('.role-dashboard').forEach(el => el.style.display = 'none');
-            if (isDev && !window.originalRole) { document.getElementById('dash-dev').style.display = 'block'; if(window.loadDevStats) window.loadDevStats(); } 
-            else if (role === 'teacher') { document.getElementById('dash-teacher').style.display = 'block'; if(window.loadTeacherDashboard) window.loadTeacherDashboard(); } 
-            else if (role === 'parent') { document.getElementById('dash-parent').style.display = 'block'; if(window.loadParentDashboard) window.loadParentDashboard(); } 
-            else { document.getElementById('dash-student').style.display = 'block'; if(window.loadStudentDashboard) window.loadStudentDashboard(); }
+
+            if (isDev && !window.originalRole) { 
+                document.getElementById('dash-dev').style.display = 'block';
+                if(window.loadDevStats) window.loadDevStats();
+            } else if (role === 'teacher') {
+                document.getElementById('dash-teacher').style.display = 'block';
+                if(window.loadTeacherDashboard) window.loadTeacherDashboard();
+            } else if (role === 'parent') {
+                document.getElementById('dash-parent').style.display = 'block';
+                if(window.loadParentDashboard) window.loadParentDashboard();
+            } else {
+                document.getElementById('dash-student').style.display = 'block';
+                if(window.loadStudentDashboard) window.loadStudentDashboard();
+            }
         };
 
         window.showGames = () => { hideAllSections(); document.getElementById('gamesContent').style.display='block'; setActiveNav('linkGames'); };
@@ -420,9 +551,28 @@
         window.showRanking = () => { hideAllSections(); document.getElementById('rankingContent').style.display='block'; setActiveNav('linkRanking'); if(window.loadRealRanking) window.loadRealRanking(); };
         window.showProfile = () => { hideAllSections(); document.getElementById('profileContent').style.display = 'block'; setActiveNav(''); if(window.loadProfile) window.loadProfile(); };
         window.showMessages = () => { hideAllSections(); document.getElementById('messagesContent').style.display = 'block'; setActiveNav('linkMessages'); if(window.loadMyMessages) window.loadMyMessages(); };
-        window.showAdmin = () => { hideAllSections(); document.getElementById('adminContent').style.display = 'block'; setActiveNav('navAdminBtn'); if(window.showAdminTab) window.showAdminTab('tasks'); };
-        window.showNotifications = () => { hideAllSections(); document.getElementById('notificationsContent').style.display = 'block'; setActiveNav(''); if(window.loadNotificationsScreen) window.loadNotificationsScreen(); };
-        window.showDev = function() { hideAllSections(); document.getElementById('devContent').style.display = 'block'; setActiveNav('navDevBtn'); if(window.showDevTab) window.showDevTab('users'); }
+        
+        window.showAdmin = () => {
+            hideAllSections();
+            document.getElementById('adminContent').style.display = 'block';
+            setActiveNav('navAdminBtn');
+            if(window.showAdminTab) window.showAdminTab('tasks');
+        };
+
+        window.showNotifications = () => {
+            hideAllSections();
+            document.getElementById('notificationsContent').style.display = 'block';
+            setActiveNav('');
+            if(window.loadNotificationsScreen) window.loadNotificationsScreen();
+        };
+        
+        window.showDev = function() {
+             hideAllSections();
+             document.getElementById('devContent').style.display = 'block';
+             setActiveNav('navDevBtn');
+             if(window.showDevTab) window.showDevTab('users');
+        }
+
     </script>
     <script src="js/app.js"></script>
 </body>
