@@ -1,9 +1,8 @@
 // JavaScript Principal - MarsFlow English Academy
-// Versão: 5.0 (Hub de Jogos, Filtros de Turma & Galaxy Defender)
+// Versão: 5.1 (Fix para navegadores antigos e erro de carregamento)
 
 document.addEventListener('DOMContentLoaded', () => console.log('MarsFlow App Pronto.'));
 
-// Inicialização Global
 window.initializeApp = function() {
     if (!window.userData) return;
     const role = window.userData.role;
@@ -25,10 +24,9 @@ window.initializeApp = function() {
 let shooterGameInstance = null;
 
 window.startSpaceShooterGame = async function() {
-    const btn = event.target; 
-    const txt = btn.innerText; 
-    btn.innerText = "Carregando..."; 
-    btn.disabled = true;
+    const btn = (window.event && window.event.target) || document.querySelector('#gamesMenu button'); // Fallback seguro
+    const txt = btn ? btn.innerText : "Carregando..."; 
+    if(btn) { btn.innerText = "Loading..."; btn.disabled = true; }
 
     try {
         const userClass = window.userData.classId;
@@ -36,15 +34,14 @@ window.startSpaceShooterGame = async function() {
         
         // Filtro por turma
         if (window.userData.role === 'student') {
-            if(!userClass) { alert("Você não tem turma vinculada!"); return; }
+            if(!userClass) { alert("Você não tem turma vinculada!"); if(btn){ btn.innerText=txt; btn.disabled=false; } return; }
             q = window.query(q, window.where("targetClasses", "array-contains", userClass));
         }
         
         const snap = await window.getDocs(q);
         if (snap.empty) { 
             alert("Sem perguntas para sua turma."); 
-            btn.innerText = txt; 
-            btn.disabled = false; 
+            if(btn){ btn.innerText=txt; btn.disabled=false; } 
             return; 
         }
 
@@ -75,8 +72,7 @@ window.startSpaceShooterGame = async function() {
         console.error(e); 
         alert("Erro ao carregar jogo. Verifique o console."); 
     } finally {
-        btn.innerText = txt; 
-        btn.disabled = false;
+        if(btn){ btn.innerText = txt; btn.disabled = false; }
     }
 }
 
@@ -88,12 +84,10 @@ class SpaceShooterEngine {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
-        // Define tamanho
         this.canvas.width = this.canvas.offsetWidth;
         this.canvas.height = this.canvas.offsetHeight;
         this.width = this.canvas.width;
         this.height = this.canvas.height;
-        
         this.isRunning = false;
         this.score = 0;
         this.qIndex = 0;
@@ -200,22 +194,18 @@ class SpaceShooterEngine {
     }
 
     update() {
-        // Player
         if ((this.keys['ArrowLeft'] || this.keys['KeyA']) && this.player.x > 0) this.player.x -= this.player.speed;
         if ((this.keys['ArrowRight'] || this.keys['KeyD']) && this.player.x + this.player.width < this.width) this.player.x += this.player.speed;
 
-        // Bullets
         this.bullets.forEach(b => b.y -= b.speed);
         this.bullets = this.bullets.filter(b => b.y + b.height > 0);
 
-        // Monsters
         this.monsters.forEach(m => { 
             m.x += m.dx; 
             m.y += m.dy; 
             if (m.x < 0 || m.x + m.width > this.width) m.dx *= -1; 
         });
 
-        // Particles
         this.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
         this.particles = this.particles.filter(p => p.life > 0);
 
@@ -261,7 +251,6 @@ class SpaceShooterEngine {
     draw() {
         this.ctx.clearRect(0, 0, this.width, this.height);
         
-        // Player
         const p = this.player; 
         this.ctx.fillStyle = p.color;
         this.ctx.beginPath(); 
@@ -272,19 +261,20 @@ class SpaceShooterEngine {
         this.ctx.fillStyle = '#00205B'; 
         this.ctx.fillRect(p.x + 10, p.y + p.height - 10, p.width - 20, 10);
 
-        // Bullets
         this.bullets.forEach(b => { 
             this.ctx.fillStyle = b.color; 
             this.ctx.beginPath(); 
-            this.ctx.roundRect(b.x, b.y, b.width, b.height, 5); 
+            // Fix de Compatibilidade: Usa rect se roundRect não existir
+            if (this.ctx.roundRect) this.ctx.roundRect(b.x, b.y, b.width, b.height, 5);
+            else this.ctx.rect(b.x, b.y, b.width, b.height);
             this.ctx.fill(); 
         });
 
-        // Monsters
         this.monsters.forEach(m => { 
             this.ctx.fillStyle = m.color; 
             this.ctx.beginPath(); 
-            this.ctx.roundRect(m.x, m.y, m.width, m.height, 15); 
+            if (this.ctx.roundRect) this.ctx.roundRect(m.x, m.y, m.width, m.height, 15); 
+            else this.ctx.rect(m.x, m.y, m.width, m.height);
             this.ctx.fill(); 
             
             this.ctx.fillStyle = '#fff'; 
@@ -300,7 +290,6 @@ class SpaceShooterEngine {
             this.ctx.fillText(m.text, m.x + m.width/2, m.y + m.height/2 + 15); 
         });
 
-        // Particles
         this.particles.forEach(pt => { 
             this.ctx.fillStyle = pt.color; 
             this.ctx.globalAlpha = pt.life / 40; 
@@ -436,24 +425,23 @@ window.resetArcadeForm = function() {
 window.unscrambleLevels=[]; window.currentUnscrambleIndex=0; window.userAnswerWords=[]; window.poolWords=[];
 
 window.startUnscrambleGame = async function() {
-    const btn = event.target; 
-    const txt = btn.innerText; 
-    btn.innerText="Carregando..."; 
-    btn.disabled=true;
+    const btn = (window.event && window.event.target) || null;
+    const txt = btn ? btn.innerText : "Loading";
+    if(btn) { btn.innerText="Carregando..."; btn.disabled=true; }
     
     try { 
         const userClass = window.userData.classId;
         let q = window.collection(window.db, "unscramble_activities");
         
         if (window.userData.role === 'student') {
-            if(!userClass) { alert("Sem turma vinculada."); return; }
+            if(!userClass) { alert("Sem turma vinculada."); if(btn){btn.disabled=false;btn.innerText=txt;} return; }
             q = window.query(q, window.where("targetClasses", "array-contains", userClass), window.orderBy("unit"));
         } else {
             q = window.query(q, window.orderBy("unit"));
         }
         
         const snap = await window.getDocs(q);
-        if(snap.empty){ alert("Sem frases disponíveis."); btn.innerText=txt; btn.disabled=false; return; }
+        if(snap.empty){ alert("Sem frases disponíveis."); if(btn){btn.innerText=txt; btn.disabled=false;} return; }
         
         window.unscrambleLevels=[]; 
         snap.forEach(d=>window.unscrambleLevels.push(d.data()));
@@ -464,8 +452,7 @@ window.startUnscrambleGame = async function() {
         loadUnscrambleLevel(0);
         
     } catch(e){ console.error(e); alert("Erro ao carregar."); } 
-    btn.innerText=txt; 
-    btn.disabled=false;
+    if(btn){ btn.innerText=txt; btn.disabled=false; }
 }
 
 window.loadUnscrambleLevel = function(i) {
@@ -761,6 +748,6 @@ window.loadAttendanceHistory=async function(){
     document.getElementById('attHistoryBody').innerHTML=h||'<tr><td>Vazio</td></tr>';
 }
 
-// Exportações (Garante que tudo esteja acessível)
+// Exports
 window.startSpaceShooterGame = startSpaceShooterGame;
 window.stopSpaceShooter = stopSpaceShooter;
