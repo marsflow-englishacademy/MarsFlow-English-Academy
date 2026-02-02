@@ -12,7 +12,6 @@
     
     <style>
         :root {
-            /* Paleta MarsFlow */
             --mars-navy: #00205B;
             --mars-navy-hover: #001540;
             --mars-red: #C8102E;
@@ -251,11 +250,16 @@
     <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;"><i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO<button class="btn btn-sm btn-light ms-3 fw-bold border-0 text-mars-navy" onclick="activateSimulation('dev')">SAIR</button></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script type="module">
+        // Importa o Firebase do CDN (Garante que funciona sem instalação local)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where, getCountFromServer, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // ============================================================
+        // ⚠️ ATENÇÃO: COLOQUE SUAS CHAVES DO FIREBASE AQUI ABAIXO!
+        // ============================================================
         const firebaseConfig = {
           apiKey: "AIzaSyBYe4oRa-uS1hTodVAsa7Zer1fOAU9-kcA",
           authDomain: "marsflow-english-academy.firebaseapp.com",
@@ -266,23 +270,41 @@
           measurementId: "G-1NC30HNJLQ"
         };
 
+        // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        window.db = db; window.auth = auth;
-        window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.addDoc = addDoc; window.deleteDoc = deleteDoc;
-        window.arrayUnion = arrayUnion; window.arrayRemove = arrayRemove;
-        window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where; window.getCountFromServer = getCountFromServer; window.increment = increment;
+        // Exporta para o escopo global (para o app.js usar)
+        window.db = db; 
+        window.auth = auth;
+        window.doc = doc; 
+        window.getDoc = getDoc; 
+        window.setDoc = setDoc; 
+        window.updateDoc = updateDoc; 
+        window.addDoc = addDoc; 
+        window.deleteDoc = deleteDoc;
+        window.arrayUnion = arrayUnion; 
+        window.arrayRemove = arrayRemove;
+        window.collection = collection; 
+        window.query = query; 
+        window.orderBy = orderBy; 
+        window.limit = limit; 
+        window.getDocs = getDocs; 
+        window.where = where; 
+        window.getCountFromServer = getCountFromServer; 
+        window.increment = increment;
 
         let currentUser = null;
         let userData = null;
 
+        // Monitora Auth
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 await loadUserData(); 
                 showAppScreen();
+                // Inicializa o app.js depois que o usuário logar
                 if (window.initializeApp) window.initializeApp();
                 if(window.checkNotifications) setInterval(() => window.checkNotifications(), 60000);
             } else {
@@ -290,11 +312,14 @@
             }
         });
 
+        // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             let loginUser = document.getElementById('loginUser').value.trim();
             const password = document.getElementById('password').value;
+            // Sufixo automático para aluno
             if (!loginUser.includes('@')) loginUser += '@aluno.marsflow';
+
             try {
                 document.getElementById('loadingSpinner').style.display = 'block';
                 await signInWithEmailAndPassword(auth, loginUser, password);
@@ -302,87 +327,152 @@
             } catch (error) {
                 document.getElementById('loadingSpinner').style.display = 'none';
                 document.getElementById('loginError').style.display = 'block';
-                document.getElementById('errorMessage').innerText = "Login inválido.";
+                let msg = "Erro no login.";
+                if(error.code === 'auth/invalid-email') msg = "Usuário inválido.";
+                if(error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') msg = "Usuário ou senha incorretos.";
+                document.getElementById('errorMessage').innerText = msg;
             }
         });
 
+        // Carrega Dados do Usuário
         async function loadUserData() {
             if (!currentUser) return;
             try {
                 const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-                if (userDoc.exists()) { userData = userDoc.data(); } 
-                else {
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                } else {
+                    // Lógica de Primeiro Acesso (Pré-Cadastro)
                     const emailKey = currentUser.email.toLowerCase();
                     const preRegDoc = await getDoc(doc(db, "pre_registers", emailKey));
+                    
                     let initialData = {};
-                    if (preRegDoc.exists()) { initialData = preRegDoc.data(); delete initialData.isPreRegistered; } 
-                    else { initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 }; }
-                    userData = { ...initialData, uid: currentUser.uid, email: currentUser.email, inventory: [], createdAt: new Date().toISOString() };
+                    if (preRegDoc.exists()) {
+                        initialData = preRegDoc.data();
+                        delete initialData.isPreRegistered;
+                    } else {
+                        initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 };
+                    }
+
+                    userData = {
+                        ...initialData,
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        inventory: [],
+                        createdAt: new Date().toISOString()
+                    };
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
                 window.userData = userData;
-                updateUserInterface();
+                updateUserInterface(); // Atualiza nome e menus
             } catch (error) { console.error('Erro load user:', error); }
         }
 
+        // Atualiza Interface (Esconde/Mostra Menus)
         function updateUserInterface() {
             if (!userData) return;
             const icon = userData.equippedIcon || '';
             const roleLabels = {'student': 'Aluno', 'teacher': 'Professor', 'parent': 'Responsável', 'admin': 'Admin'};
-            document.getElementById('userName').innerHTML = `${icon} ${userData.name} <span class="badge bg-white text-mars-navy ms-2" style="font-size:0.7em">${roleLabels[userData.role]||'User'}</span>`;
+            
+            document.getElementById('userName').innerHTML = `${icon} ${userData.name} <span class="badge bg-white text-mars-navy ms-2" style="font-size:0.7em">${roleLabels[userData.role] || 'User'}</span>`;
             
             const role = userData.role; 
             const isDev = (currentUser.email === 'fmartimr@gmail.com');
             
+            // Reseta menus
             document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'none');
             document.getElementById('navAdminBtn').style.display = 'none';
             document.getElementById('navDevBtn').style.display = 'none';
 
+            // Ativa conforme perfil
             if (isDev) {
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
                 document.getElementById('navAdminBtn').style.display = 'block';
                 document.getElementById('navDevBtn').style.display = 'block';
-            } else if (role === 'teacher' || role === 'admin') {
+            } 
+            else if (role === 'teacher' || role === 'admin') {
                 document.getElementById('navAdminBtn').style.display = 'block';
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
-            } else if (role === 'parent') {
+            } 
+            else if (role === 'parent') {
                 document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'block');
-            } else {
+            } 
+            else { // Aluno
                 document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
             }
+
             if (role === 'teacher' || role === 'admin' || isDev) {
                 if(window.loadPendingPhotos) window.loadPendingPhotos();
             }
         }
 
         window.logout = async function() { await signOut(auth); window.location.reload(); };
+
+        // Navegação Básica
         window.showLoginScreen = () => { document.getElementById('loginScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
         window.showAppScreen = () => { document.getElementById('loginScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; window.showHome(); }
         window.hideAllSections = () => { document.querySelectorAll('.content-section').forEach(s => s.style.display='none'); }
         function setActiveNav(id) { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
 
+        // Roteamento
         window.showHome = () => { 
-            hideAllSections(); document.getElementById('homeContent').style.display='block'; setActiveNav('linkHome');
+            hideAllSections(); 
+            document.getElementById('homeContent').style.display='block'; 
+            setActiveNav('linkHome');
+            
             const role = window.userData.role;
             const isDev = (window.auth.currentUser.email === 'fmartimr@gmail.com');
+
             document.querySelectorAll('.role-dashboard').forEach(el => el.style.display = 'none');
-            if (isDev && !window.originalRole) { document.getElementById('dash-dev').style.display = 'block'; if(window.loadDevStats) window.loadDevStats(); } 
-            else if (role === 'teacher') { document.getElementById('dash-teacher').style.display = 'block'; if(window.loadTeacherDashboard) window.loadTeacherDashboard(); } 
-            else if (role === 'parent') { document.getElementById('dash-parent').style.display = 'block'; if(window.loadParentDashboard) window.loadParentDashboard(); } 
-            else { document.getElementById('dash-student').style.display = 'block'; if(window.loadStudentDashboard) window.loadStudentDashboard(); }
+
+            if (isDev && !window.originalRole) {
+                document.getElementById('dash-dev').style.display = 'block';
+                if(window.loadDevStats) window.loadDevStats();
+            } else if (role === 'teacher') {
+                document.getElementById('dash-teacher').style.display = 'block';
+                if(window.loadTeacherDashboard) window.loadTeacherDashboard();
+            } else if (role === 'parent') {
+                document.getElementById('dash-parent').style.display = 'block';
+                if(window.loadParentDashboard) window.loadParentDashboard();
+            } else {
+                document.getElementById('dash-student').style.display = 'block';
+                if(window.loadStudentDashboard) window.loadStudentDashboard();
+            }
         };
 
+        // Funções de Atalho (Chamadas pelo HTML)
         window.showGames = () => { hideAllSections(); document.getElementById('gamesContent').style.display='block'; setActiveNav('linkGames'); };
         window.showStore = () => { hideAllSections(); document.getElementById('storeContent').style.display='block'; setActiveNav('linkStore'); if(window.loadStore) window.loadStore(); };
         window.showTasks = () => { hideAllSections(); document.getElementById('tasksContent').style.display='block'; setActiveNav('linkTasks'); if(window.loadTasks) window.loadTasks(); };
         window.showRanking = () => { hideAllSections(); document.getElementById('rankingContent').style.display='block'; setActiveNav('linkRanking'); if(window.loadRealRanking) window.loadRealRanking(); };
         window.showProfile = () => { hideAllSections(); document.getElementById('profileContent').style.display = 'block'; setActiveNav(''); if(window.loadProfile) window.loadProfile(); };
         window.showMessages = () => { hideAllSections(); document.getElementById('messagesContent').style.display = 'block'; setActiveNav('linkMessages'); if(window.loadMyMessages) window.loadMyMessages(); };
-        window.showAdmin = () => { hideAllSections(); document.getElementById('adminContent').style.display = 'block'; setActiveNav('navAdminBtn'); if(window.showAdminTab) window.showAdminTab('tasks'); };
-        window.showNotifications = () => { hideAllSections(); document.getElementById('notificationsContent').style.display = 'block'; setActiveNav(''); if(window.loadNotificationsScreen) window.loadNotificationsScreen(); };
-        window.showDev = function() { hideAllSections(); document.getElementById('devContent').style.display = 'block'; setActiveNav('navDevBtn'); if(window.showDevTab) window.showDevTab('users'); }
+        
+        window.showAdmin = () => {
+            hideAllSections();
+            document.getElementById('adminContent').style.display = 'block';
+            setActiveNav('navAdminBtn');
+            if(window.showAdminTab) window.showAdminTab('tasks');
+        };
+
+        window.showNotifications = () => {
+            hideAllSections();
+            document.getElementById('notificationsContent').style.display = 'block';
+            setActiveNav('');
+            if(window.loadNotificationsScreen) window.loadNotificationsScreen();
+        };
+        
+        window.showDev = function() {
+             hideAllSections();
+             document.getElementById('devContent').style.display = 'block';
+             setActiveNav('navDevBtn');
+             if(window.showDevTab) window.showDevTab('users');
+        }
+
     </script>
+    
     <script src="js/app.js"></script>
 </body>
 </html>
