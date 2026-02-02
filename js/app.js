@@ -988,6 +988,43 @@ window.applyManualAdjustment = async function() {
     alert("Ajustado!");
 }
 
+// --- NOVO: Gestão de Quiz (Adicione ao final do js/app.js) ---
+
+window.createQuizQuestion = async function() {
+    const text = document.getElementById('qText').value;
+    const opt1 = document.getElementById('qOpt1').value;
+    const opt2 = document.getElementById('qOpt2').value;
+    const opt3 = document.getElementById('qOpt3').value;
+    const opt4 = document.getElementById('qOpt4').value;
+    const correct = parseInt(document.getElementById('qCorrect').value); // 0 a 3
+    const subject = document.getElementById('qSubject').value;
+    const xp = parseInt(document.getElementById('qXP').value) || 5;
+    const coins = parseInt(document.getElementById('qCoins').value) || 10;
+
+    if(!text || !opt1 || !opt2) return alert("Preencha a pergunta e as opções!");
+
+    try {
+        await window.addDoc(window.collection(window.db, "questions"), {
+            pergunta: text,
+            opcoes: [opt1, opt2, opt3, opt4],
+            correta: correct,
+            disciplina: subject,
+            xp: xp,
+            moedas: coins,
+            createdAt: new Date().toISOString()
+        });
+        alert("✅ Pergunta salva com sucesso!");
+        // Limpar campos básicos
+        document.getElementById('qText').value = '';
+        document.getElementById('qOpt1').value = '';
+        document.getElementById('qOpt2').value = '';
+        document.getElementById('qOpt3').value = '';
+        document.getElementById('qOpt4').value = '';
+    } catch(e) { 
+        alert("Erro ao salvar: " + e.message); 
+    }
+}
+
 // Exportações
 window.loadTasks = loadTasks;
 window.loadRealRanking = loadRealRanking;
