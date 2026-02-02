@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarsFlow English Academy</title>
+    <title>Mars Flow English Academy</title>
     <link rel="icon" type="image/png" href="img/logo.png">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,17 +12,20 @@
     
     <style>
         :root {
-            /* Paleta Oficial MarsFlow */
-            --mars-navy: #00205B;
+            /* Paleta Oficial Mars Flow */
+            --mars-navy: #00205B;      /* Azul Marinho Profundo */
             --mars-navy-hover: #001540;
-            --mars-red: #C8102E;
+            --mars-red: #C8102E;       /* Vermelho Carmesim */
             --mars-red-hover: #a50b23;
-            --mars-gold: #D4AF37;
+            --mars-gold: #FFD700;      /* Dourado para Moedas/Rank */
+            --mars-bg: #f4f7f6;        /* Fundo claro para áreas de conteúdo */
             --text-dark: #1a1a1a;
+            --text-muted: #666666;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
+            /* Fundo Gradiente Premium Escuro */
             background: linear-gradient(135deg, var(--mars-navy) 0%, #000814 100%);
             min-height: 100vh;
             color: var(--text-dark);
@@ -30,13 +33,12 @@
             padding-bottom: 60px;
         }
         
-        /* Utilitários */
+        /* --- ESTILOS DE TEXTO & CORES --- */
         .text-mars-navy { color: var(--mars-navy) !important; }
         .text-mars-red { color: var(--mars-red) !important; }
-        .bg-mars-navy { background-color: var(--mars-navy) !important; color: white; }
-        .bg-mars-red { background-color: var(--mars-red) !important; color: white; }
-
-        /* Cartões */
+        .text-mars-gold { color: #d4af37 !important; } /* Ouro escuro para leitura em fundo branco */
+        
+        /* --- CARTÕES (CARDS) --- */
         .card {
             border: none;
             border-radius: 16px;
@@ -45,33 +47,73 @@
             margin-bottom: 24px;
             overflow: hidden;
         }
+        
         .card-header {
             background-color: white;
             border-bottom: 1px solid rgba(0,0,0,0.08);
             padding: 18px 24px;
             font-weight: 700;
             color: var(--mars-navy);
+            border-radius: 16px 16px 0 0 !important;
         }
+        
+        /* Headers coloridos específicos */
+        .card-header.bg-mars-navy { background-color: var(--mars-navy) !important; color: white !important; }
+        .card-header.bg-mars-red { background-color: var(--mars-red) !important; color: white !important; }
 
-        /* Botões */
-        .btn-primary { background-color: var(--mars-navy); border-color: var(--mars-navy); font-weight: 600; }
-        .btn-primary:hover { background-color: var(--mars-navy-hover); transform: translateY(-2px); }
-        .btn-danger { background-color: var(--mars-red); border-color: var(--mars-red); font-weight: 700; }
-        .btn-danger:hover { background-color: var(--mars-red-hover); transform: translateY(-2px); }
-        .btn-outline-primary { color: var(--mars-navy); border-color: var(--mars-navy); font-weight: 600; }
+        /* --- BOTÕES PERSONALIZADOS --- */
+        /* Primário = Navy (Padrão) */
+        .btn-primary { 
+            background-color: var(--mars-navy); 
+            border-color: var(--mars-navy);
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .btn-primary:hover { background-color: var(--mars-navy-hover); border-color: var(--mars-navy-hover); transform: translateY(-1px); }
+        
+        /* Perigo/Ação Forte = Red (Comprar/Login) */
+        .btn-danger { 
+            background-color: var(--mars-red); 
+            border-color: var(--mars-red);
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .btn-danger:hover { background-color: var(--mars-red-hover); border-color: var(--mars-red-hover); transform: translateY(-1px); }
+
+        /* Secundário */
+        .btn-outline-primary {
+            color: var(--mars-navy);
+            border-color: var(--mars-navy);
+            font-weight: 600;
+        }
         .btn-outline-primary:hover { background-color: var(--mars-navy); color: white; }
 
-        /* Navbar */
-        .navbar {
-            background-color: var(--mars-navy) !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-            padding: 12px 0;
+        /* --- INPUTS --- */
+        .form-control, .form-select {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--mars-navy);
+            font-weight: 500;
         }
-        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; transition: 0.3s; margin: 0 5px; border-radius: 8px; padding: 8px 16px !important; }
-        .nav-link:hover { background-color: rgba(255,255,255,0.1); color: white !important; transform: translateY(-2px); }
-        .nav-link.active { background-color: var(--mars-red); color: white !important; font-weight: 700; box-shadow: 0 4px 10px rgba(200, 16, 46, 0.4); }
+        .form-control:focus, .form-select:focus {
+            background-color: #fff;
+            border-color: var(--mars-navy);
+            box-shadow: 0 0 0 4px rgba(0, 32, 91, 0.1);
+        }
+        .form-label {
+            color: var(--mars-navy);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        /* Login */
+        /* --- LOGIN --- */
         .login-container {
             background: #ffffff;
             border-radius: 24px;
@@ -80,24 +122,67 @@
             margin-top: 60px;
             border-top: 8px solid var(--mars-red);
         }
+        
+        .brand-text {
+            color: var(--mars-navy);
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        .brand-subtext {
+            color: var(--mars-red);
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
 
-        .content-section { display: none; }
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: var(--mars-navy) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            padding: 14px 0;
+        }
+        .navbar-brand { font-weight: 800; letter-spacing: 1px; font-size: 1.4rem; }
+        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; transition: 0.3s; margin: 0 8px; }
+        .nav-link:hover, .nav-link.active { color: #fff !important; transform: translateY(-2px); text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        /* Dropdown */
+        .dropdown-menu { border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; margin-top: 10px; }
+        .dropdown-item { padding: 10px 20px; color: var(--mars-navy); font-weight: 500; }
+        .dropdown-item:hover { background-color: #f0f4f8; color: var(--mars-red); }
+
+        /* --- TABELAS --- */
+        .table { --bs-table-bg: transparent; }
+        .table thead th {
+            background-color: var(--mars-navy);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px;
+        }
+        .table tbody td {
+            vertical-align: middle;
+            color: var(--text-dark);
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .table-hover tbody tr:hover { background-color: rgba(0, 32, 91, 0.03); }
+
+        /* --- MISC --- */
+        .badge-mars { background-color: var(--mars-red); color: white; border: 2px solid white; }
         .hover-effect { cursor: pointer; transition: transform 0.2s; }
         .hover-effect:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
         
-        /* Level Badge no Perfil/Home */
-        .level-badge {
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--mars-red);
-            color: white;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            border: 2px solid white;
+        .content-section { display: none; }
+        .loading-spinner { display: none; text-align: center; margin-top: 20px; color: white; }
+        
+        /* Barra de Simulação */
+        #simulationBar {
+            background-color: var(--mars-gold);
+            color: var(--mars-navy);
+            border-top: 4px solid var(--mars-navy);
         }
     </style>
 </head>
@@ -107,17 +192,43 @@
         <div class="row justify-content-center">
             <div class="col-md-5 col-lg-4">
                 <div class="login-container text-center">
+                    
                     <div class="mb-4">
                         <img src="img/logo.png" alt="Logo" style="max-height: 100px; width: auto;" class="mb-3">
-                        <h1 class="text-mars-navy fw-bold" style="letter-spacing: 1px;">MarsFlow</h1>
-                        <p class="text-mars-red fw-bold small text-uppercase">English Academy</p>
+                        <h1 class="brand-text">MARS FLOW</h1>
+                        <p class="brand-subtext">English Academy</p>
                     </div>
+                    
                     <form id="loginForm" class="text-start mt-4">
-                        <div class="mb-3"><label class="form-label small fw-bold">USUÁRIO</label><input type="text" class="form-control" id="loginUser" required placeholder="Ex: pedro.h"></div>
-                        <div class="mb-4"><label class="form-label small fw-bold">SENHA</label><input type="password" class="form-control" id="password" required></div>
-                        <div class="d-grid"><button type="submit" class="btn btn-danger btn-lg fw-bold shadow">ACESSAR</button></div>
-                        <div class="text-center mt-3" style="display:none;" id="loadingSpinner"><div class="spinner-border text-mars-navy"></div></div>
-                        <div id="loginError" class="alert alert-danger mt-3 small border-0" style="display: none;"></div>
+                        <div class="mb-3">
+                            <label class="form-label">Usuário</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+                                <input type="text" class="form-control" id="loginUser" required placeholder="Ex: pedro.h">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-danger btn-lg shadow">
+                                <i class="fas fa-sign-in-alt me-2"></i>ENTRAR
+                            </button>
+                        </div>
+                        
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner-border text-mars-navy" role="status"></div>
+                            <p class="mt-2 text-muted small">Carregando...</p>
+                        </div>
+                        <div id="loginError" class="alert alert-danger mt-3 small border-0 shadow-sm" style="display: none;">
+                            <i class="fas fa-exclamation-circle me-1"></i> <span id="errorMessage"></span>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -125,31 +236,50 @@
     </div>
 
     <div id="appScreen" style="display: none;">
+        
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="#" onclick="showHome()">
                     <img src="img/logo.png" alt="MF" height="35" class="me-2 d-inline-block align-text-top bg-white rounded-circle p-1">
-                    <span>MarsFlow</span>
+                    <span>MARS FLOW</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto ms-lg-3">
-                        <li class="nav-item"><a class="nav-link" href="#" onclick="showHome()" id="linkHome">Home</a></li>
-                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showGames()" id="linkGames">Jogos</a></li>
-                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showStore()" id="linkStore">Loja</a></li>
-                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showTasks()" id="linkTasks">Tarefas</a></li>
-                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showRanking()" id="linkRanking">Ranking</a></li>
-                        <li class="nav-item nav-parent"><a class="nav-link" href="#" onclick="showMessages()" id="linkMessages">Falar com Escola</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showHome()">Home</a></li>
+                        
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showGames()">Jogos</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showStore()">Loja</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showTasks()">Tarefas</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showRanking()">Ranking</a></li>
+
+                        <li class="nav-item nav-parent"><a class="nav-link" href="#" onclick="showMessages()">Falar com Escola</a></li>
+
                         <li class="nav-item"><a class="nav-link text-warning fw-bold" href="#" onclick="showAdmin()" id="navAdminBtn">Professor</a></li>
                         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn">DEV</a></li>
                     </ul>
+                    
                     <ul class="navbar-nav align-items-center">
-                        <li class="nav-item me-3 position-relative"><a class="nav-link" href="#" onclick="showNotifications()"><i class="fas fa-bell"></i><span id="notifBadge" class="position-absolute badge bg-danger rounded-circle" style="display:none; width:10px; height:10px; top:10px; right:5px;"></span></a></li>
+                        <li class="nav-item me-3 position-relative">
+                            <a class="nav-link" href="#" onclick="showNotifications()">
+                                <i class="fas fa-bell"></i>
+                                <span id="notifBadge" class="position-absolute badge-mars rounded-circle" 
+                                      style="display: none; width: 12px; height: 12px; bottom: 10px; right: 0px;"></span>
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"><span id="userName" class="fw-bold text-white small">Aluno</span></a>
-                            <ul class="dropdown-menu dropdown-menu-end mt-2 shadow border-0">
-                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()">Perfil</a></li>
-                                <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Sair</a></li>
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <span id="userName" class="fw-bold text-white small">Aluno</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end mt-2">
+                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()"><i class="fas fa-id-card me-2"></i>Meu Perfil</a></li>
+                                <li><a class="dropdown-item nav-parent" href="#" onclick="showMessages()"><i class="fas fa-envelope me-2"></i>Mensagens</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -166,93 +296,123 @@
                             <div class="card mb-4 border-0 text-white" style="background: linear-gradient(135deg, var(--mars-navy) 0%, #001030 100%);">
                                 <div class="card-body p-4 d-flex align-items-center">
                                     <div class="me-4 position-relative">
-                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-4 border-white p-1" style="width:100px; height:100px; background-size:cover; background-position:center;">👤</div>
-                                        <div class="level-badge">Lvl <span id="homeStudentLevel">1</span></div>
+                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-4 border-danger p-1" style="width: 100px; height: 100px; background-size: cover; background-position: center; line-height: 1.3;">👤</div>
+                                        <span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-danger border border-2 border-white">Lvl <span id="homeStudentLevel">1</span></span>
                                     </div>
-                                    <div class="flex-grow-1 ms-3">
+                                    <div class="flex-grow-1">
                                         <h2 class="fw-bold mb-0">Hi, <span id="homeStudentName">Student</span>!</h2>
-                                        <div class="progress mt-3" style="height:10px; background:rgba(255,255,255,0.2);"><div id="homeStudentXPBar" class="progress-bar bg-danger" style="width:0%"></div></div>
+                                        <div class="progress mt-3" style="height: 10px; background-color: rgba(255,255,255,0.2);">
+                                            <div id="homeStudentXPBar" class="progress-bar bg-warning" style="width: 0%"></div>
+                                        </div>
                                         <small class="text-white-50 fw-bold"><span id="homeStudentXP">0</span> XP Total</small>
                                     </div>
                                 </div>
                             </div>
                             <div class="row g-3 mb-4">
-                                <div class="col-md-6"><div class="card h-100 border-start border-4 border-danger"><div class="card-body d-flex align-items-center"><i class="fas fa-coins fa-3x text-mars-red me-3"></i><div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentCoins">0</h3><small class="text-muted fw-bold">COINS</small></div></div></div></div>
-                                <div class="col-md-6"><div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showTasks()"><div class="card-body d-flex align-items-center"><i class="fas fa-star fa-3x text-primary me-3"></i><div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentTasks">0</h3><small class="text-muted fw-bold">MISSÕES</small></div></div></div></div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-start border-4 border-warning">
+                                        <div class="card-body d-flex align-items-center">
+                                            <i class="fas fa-coins fa-3x text-warning me-3"></i>
+                                            <div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentCoins">0</h3><small class="text-muted fw-bold">MARS COINS</small></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showTasks()">
+                                        <div class="card-body d-flex align-items-center">
+                                            <i class="fas fa-clipboard-list fa-3x text-primary me-3"></i>
+                                            <div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentTasks">0</h3><small class="text-muted fw-bold">MISSÕES ATIVAS</small></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-4"><div class="card h-100"><div class="card-header bg-mars-navy text-white fw-bold">Top Alunos</div><div class="card-body p-0"><div id="homeTopStudents" class="list-group list-group-flush"></div></div></div></div>
+                        <div class="col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-mars-red">TOP 5 ALUNOS</div>
+                                <div class="card-body p-0"><div id="homeTopStudents" class="list-group list-group-flush">Carregando...</div></div>
+                                <div class="card-footer bg-white text-center"><a href="#" onclick="showRanking()" class="text-decoration-none fw-bold text-mars-red">VER RANKING</a></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div id="dash-teacher" class="role-dashboard" style="display:none;"><h2 class="text-white mb-4">Painel Professor</h2><div class="row g-3"><div class="col-md-4"><div class="card h-100 border-start border-4 border-danger" onclick="showAdminTab('tasks'); showAdmin();"><div class="card-body"><h6>CORREÇÕES</h6><h2 id="dashTeacherSubs">0</h2></div></div></div><div class="col-md-4"><div class="card h-100 border-start border-4 border-primary" onclick="showAdminTab('store'); showAdmin();"><div class="card-body"><h6>LOJA</h6><h2 id="dashTeacherOrders">0</h2></div></div></div><div class="col-md-4"><div class="card h-100 border-start border-4 border-info" onclick="showAdminTab('classes'); showAdmin();"><div class="card-body"><h6>FOTOS</h6><h2 id="dashTeacherPhotos">0</h2></div></div></div></div></div>
-                <div id="dash-parent" class="role-dashboard" style="display:none;"><div class="alert bg-mars-navy text-white">Área do Responsável</div><div class="card text-center"><div class="card-body"><h3 id="dashParentChildName">Filho</h3></div></div></div>
-                <div id="dash-dev" class="role-dashboard" style="display:none;"><h2 class="text-danger">>_ ROOT</h2><div class="row"><div class="col-6"><button class="btn btn-outline-danger w-100 py-4" onclick="showDev()">Factory</button></div><div class="col-6"><button class="btn btn-outline-light w-100 py-4" onclick="showDevTab('simulator'); showDev();">Simulador</button></div></div></div>
+
+                <div id="dash-teacher" class="role-dashboard" style="display:none;">
+                    <h2 class="text-white mb-4"><i class="fas fa-chalkboard-teacher me-2"></i>Painel do Professor</h2>
+                    <div class="row g-3">
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-warning hover-effect" onclick="showAdminTab('tasks'); showAdmin();"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted fw-bold small">CORREÇÕES</h6><h2 class="mb-0 fw-bold text-mars-navy" id="dashTeacherSubs">0</h2></div><i class="fas fa-pen-alt fa-2x text-warning opacity-25"></i></div></div></div>
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-success hover-effect" onclick="showAdminTab('store'); showAdmin();"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted fw-bold small">LOJA / PEDIDOS</h6><h2 class="mb-0 fw-bold text-mars-navy" id="dashTeacherOrders">0</h2></div><i class="fas fa-shopping-bag fa-2x text-success opacity-25"></i></div></div></div>
+                        <div class="col-md-4"><div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showAdminTab('classes'); showAdmin();"><div class="card-body d-flex justify-content-between align-items-center"><div><h6 class="text-muted fw-bold small">FOTOS PENDENTES</h6><h2 class="mb-0 fw-bold text-mars-navy" id="dashTeacherPhotos">0</h2></div><i class="fas fa-camera fa-2x text-primary opacity-25"></i></div></div></div>
+                    </div>
+                </div>
+
+                <div id="dash-parent" class="role-dashboard" style="display:none;">
+                    <div class="alert bg-mars-navy text-white border-0 shadow-sm d-flex align-items-center mb-4">
+                        <i class="fas fa-user-shield fa-2x me-3"></i>
+                        <div><strong>Área do Responsável</strong><p class="mb-0 small opacity-75">Acompanhe o progresso do seu filho.</p></div>
+                    </div>
+                    <div class="row"><div class="col-md-6 mx-auto"><div class="card shadow text-center"><div class="card-header bg-white"><h5 class="mb-0 text-mars-navy">Desempenho</h5></div><div class="card-body"><div class="display-1 mb-3">🎓</div><h3 id="dashParentChildName" class="fw-bold text-mars-navy">Filho</h3><span class="badge bg-success mb-3">Nível <span id="dashParentChildLevel">1</span></span><div class="row mt-3"><div class="col-6 border-end"><h4 class="text-primary fw-bold" id="dashParentChildXP">0</h4><small class="text-muted">XP</small></div><div class="col-6"><h4 class="text-warning fw-bold" id="dashParentChildCoins">0</h4><small class="text-muted">Coins</small></div></div><hr><button class="btn btn-outline-primary w-100" onclick="showMessages()">Falar com Professor</button></div></div></div></div>
+                </div>
+
+                <div id="dash-dev" class="role-dashboard" style="display:none;">
+                    <h2 class="text-danger font-monospace mb-4">>_ SYSTEM.ROOT</h2>
+                    <div class="row g-3"><div class="col-md-3"><div class="card bg-dark text-white h-100"><div class="card-body text-center"><h1 class="font-monospace text-success" id="devStatUsers">0</h1><small>Usuários</small></div></div></div><div class="col-md-9"><div class="card border-danger h-100"><div class="card-body d-flex align-items-center justify-content-around"><button class="btn btn-outline-danger" onclick="showDev()"><i class="fas fa-users-cog fa-2x d-block mb-2"></i> User Factory</button><button class="btn btn-outline-dark" onclick="showDevTab('simulator'); showDev();"><i class="fas fa-glasses fa-2x d-block mb-2"></i> Simulador</button></div></div></div></div>
+                </div>
             </div>
 
             <div id="gamesContent" class="content-section">
-                <div class="card shadow-sm mb-4"><div class="card-header bg-mars-navy text-white"><i class="fas fa-gamepad me-2"></i>Arcade MarsFlow</div><div class="card-body"><div class="row g-4">
-                    <div class="col-md-4"><div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="window.location.href='quiz.html'"><i class="fas fa-brain fa-4x text-mars-navy mb-3"></i><h4 class="fw-bold text-mars-navy">Quiz</h4><button class="btn btn-outline-primary rounded-pill w-100 mt-2">JOGAR</button></div></div>
-                    <div class="col-md-4"><div class="card h-100 text-center p-4 border-0 shadow-sm opacity-50"><i class="fas fa-puzzle-piece fa-4x text-muted mb-3"></i><h4 class="fw-bold text-muted">Unscramble</h4><button class="btn btn-secondary rounded-pill w-100 mt-2" disabled>Em breve</button></div></div>
-                    <div class="col-md-4"><div class="card h-100 text-center p-4 border-0 shadow-sm opacity-50"><i class="fas fa-rocket fa-4x text-muted mb-3"></i><h4 class="fw-bold text-muted">Galaxy</h4><button class="btn btn-secondary rounded-pill w-100 mt-2" disabled>Em breve</button></div></div>
-                </div></div></div>
+                <div class="card"><div class="card-header bg-mars-navy"><i class="fas fa-gamepad me-2"></i>Central de Jogos</div><div class="card-body"><div class="row"><div class="col-md-4"><div class="card h-100 text-center p-4 shadow-sm hover-effect border-0"><i class="fas fa-question-circle fa-4x text-primary mb-3"></i><h5 class="fw-bold text-mars-navy">Quiz Mars Flow</h5><button class="btn btn-primary rounded-pill w-100 mt-3" onclick="window.location.href='quiz.html'">JOGAR AGORA</button></div></div><div class="col-md-4"><div class="card h-100 text-center p-4 border-0 opacity-50"><i class="fas fa-puzzle-piece fa-4x text-muted mb-3"></i><h5>Quebra-cabeça</h5><button class="btn btn-secondary w-100 rounded-pill mt-3" disabled>Em breve</button></div></div></div></div></div>
             </div>
 
-            <div id="storeContent" class="content-section"><div class="d-flex justify-content-between mb-4"><h2 class="text-white">Loja</h2><div class="bg-white p-2 px-4 rounded-pill"><span class="h4 text-mars-gold fw-bold" id="storeBalance">...</span></div></div><div class="row" id="storeList"></div></div>
-            <div id="tasksContent" class="content-section"><div class="row"><div class="col-md-8"><div class="card"><div class="card-header bg-primary text-white d-flex justify-content-between"><h5>Missões</h5><span class="badge bg-white text-primary" id="taskCount">0</span></div><div class="card-body p-0"><div id="taskList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-4"><div class="card bg-mars-red text-white"><div class="card-body text-center"><h5>XP Boost</h5><p>Complete as tarefas.</p></div></div></div></div></div>
-            <div id="rankingContent" class="content-section"><div class="card"><div class="card-header bg-mars-navy"><div class="d-flex justify-content-between mb-2"><h5 class="mb-0 text-white"><i class="fas fa-trophy text-mars-gold me-2"></i>Ranking</h5><span class="badge bg-light text-mars-navy" id="myClassBadge">...</span></div><ul class="nav nav-tabs border-bottom-0"><li class="nav-item"><a class="nav-link active" id="tabGeneral" href="#" onclick="switchRanking('general')">Geral</a></li><li class="nav-item"><a class="nav-link" id="tabClass" href="#" onclick="switchRanking('class')">Turma</a></li></ul></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover table-striped mb-0"><thead class="bg-light text-mars-navy"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Lvl</th><th class="text-end pe-4">XP</th></tr></thead><tbody id="tabelaRankingCompleta"></tbody></table></div></div></div></div>
-            <div id="profileContent" class="content-section"><div class="row"><div class="col-md-4 mb-4"><div class="card shadow border-0" id="profileCard"><div class="card-body text-center pt-5 pb-4"><div class="mb-4 position-relative d-inline-block"><div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-4 border-white shadow-sm p-1 position-relative overflow-hidden" style="width: 140px; height: 140px; background-size: cover; background-position: center;">👤</div><label for="photoUpload" class="position-absolute top-0 end-0 btn btn-sm btn-light rounded-circle border shadow-sm" style="cursor: pointer;"><i class="fas fa-camera text-mars-navy"></i></label><input type="file" id="photoUpload" style="display: none;" onchange="handlePhotoUpload(this)"><div class="level-badge">Lvl <span id="profileLevel">1</span></div></div><h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3><div class="px-4 mb-3"><button class="btn btn-link btn-sm text-danger" onclick="editBio()">Editar Bio</button><div id="bioEditContainer" style="display:none;" class="mt-2"><textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2"></textarea><button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button></div></div><div class="mt-4 px-3"><div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div><div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-mars-red" style="width: 0%"></div></div></div></div></div></div><div class="col-md-8"><div class="card shadow-sm h-100"><div class="card-header bg-white text-mars-navy">Inventário</div><div class="card-body bg-light"><div class="row g-3" id="inventoryList"></div></div></div></div></div></div>
-            <div id="messagesContent" class="content-section"><div class="row"><div class="col-md-5"><div class="card"><div class="card-header bg-mars-navy text-white">Nova Mensagem</div><div class="card-body"><form onsubmit="event.preventDefault(); sendMessage();"><select id="msgSubject" class="form-select mb-3"><option>Dúvida</option><option>Outros</option></select><textarea id="msgContent" class="form-control mb-3" rows="5"></textarea><button class="btn btn-primary w-100">ENVIAR</button></form></div></div></div><div class="col-md-7"><div class="card"><div class="card-header">Histórico</div><div class="card-body p-0"><div id="myMessagesList"></div></div></div></div></div></div>
-            <div id="notificationsContent" class="content-section"><div class="row h-100"><div class="col-md-4 border-end"><div class="list-group list-group-flush" id="notifList"></div></div><div class="col-md-8"><div id="notifDetail" class="p-5 text-center text-muted">Selecione...</div></div></div></div>
+            <div id="storeContent" class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-4"><h2 class="text-white fw-bold"><i class="fas fa-store me-2"></i>Loja</h2><div class="bg-white p-2 px-4 rounded-pill shadow-sm"><small class="text-muted fw-bold d-block" style="font-size:0.7rem">SEU SALDO</small><span class="h4 text-mars-gold fw-bold mb-0" id="storeBalance">...</span></div></div>
+                <div class="row" id="storeList"><div class="col-12 text-center p-5 text-white">Carregando loja...</div></div>
+            </div>
+
+            <div id="tasksContent" class="content-section">
+                <div class="row"><div class="col-md-8"><div class="card shadow-sm"><div class="card-header bg-primary text-white d-flex justify-content-between"><h5>Missões</h5><span class="badge bg-white text-primary" id="taskCount">0</span></div><div class="card-body p-0"><div id="taskList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-4"><div class="card bg-warning border-0 shadow-sm"><div class="card-body text-center"><i class="fas fa-star fa-3x text-white mb-3"></i><h5 class="fw-bold">Ganhe XP!</h5><p class="small mb-0">Complete tarefas para subir de nível.</p></div></div></div></div>
+            </div>
+
+            <div id="rankingContent" class="content-section">
+                <div class="card"><div class="card-header bg-mars-navy"><div class="d-flex justify-content-between align-items-center mb-2"><h5 class="mb-0"><i class="fas fa-trophy me-2 text-warning"></i>Classificação</h5><span class="badge bg-white text-mars-navy" id="myClassBadge">...</span></div><ul class="nav nav-tabs card-header-tabs border-bottom-0"><li class="nav-item"><a class="nav-link active fw-bold" id="tabGeneral" href="#" onclick="switchRanking('general')">Geral</a></li><li class="nav-item"><a class="nav-link text-white-50" id="tabClass" href="#" onclick="switchRanking('class')">Minha Turma</a></li></ul></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover table-striped mb-0"><thead class="table-light"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Lvl</th><th class="text-end pe-4">XP</th></tr></thead><tbody id="tabelaRankingCompleta"><tr><td colspan="4" class="text-center p-4">Carregando...</td></tr></tbody></table></div></div></div>
+            </div>
+
+            <div id="notificationsContent" class="content-section">
+                <div class="row h-100" style="min-height: 500px;"><div class="col-md-4 border-end pe-0"><div class="list-group list-group-flush h-100 overflow-auto" id="notifList"></div></div><div class="col-md-8 ps-0"><div id="notifDetail" class="p-5 h-100 bg-light d-flex flex-column justify-content-center align-items-center text-center"><i class="far fa-envelope-open fa-3x mb-3 text-muted"></i><p class="text-muted">Selecione uma mensagem.</p></div></div></div>
+            </div>
+
+            <div id="messagesContent" class="content-section">
+                <div class="row"><div class="col-md-5 mb-4"><div class="card shadow-sm border-primary h-100"><div class="card-header bg-primary text-white">Nova Mensagem</div><div class="card-body"><form onsubmit="event.preventDefault(); sendMessage();"><div class="mb-3"><label class="form-label">Assunto</label><select id="msgSubject" class="form-select"><option>Dúvida</option><option>Problema</option><option>Financeiro</option><option>Outros</option></select></div><div class="mb-3"><label class="form-label">Mensagem</label><textarea id="msgContent" class="form-control" rows="5"></textarea></div><button type="submit" class="btn btn-primary w-100">ENVIAR</button></form></div></div></div><div class="col-md-7"><div class="card h-100"><div class="card-header">Histórico</div><div class="card-body p-0"><div id="myMessagesList" class="list-group list-group-flush"></div></div></div></div></div>
+            </div>
+
+            <div id="profileContent" class="content-section">
+                <div class="row"><div class="col-md-4 mb-4"><div class="card shadow border-0" id="profileCard"><div class="card-body text-center pt-5 pb-4"><div class="mb-3 position-relative d-inline-block"><div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-3 border-danger p-3 position-relative overflow-hidden" style="width: 120px; height: 120px; background-size: cover; background-position: center;">👤</div><label for="photoUpload" class="position-absolute bottom-0 end-0 btn btn-sm btn-danger rounded-circle" style="cursor: pointer;"><i class="fas fa-camera"></i></label><input type="file" id="photoUpload" style="display: none;" onchange="handlePhotoUpload(this)"><span class="position-absolute top-100 start-50 translate-middle badge rounded-pill bg-mars-navy border border-2 border-white">Lvl <span id="profileLevel">1</span></span></div><div id="photoStatusBadge" class="mb-2"></div><h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3><div class="px-4 mb-3"><p class="text-muted small fst-italic" id="profileBioDisplay">"..."</p><button class="btn btn-link btn-sm text-danger text-decoration-none" onclick="editBio()">Editar Bio</button><div id="bioEditContainer" style="display: none;" class="mt-2"><textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2"></textarea><button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button></div></div><p class="text-muted mb-2 fw-bold" id="profileClass">...</p><p class="badge bg-light text-dark border">Aluno</p><div class="mt-4 px-3"><div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div><div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-success" style="width: 0%"></div></div></div></div></div></div><div class="col-md-8"><div class="card shadow-sm h-100"><div class="card-header bg-white text-mars-navy">Inventário</div><div class="card-body bg-light"><div class="row g-3" id="inventoryList"><div class="col-12 text-center p-5 text-muted">Carregando...</div></div></div></div></div></div>
+            </div>
 
             <div id="adminContent" class="content-section">
-                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card h-100 border-0"><div class="card-header bg-mars-navy text-white text-center py-4"><h5 class="mb-0">Professor</h5></div><div class="list-group list-group-flush" id="adminSidebar"><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('tasks')">Atividades</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('store')">Loja</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('classes')">Turmas</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('comms')">Comunicação</button></div></div></div>
-                <div class="col-md-9">
-                    <div id="adminTab-tasks" class="admin-tab">
-                        <div class="row"><div class="col-md-5"><div class="card shadow-sm mb-4"><div class="card-header bg-mars-red text-white">Criar Missão</div><div class="card-body"><form onsubmit="event.preventDefault(); createTask();"><input type="text" id="taskTitle" class="form-control mb-2" required placeholder="Título"><textarea id="taskDesc" class="form-control mb-2" required placeholder="Descrição"></textarea><div class="row mb-2"><div class="col"><input type="number" id="taskXP" class="form-control" placeholder="XP" value="100"></div><div class="col"><input type="number" id="taskCoins" class="form-control" placeholder="$" value="50"></div></div><input type="date" id="taskDate" class="form-control mb-2"><button type="submit" class="btn btn-danger w-100 fw-bold">PUBLICAR</button></form></div></div></div><div class="col-md-7"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Entregas</span><button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Sync</button></div><div class="card-body p-0"><div id="submissionsList" class="list-group list-group-flush"></div></div></div></div></div>
-                    </div>
-                    <div id="adminTab-store" class="admin-tab" style="display:none;">
-                        <div class="row"><div class="col-md-6"><div class="card shadow-sm border-success h-100"><div class="card-header bg-success text-white d-flex justify-content-between"><span>Pedidos</span><button class="btn btn-sm btn-light text-success" onclick="loadPendingOrders()">Sync</button></div><div class="card-body p-0"><div id="ordersList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Histórico</span><button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()">Sync</button></div><div class="card-body p-0"><div class="table-responsive" style="max-height:400px;"><table class="table table-striped mb-0 text-center small"><thead><tr><th>Data</th><th>Aluno</th><th>Item</th><th>$</th></tr></thead><tbody id="redemptionHistoryBody"></tbody></table></div></div></div></div></div>
-                    </div>
-                    <div id="adminTab-classes" class="admin-tab" style="display:none;">
-                        <div class="row mb-4"><div class="col-md-6"><div class="card shadow-sm border-info h-100"><div class="card-header bg-info text-white d-flex justify-content-between"><span>Aprovar Fotos</span><button class="btn btn-sm btn-light text-info" onclick="loadPendingPhotos()">Sync</button></div><div class="card-body p-0"><div id="pendingPhotosList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm border-primary h-100"><div class="card-header bg-primary text-white d-flex justify-content-between"><span>Minhas Turmas</span><button class="btn btn-sm btn-light text-primary fw-bold" onclick="createNewClassPrompt()">Nova</button></div><div class="card-body p-0"><div id="classList" class="list-group list-group-flush"></div></div></div></div></div>
-                        <div class="card shadow-sm border-dark"><div class="card-header bg-dark text-white">Regras</div><div class="card-body"><div class="row"><div class="col-md-4"><select id="studentSelect" class="form-select mb-3"><option>Carregando...</option></select><form onsubmit="event.preventDefault(); applyManualAdjustment();"><div class="input-group mb-2"><span class="input-group-text">XP</span><input type="number" id="manualXP" class="form-control"></div><div class="input-group mb-2"><span class="input-group-text">$</span><input type="number" id="manualCoins" class="form-control"></div><button type="submit" class="btn btn-outline-primary w-100 btn-sm">Aplicar</button></form></div><div class="col-md-4"><div id="rulesList" class="d-flex flex-wrap gap-2 mt-2"></div></div><div class="col-md-4 border-start"><form onsubmit="event.preventDefault(); createRule();"><input type="text" id="ruleName" class="form-control form-control-sm mb-2" placeholder="Nome" required><div class="row mb-2"><div class="col"><input type="number" id="ruleXP" class="form-control form-control-sm" placeholder="XP"></div><div class="col"><input type="number" id="ruleCoins" class="form-control form-control-sm" placeholder="$"></div></div><select id="ruleType" class="form-select form-select-sm mb-2"><option value="positive">Positiva</option><option value="negative">Negativa</option></select><button type="submit" class="btn btn-secondary btn-sm w-100">Salvar</button></form></div></div></div></div>
-                    </div>
-                    <div id="adminTab-comms" class="admin-tab" style="display:none;">
-                        <div class="card shadow-sm border-danger mb-4"><div class="card-header bg-danger text-white d-flex justify-content-between"><span>Inbox</span><button class="btn btn-sm btn-light text-danger fw-bold" onclick="loadInbox()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle"><thead class="table-light"><tr><th>Data</th><th>De</th><th>Assunto</th><th>Msg</th><th>Ação</th></tr></thead><tbody id="inboxTableBody"></tbody></table></div></div></div><div class="card shadow-sm border-primary"><div class="card-header bg-mars-navy text-white">Enviar Comunicado</div><div class="card-body"><form onsubmit="event.preventDefault(); sendNotification();"><div class="row mb-3"><div class="col-8"><input type="text" id="notifTitle" class="form-control" placeholder="Título" required></div><div class="col-4"><select id="notifTarget" class="form-select"></select></div></div><textarea id="notifMessage" class="form-control mb-3" rows="3" placeholder="Mensagem"></textarea><div class="row mb-3"><div class="col"><select id="notifType" class="form-select"><option value="homework">Homework</option><option value="test">Prova</option><option value="event">Evento</option><option value="dm">DM</option></select></div><div class="col"><select id="notifUrgency" class="form-select"><option value="chill">Tranquilo</option><option value="attention">Atenção</option><option value="urgent">Urgente</option></select></div></div><button type="submit" class="btn btn-danger w-100 fw-bold">ENVIAR</button></form></div></div>
-                    </div>
-                </div></div>
+                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card shadow-sm h-100 border-0"><div class="card-header bg-mars-navy text-white text-center py-4"><i class="fas fa-chalkboard-teacher fa-3x mb-2"></i><h5 class="mb-0">Professor</h5></div><div class="list-group list-group-flush" id="adminSidebar"><button class="list-group-item list-group-item-action active fw-bold py-3 border-0" onclick="showAdminTab('tasks')">Atividades</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('store')">Loja</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('classes')">Turmas</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('comms')">Comunicação</button></div></div></div><div class="col-md-9"><div id="adminTab-tasks" class="admin-tab"><div class="row"><div class="col-md-5"><div class="card shadow-sm mb-4"><div class="card-header bg-mars-red">Criar Missão</div><div class="card-body"><form onsubmit="event.preventDefault(); createTask();"><input type="text" id="taskTitle" class="form-control mb-2" required placeholder="Título"><textarea id="taskDesc" class="form-control mb-2" required placeholder="Descrição"></textarea><div class="row mb-2"><div class="col"><input type="number" id="taskXP" class="form-control" placeholder="XP" value="100"></div><div class="col"><input type="number" id="taskCoins" class="form-control" placeholder="$" value="50"></div></div><input type="date" id="taskDate" class="form-control mb-2"><button type="submit" class="btn btn-danger w-100">PUBLICAR</button></form></div></div></div><div class="col-md-7"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Entregas</span><button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Sync</button></div><div class="card-body p-0"><div id="submissionsList" class="list-group list-group-flush"></div></div></div></div></div></div><div id="adminTab-store" class="admin-tab" style="display:none;"><div class="row"><div class="col-md-6"><div class="card shadow-sm border-success h-100"><div class="card-header bg-success text-white d-flex justify-content-between"><span>Pedidos</span><button class="btn btn-sm btn-light text-success" onclick="loadPendingOrders()">Sync</button></div><div class="card-body p-0"><div id="ordersList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Histórico</span><div class="d-flex gap-2"><select id="historyFilterClass" class="form-select form-select-sm" style="width:100px;" onchange="loadRedemptionHistory()"><option value="all">Todos</option></select><button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()">Sync</button></div></div><div class="card-body p-0"><div class="table-responsive" style="max-height:400px;"><table class="table table-striped mb-0 text-center small"><thead><tr><th>Data</th><th>Aluno</th><th>Item</th><th>$</th></tr></thead><tbody id="redemptionHistoryBody"></tbody></table></div></div></div></div></div></div><div id="adminTab-classes" class="admin-tab" style="display:none;"><div class="row mb-4"><div class="col-md-6"><div class="card shadow-sm border-info h-100"><div class="card-header bg-info text-white d-flex justify-content-between"><span>Aprovar Fotos</span><button class="btn btn-sm btn-light text-info" onclick="loadPendingPhotos()">Sync</button></div><div class="card-body p-0"><div id="pendingPhotosList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm border-primary h-100"><div class="card-header bg-primary text-white d-flex justify-content-between"><span>Minhas Turmas</span><button class="btn btn-sm btn-light text-primary fw-bold" onclick="createNewClassPrompt()">Nova</button></div><div class="card-body p-0"><div id="classList" class="list-group list-group-flush"></div></div></div></div></div><div class="card shadow-sm border-dark"><div class="card-header bg-dark text-white">Regras</div><div class="card-body"><div class="row"><div class="col-md-4"><select id="studentSelect" class="form-select mb-3"><option>Carregando...</option></select><form onsubmit="event.preventDefault(); applyManualAdjustment();"><div class="input-group mb-2"><span class="input-group-text">XP</span><input type="number" id="manualXP" class="form-control"></div><div class="input-group mb-2"><span class="input-group-text">$</span><input type="number" id="manualCoins" class="form-control"></div><button type="submit" class="btn btn-outline-primary w-100 btn-sm">Aplicar</button></form></div><div class="col-md-4"><div id="rulesList" class="d-flex flex-wrap gap-2 mt-2"></div></div><div class="col-md-4 border-start"><form onsubmit="event.preventDefault(); createRule();"><input type="text" id="ruleName" class="form-control form-control-sm mb-2" placeholder="Nome" required><div class="row mb-2"><div class="col"><input type="number" id="ruleXP" class="form-control form-control-sm" placeholder="XP"></div><div class="col"><input type="number" id="ruleCoins" class="form-control form-control-sm" placeholder="$"></div></div><select id="ruleType" class="form-select form-select-sm mb-2"><option value="positive">Positiva</option><option value="negative">Negativa</option></select><button type="submit" class="btn btn-secondary btn-sm w-100">Salvar</button></form></div></div></div></div></div><div id="adminTab-comms" class="admin-tab" style="display:none;"><div class="card shadow-sm border-danger mb-4"><div class="card-header bg-danger text-white d-flex justify-content-between"><h5 class="mb-0">Inbox (DMs)</h5><button class="btn btn-sm btn-light text-danger fw-bold" onclick="loadInbox()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle"><thead class="table-light"><tr><th>Data</th><th>De</th><th>Assunto</th><th>Msg</th><th>Ação</th></tr></thead><tbody id="inboxTableBody"></tbody></table></div></div></div><div class="card shadow-sm border-warning"><div class="card-header bg-warning text-dark">Enviar Comunicado</div><div class="card-body"><form onsubmit="event.preventDefault(); sendNotification();"><div class="row mb-3"><div class="col-8"><input type="text" id="notifTitle" class="form-control" placeholder="Título" required></div><div class="col-4"><select id="notifTarget" class="form-select"></select></div></div><textarea id="notifMessage" class="form-control mb-3" rows="3" placeholder="Mensagem"></textarea><div class="row mb-3"><div class="col"><select id="notifType" class="form-select"><option value="homework">Homework</option><option value="test">Prova</option><option value="event">Evento</option><option value="dm">DM</option></select></div><div class="col"><select id="notifUrgency" class="form-select"><option value="chill">Tranquilo</option><option value="attention">Atenção</option><option value="urgent">Urgente</option></select></div></div><button type="submit" class="btn btn-warning w-100 fw-bold">ENVIAR</button></form></div></div></div></div></div>
             </div>
-            
+
             <div id="devContent" class="content-section">
-                <div class="row h-100"><div class="col-md-3"><div class="card border-danger h-100"><div class="card-header bg-danger text-white"><h5>DEV</h5></div><div class="list-group list-group-flush" id="devSidebar"><button class="list-group-item" onclick="showDevTab('users')">Users</button><button class="list-group-item" onclick="showDevTab('store')">Loja</button><button class="list-group-item" onclick="showDevTab('simulator')">Simular</button></div></div></div>
-                <div class="col-md-9">
-                    <div id="devTab-users" class="dev-tab">
-                        <h3 class="text-white mb-3">Cadastro de Usuários</h3>
-                        <div class="card shadow-sm border-danger"><div class="card-body"><form onsubmit="event.preventDefault(); createPreRegistry();"><div class="row mb-3"><div class="col-md-4"><label class="form-label">Função</label><select id="devUserRole" class="form-select" onchange="toggleDevFields()"><option value="student">Aluno</option><option value="teacher">Professor</option><option value="parent">Responsável</option></select></div><div class="col-md-8"><label class="form-label">Nome</label><input type="text" id="devUserName" class="form-control" required></div></div><label class="form-label">Login/Email</label><input type="text" id="devUserEmail" class="form-control mb-3" required><div id="devStudentFields" class="p-3 bg-light rounded mb-3"><div class="row"><div class="col"><input type="date" id="devUserDOB" class="form-control"></div><div class="col"><select id="devUserClass" class="form-select"></select></div></div></div><div id="devTeacherFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserClasses" class="form-select" multiple></select></div><div id="devParentFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserChildren" class="form-select" multiple></select></div><button type="submit" class="btn btn-danger w-100 fw-bold">CRIAR</button></form></div></div>
-                    </div>
-                    <div id="devTab-store" class="dev-tab" style="display:none;">
-                        <h3 class="text-white mb-3">Catálogo</h3>
-                        <div class="card shadow-sm mb-4 border-dark"><div class="card-header bg-dark text-white">Item</div><div class="card-body"><form onsubmit="event.preventDefault(); saveStoreItem();"><input type="hidden" id="devItemId"><div class="row mb-2"><div class="col-md-2"><input type="text" id="devItemIcon" class="form-control text-center fs-4" placeholder="🎁" required></div><div class="col-md-7"><input type="text" id="devItemName" class="form-control" required placeholder="Nome"></div><div class="col-md-3"><input type="number" id="devItemPrice" class="form-control" value="100"></div></div><input type="text" id="devItemDesc" class="form-control mb-2" placeholder="Desc"><div class="row mb-3"><div class="col-md-4"><select id="devItemType" class="form-select"><option value="permanent">Permanente</option><option value="consumable">Consumível</option></select></div><div class="col-md-4"><select id="devItemCat" class="form-select"><option value="avatar">Avatar</option><option value="frame">Moldura</option></select></div><div class="col-md-2"><input type="number" id="devItemStock" class="form-control" value="99"></div><div class="col-md-2"><button type="submit" class="btn btn-success w-100">Salvar</button></div></div></form></div></div>
-                        <div class="card shadow-sm"><div class="card-header d-flex justify-content-between"><span>Itens</span><button class="btn btn-sm btn-outline-secondary" onclick="loadStoreManagement()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle text-center"><thead class="table-light"><tr><th>Icon</th><th>Nome</th><th>$</th><th>Est</th><th>Ações</th></tr></thead><tbody id="devStoreList"></tbody></table></div></div></div>
-                    </div>
-                    <div id="devTab-simulator" class="dev-tab" style="display:none;">
-                        <h3 class="text-white mb-3">Simulador</h3><div class="card shadow-sm border-primary"><div class="card-body text-center"><div class="row g-3"><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('student')"><div class="card-body"><i class="fas fa-user-graduate fa-3x text-primary mb-3"></i><h5>Aluno</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('teacher')"><div class="card-body"><i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i><h5>Professor</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('parent')"><div class="card-body"><i class="fas fa-user-friends fa-3x text-success mb-3"></i><h5>Pai</h5></div></div></div></div><div class="mt-4 pt-3 border-top"><button class="btn btn-outline-danger" onclick="activateSimulation('dev')">Reset</button></div></div></div>
-                    </div>
-                </div></div>
+                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card shadow-sm h-100 border-danger"><div class="card-header bg-danger text-white text-center py-4"><i class="fas fa-code fa-3x mb-2"></i><h5 class="mb-0">DEV CONSOLE</h5></div><div class="list-group list-group-flush" id="devSidebar"><button class="list-group-item list-group-item-action active fw-bold py-3" onclick="showDevTab('users')">Usuários</button><button class="list-group-item list-group-item-action fw-bold py-3" onclick="showDevTab('store')">Loja</button><button class="list-group-item list-group-item-action fw-bold py-3 text-primary" onclick="showDevTab('simulator')">Simulador</button></div></div></div><div class="col-md-9"><div id="devTab-users" class="dev-tab"><h3 class="text-white mb-3">Cadastro de Usuários</h3><div class="card shadow-sm border-danger"><div class="card-body"><form onsubmit="event.preventDefault(); createPreRegistry();"><div class="row mb-3"><div class="col-md-4"><label class="form-label">Função</label><select id="devUserRole" class="form-select" onchange="toggleDevFields()"><option value="student">Aluno</option><option value="teacher">Professor</option><option value="parent">Responsável</option></select></div><div class="col-md-8"><label class="form-label">Nome</label><input type="text" id="devUserName" class="form-control" required></div></div><label class="form-label">Login/Email</label><input type="text" id="devUserEmail" class="form-control mb-3" required><div id="devStudentFields" class="p-3 bg-light rounded mb-3"><div class="row"><div class="col"><input type="date" id="devUserDOB" class="form-control"></div><div class="col"><select id="devUserClass" class="form-select"></select></div></div></div><div id="devTeacherFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserClasses" class="form-select" multiple></select></div><div id="devParentFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserChildren" class="form-select" multiple></select></div><button type="submit" class="btn btn-danger w-100 fw-bold">CRIAR</button></form></div></div></div><div id="devTab-store" class="dev-tab" style="display:none;"><h3 class="text-white mb-3">Catálogo</h3><div class="card shadow-sm mb-4 border-dark"><div class="card-header bg-dark text-white">Item</div><div class="card-body"><form onsubmit="event.preventDefault(); saveStoreItem();"><input type="hidden" id="devItemId"><div class="row mb-2"><div class="col-md-2"><input type="text" id="devItemIcon" class="form-control text-center fs-4" placeholder="🎁" required></div><div class="col-md-7"><input type="text" id="devItemName" class="form-control" required placeholder="Nome"></div><div class="col-md-3"><input type="number" id="devItemPrice" class="form-control" value="100"></div></div><input type="text" id="devItemDesc" class="form-control mb-2" placeholder="Desc"><div class="row mb-3"><div class="col-md-4"><select id="devItemType" class="form-select"><option value="permanent">Permanente</option><option value="consumable">Consumível</option></select></div><div class="col-md-4"><select id="devItemCat" class="form-select"><option value="avatar">Avatar</option><option value="frame">Moldura</option></select></div><div class="col-md-2"><input type="number" id="devItemStock" class="form-control" value="99"></div><div class="col-md-2"><button type="submit" class="btn btn-success w-100">Salvar</button></div></div></form></div></div><div class="card shadow-sm"><div class="card-header d-flex justify-content-between"><span>Itens</span><button class="btn btn-sm btn-outline-secondary" onclick="loadStoreManagement()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle text-center"><thead class="table-light"><tr><th>Icon</th><th>Nome</th><th>$</th><th>Est</th><th>Ações</th></tr></thead><tbody id="devStoreList"></tbody></table></div></div></div></div><div id="devTab-simulator" class="dev-tab" style="display:none;"><h3 class="text-white mb-3">Simulador</h3><div class="card shadow-sm border-primary"><div class="card-body text-center"><div class="row g-3"><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('student')"><div class="card-body"><i class="fas fa-user-graduate fa-3x text-primary mb-3"></i><h5>Aluno</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('teacher')"><div class="card-body"><i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i><h5>Professor</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('parent')"><div class="card-body"><i class="fas fa-user-friends fa-3x text-success mb-3"></i><h5>Pai</h5></div></div></div></div><div class="mt-4 pt-3 border-top"><button class="btn btn-outline-danger" onclick="activateSimulation('dev')">Reset</button></div></div></div></div></div></div>
             </div>
 
         </div>
     </div>
 
-    <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;"><i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO<button class="btn btn-sm btn-light ms-3 fw-bold border-0 text-mars-navy" onclick="activateSimulation('dev')">SAIR</button></div>
+    <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;">
+        <i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO: <span id="simRoleName"></span>
+        <button class="btn btn-sm btn-light ms-3 fw-bold border-0" onclick="activateSimulation('dev')">SAIR</button>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ⚠️ COLOQUE SUAS CHAVES AQUI
+        // Configuração
         const firebaseConfig = {
           apiKey: "AIzaSyBYe4oRa-uS1hTodVAsa7Zer1fOAU9-kcA",
           authDomain: "marsflow-english-academy.firebaseapp.com",
@@ -267,7 +427,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        window.db = db; window.auth = auth; window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.addDoc = addDoc; window.deleteDoc = deleteDoc; window.arrayUnion = arrayUnion; window.arrayRemove = arrayRemove; window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where; window.getCountFromServer = getCountFromServer;
+        // Exportações Globais
+        window.db = db; window.auth = auth;
+        window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.addDoc = addDoc; window.deleteDoc = deleteDoc;
+        window.arrayUnion = arrayUnion; window.arrayRemove = arrayRemove;
+        window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where; window.getCountFromServer = getCountFromServer;
 
         let currentUser = null;
         let userData = null;
@@ -288,7 +452,9 @@
             e.preventDefault();
             let loginUser = document.getElementById('loginUser').value.trim();
             const password = document.getElementById('password').value;
+            
             if (!loginUser.includes('@')) loginUser += '@aluno.marsflow';
+
             try {
                 document.getElementById('loadingSpinner').style.display = 'block';
                 await signInWithEmailAndPassword(auth, loginUser, password);
@@ -296,7 +462,10 @@
             } catch (error) {
                 document.getElementById('loadingSpinner').style.display = 'none';
                 document.getElementById('loginError').style.display = 'block';
-                document.getElementById('errorMessage').innerText = "Login inválido.";
+                let msg = "Erro no login.";
+                if(error.code === 'auth/invalid-email') msg = "Usuário inválido.";
+                if(error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') msg = "Usuário ou senha incorretos.";
+                document.getElementById('errorMessage').innerText = msg;
             }
         });
 
@@ -304,13 +473,19 @@
             if (!currentUser) return;
             try {
                 const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-                if (userDoc.exists()) { userData = userDoc.data(); } 
-                else {
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                } else {
                     const emailKey = currentUser.email.toLowerCase();
                     const preRegDoc = await getDoc(doc(db, "pre_registers", emailKey));
                     let initialData = {};
-                    if (preRegDoc.exists()) { initialData = preRegDoc.data(); delete initialData.isPreRegistered; } 
-                    else { initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 }; }
+                    if (preRegDoc.exists()) {
+                        initialData = preRegDoc.data();
+                        delete initialData.isPreRegistered;
+                    } else {
+                        initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 };
+                    }
                     userData = { ...initialData, uid: currentUser.uid, email: currentUser.email, inventory: [], createdAt: new Date().toISOString() };
                     await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
@@ -322,50 +497,92 @@
         function updateUserInterface() {
             if (!userData) return;
             const icon = userData.equippedIcon || '';
-            const roleLabels = {'student': 'Aluno', 'teacher': 'Professor', 'parent': 'Responsável', 'admin': 'Admin'};
-            document.getElementById('userName').innerHTML = `${icon} ${userData.name} <span class="badge bg-white text-mars-navy ms-2" style="font-size:0.7em">${roleLabels[userData.role]||'User'}</span>`;
+            document.getElementById('userName').innerHTML = `${icon} ${userData.name}`;
             
             const role = userData.role; 
             const isDev = (currentUser.email === 'fmartimr@gmail.com');
+            
             document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'none');
             document.getElementById('navAdminBtn').style.display = 'none';
             document.getElementById('navDevBtn').style.display = 'none';
 
-            if (isDev) { document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block'); document.getElementById('navAdminBtn').style.display = 'block'; document.getElementById('navDevBtn').style.display = 'block'; }
-            else if (role === 'teacher' || role === 'admin') { document.getElementById('navAdminBtn').style.display = 'block'; document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block'); }
-            else if (role === 'parent') { document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'block'); }
-            else { document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block'); }
-            
-            if (role === 'teacher' || role === 'admin' || isDev) { if(window.loadPendingPhotos) window.loadPendingPhotos(); }
+            if (isDev) {
+                document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
+                document.getElementById('navAdminBtn').style.display = 'block';
+                document.getElementById('navDevBtn').style.display = 'block';
+            } 
+            else if (role === 'teacher' || role === 'admin') {
+                document.getElementById('navAdminBtn').style.display = 'block';
+                document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
+            } 
+            else if (role === 'parent') {
+                document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'block');
+            } 
+            else {
+                document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block');
+            }
+
+            if (role === 'teacher' || role === 'admin' || isDev) {
+                if(window.loadPendingPhotos) window.loadPendingPhotos();
+            }
         }
 
         window.logout = async function() { await signOut(auth); window.location.reload(); };
+
         window.showLoginScreen = () => { document.getElementById('loginScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
         window.showAppScreen = () => { document.getElementById('loginScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; window.showHome(); }
         window.hideAllSections = () => { document.querySelectorAll('.content-section').forEach(s => s.style.display='none'); }
-        function setActiveNav(id) { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
 
         window.showHome = () => { 
-            hideAllSections(); document.getElementById('homeContent').style.display='block'; setActiveNav('linkHome');
+            hideAllSections(); 
+            document.getElementById('homeContent').style.display='block'; 
+            
             const role = window.userData.role;
             const isDev = (window.auth.currentUser.email === 'fmartimr@gmail.com');
+
             document.querySelectorAll('.role-dashboard').forEach(el => el.style.display = 'none');
-            if (isDev && !window.originalRole) { document.getElementById('dash-dev').style.display = 'block'; if(window.loadDevStats) window.loadDevStats(); } 
-            else if (role === 'teacher') { document.getElementById('dash-teacher').style.display = 'block'; if(window.loadTeacherDashboard) window.loadTeacherDashboard(); } 
-            else if (role === 'parent') { document.getElementById('dash-parent').style.display = 'block'; if(window.loadParentDashboard) window.loadParentDashboard(); } 
-            else { document.getElementById('dash-student').style.display = 'block'; if(window.loadStudentDashboard) window.loadStudentDashboard(); }
+
+            if (isDev && !window.originalRole) { // Se for dev e não estiver simulando
+                document.getElementById('dash-dev').style.display = 'block';
+                if(window.loadDevStats) window.loadDevStats();
+            } else if (role === 'teacher') {
+                document.getElementById('dash-teacher').style.display = 'block';
+                if(window.loadTeacherDashboard) window.loadTeacherDashboard();
+            } else if (role === 'parent') {
+                document.getElementById('dash-parent').style.display = 'block';
+                if(window.loadParentDashboard) window.loadParentDashboard();
+            } else {
+                document.getElementById('dash-student').style.display = 'block';
+                if(window.loadStudentDashboard) window.loadStudentDashboard();
+            }
         };
 
-        window.showGames = () => { hideAllSections(); document.getElementById('gamesContent').style.display='block'; setActiveNav('linkGames'); };
-        window.showStore = () => { hideAllSections(); document.getElementById('storeContent').style.display='block'; setActiveNav('linkStore'); if(window.loadStore) window.loadStore(); };
-        window.showTasks = () => { hideAllSections(); document.getElementById('tasksContent').style.display='block'; setActiveNav('linkTasks'); if(window.loadTasks) window.loadTasks(); };
-        window.showRanking = () => { hideAllSections(); document.getElementById('rankingContent').style.display='block'; setActiveNav('linkRanking'); if(window.loadRealRanking) window.loadRealRanking(); };
-        window.showProfile = () => { hideAllSections(); document.getElementById('profileContent').style.display = 'block'; setActiveNav(''); if(window.loadProfile) window.loadProfile(); };
-        window.showMessages = () => { hideAllSections(); document.getElementById('messagesContent').style.display = 'block'; setActiveNav('linkMessages'); if(window.loadMyMessages) window.loadMyMessages(); };
-        window.showAdmin = () => { hideAllSections(); document.getElementById('adminContent').style.display = 'block'; setActiveNav('navAdminBtn'); if(window.showAdminTab) window.showAdminTab('tasks'); };
-        window.showNotifications = () => { hideAllSections(); document.getElementById('notificationsContent').style.display = 'block'; setActiveNav(''); if(window.loadNotificationsScreen) window.loadNotificationsScreen(); };
-        window.showDev = function() { hideAllSections(); document.getElementById('devContent').style.display = 'block'; setActiveNav('navDevBtn'); if(window.showDevTab) window.showDevTab('users'); }
+        window.showGames = () => { hideAllSections(); document.getElementById('gamesContent').style.display='block'; };
+        window.showStore = () => { hideAllSections(); document.getElementById('storeContent').style.display='block'; if(window.loadStore) window.loadStore(); };
+        window.showTasks = () => { hideAllSections(); document.getElementById('tasksContent').style.display='block'; if(window.loadTasks) window.loadTasks(); };
+        window.showRanking = () => { hideAllSections(); document.getElementById('rankingContent').style.display='block'; if(window.loadRealRanking) window.loadRealRanking(); };
+        window.showProfile = () => { hideAllSections(); document.getElementById('profileContent').style.display = 'block'; if(window.loadProfile) window.loadProfile(); };
+        window.showMessages = () => { hideAllSections(); document.getElementById('messagesContent').style.display = 'block'; if(window.loadMyMessages) window.loadMyMessages(); };
+        
+        window.showAdmin = () => {
+            hideAllSections();
+            document.getElementById('adminContent').style.display = 'block';
+            if(window.showAdminTab) window.showAdminTab('tasks');
+        };
+
+        window.showNotifications = () => {
+            hideAllSections();
+            document.getElementById('notificationsContent').style.display = 'block';
+            if(window.loadNotificationsScreen) window.loadNotificationsScreen();
+        };
+        
+        window.showDev = function() {
+             hideAllSections();
+             document.getElementById('devContent').style.display = 'block';
+             if(window.showDevTab) window.showDevTab('users');
+        }
+
     </script>
     <script src="js/app.js"></script>
 </body>

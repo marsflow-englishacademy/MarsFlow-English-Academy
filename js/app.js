@@ -1,31 +1,43 @@
-// JavaScript Principal - MarsFlow English Academy
-// Versão: 3.2 (Design, Tag Perfil & MarsFlow Fix)
+// JavaScript Principal - Mars Flow English Academy
+// Versão: 3.0 (Branding, Dashboards, Mensagens, Dev Tools & Simulador)
 
-document.addEventListener('DOMContentLoaded', () => console.log('MarsFlow App Pronto.'));
+document.addEventListener('DOMContentLoaded', () => console.log('Mars Flow App Pronto.'));
 
+// Inicialização Global (Chamada ao logar)
 window.initializeApp = function() {
+    // Carrega dados iniciais baseados no perfil
     const role = window.userData.role;
+    
+    // Se for aluno, carrega ranking e tarefas
     if (role === 'student') {
         loadRealRanking();
         loadTasks();
     }
+    
+    // Se for professor, carrega notificações pendentes para o dashboard
     if (role === 'teacher' || role === 'admin') {
         if(window.loadTeacherDashboard) window.loadTeacherDashboard();
     }
+
+    // Inicia checagem de notificações para todos
     if(window.checkNotifications) window.checkNotifications();
 }
 
 // =================================================================
-// 1. DASHBOARDS
+// 1. DASHBOARDS PERSONALIZADOS (Lógica da Home)
 // =================================================================
 
+// 1.1 Dashboard Aluno
 window.loadStudentDashboard = async function() {
     const u = window.userData;
-    document.getElementById('homeStudentName').innerText = u.name.split(' ')[0];
+    
+    // Preenche Hero Section
+    document.getElementById('homeStudentName').innerText = u.name.split(' ')[0]; // Primeiro nome
     document.getElementById('homeStudentLevel').innerText = u.level || 1;
     document.getElementById('homeStudentXP').innerText = u.experience || 0;
     document.getElementById('homeStudentCoins').innerText = u.coins || 0;
     
+    // Avatar
     const avatarDiv = document.getElementById('homeStudentAvatar');
     if (u.photoURL) {
         avatarDiv.innerText = '';
@@ -35,9 +47,11 @@ window.loadStudentDashboard = async function() {
         avatarDiv.innerText = u.equippedIcon || '👤';
     }
 
+    // Barra de XP (Cálculo simples: 0 a 100 por nível)
     const xpInLevel = (u.experience || 0) % 100;
     document.getElementById('homeStudentXPBar').style.width = `${xpInLevel}%`;
 
+    // Ranking Preview (Top 5)
     const topDiv = document.getElementById('homeTopStudents');
     if(topDiv && window.db) {
         try {
@@ -50,44 +64,53 @@ window.loadStudentDashboard = async function() {
                 const icon = s.equippedIcon || '👤';
                 html += `
                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><strong class="text-mars-red me-2">#${pos}</strong> ${icon} ${s.name.split(' ')[0]}</span>
-                        <span class="badge bg-light text-dark border fw-bold">${s.experience} XP</span>
+                        <span><strong class="text-danger me-2">#${pos}</strong> ${icon} ${s.name.split(' ')[0]}</span>
+                        <span class="badge bg-light text-dark border">${s.experience} XP</span>
                     </div>`;
                 pos++;
             });
             topDiv.innerHTML = html;
-        } catch(e) { console.error("Erro rank:", e); }
+        } catch(e) { console.error("Erro dashboard rank:", e); }
     }
     
+    // Contar Missões Pendentes (Simples)
     try {
-        const qTasks = window.query(window.collection(window.db, "tasks"));
-        const snapT = await window.getDocs(qTasks);
+        const qTasks = window.query(window.collection(window.db, "tasks")); // Em produção, filtrar por data
+        const snapT = await window.getDocs(qTasks); // Apenas contagem aproximada para demo
         document.getElementById('homeStudentTasks').innerText = snapT.size; 
     } catch(e){}
 }
 
+// 1.2 Dashboard Professor
 window.loadTeacherDashboard = async function() {
+    // Tenta usar getCountFromServer (mais eficiente), se falhar usa getDocs
     try {
+        // Pedidos Pendentes
         const qOrders = window.query(window.collection(window.db, "orders"), window.where("status", "==", "pending_delivery"));
         const snapOrders = await window.getCountFromServer(qOrders);
         document.getElementById('dashTeacherOrders').innerText = snapOrders.data().count;
 
+        // Entregas Pendentes
         const qSubs = window.query(window.collection(window.db, "submissions"), window.where("status", "==", "pending"));
         const snapSubs = await window.getCountFromServer(qSubs);
         document.getElementById('dashTeacherSubs').innerText = snapSubs.data().count;
 
+        // Fotos Pendentes
         const qPhotos = window.query(window.collection(window.db, "users"), window.where("photoStatus", "==", "pending"));
         const snapPhotos = await window.getCountFromServer(qPhotos);
         document.getElementById('dashTeacherPhotos').innerText = snapPhotos.data().count;
 
     } catch (e) {
+        console.warn("getCountFromServer falhou ou não importado, usando fallback...", e);
         document.getElementById('dashTeacherOrders').innerText = "-";
         document.getElementById('dashTeacherSubs').innerText = "-";
         document.getElementById('dashTeacherPhotos').innerText = "-";
     }
 }
 
+// 1.3 Dashboard Pais
 window.loadParentDashboard = async function() {
+    // Tenta pegar o primeiro filho vinculado
     if (window.userData.childrenIds && window.userData.childrenIds.length > 0) {
         const childId = window.userData.childrenIds[0];
         try {
@@ -99,12 +122,13 @@ window.loadParentDashboard = async function() {
                 document.getElementById('dashParentChildXP').innerText = child.experience || 0;
                 document.getElementById('dashParentChildCoins').innerText = child.coins || 0;
             }
-        } catch(e) { console.error("Erro child:", e); }
+        } catch(e) { console.error("Erro loading child:", e); }
     } else {
-        document.getElementById('dashParentChildName').innerText = "Nenhum filho";
+        document.getElementById('dashParentChildName').innerText = "Nenhum filho vinculado";
     }
 }
 
+// 1.4 Dashboard Dev
 window.loadDevStats = async function() {
     try {
         const qUsers = window.query(window.collection(window.db, "users"));
@@ -114,39 +138,49 @@ window.loadDevStats = async function() {
 }
 
 // =================================================================
-// 2. NAVEGAÇÃO
+// 2. NAVEGAÇÃO DE ABAS (ADMIN & DEV)
 // =================================================================
 
+// Navegação Professor (Sidebar)
 window.showAdminTab = function(tabName) {
     document.querySelectorAll('.admin-tab').forEach(el => el.style.display = 'none');
     document.getElementById(`adminTab-${tabName}`).style.display = 'block';
+    
+    // Atualiza classe 'active' no menu
     if(event && event.currentTarget) {
         document.querySelectorAll('#adminSidebar button').forEach(btn => btn.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
+
+    // Carregamento sob demanda (Lazy Loading)
     if (tabName === 'store') { loadPendingOrders(); loadRedemptionHistory(); }
     if (tabName === 'classes') { loadTeacherClasses(); loadStudentsForAdmin(); loadPendingPhotos(); }
     if (tabName === 'comms') { loadInbox(); loadTeacherClasses(); }
 }
 
+// Navegação Dev (Sidebar)
 window.showDevTab = function(tabName) {
     document.querySelectorAll('.dev-tab').forEach(el => el.style.display = 'none');
     document.getElementById(`devTab-${tabName}`).style.display = 'block';
+    
     if(event && event.currentTarget) {
         document.querySelectorAll('#devSidebar button').forEach(btn => btn.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
+
     if (tabName === 'users') loadDevDropdowns();
     if (tabName === 'store') loadStoreManagement();
 }
 
+
 // =================================================================
-// 3. MENSAGENS
+// 3. SISTEMA DE MENSAGENS (DM)
 // =================================================================
 
 window.sendMessage = async function() {
     const subject = document.getElementById('msgSubject').value;
     const content = document.getElementById('msgContent').value;
+
     if (!content) return alert("Escreva uma mensagem!");
 
     try {
@@ -160,7 +194,8 @@ window.sendMessage = async function() {
             status: 'unread',
             createdAt: new Date().toISOString()
         });
-        alert("📨 Mensagem enviada!");
+
+        alert("📨 Mensagem enviada! O professor receberá em breve.");
         document.getElementById('msgContent').value = '';
         loadMyMessages(); 
     } catch (e) { alert("Erro ao enviar."); }
@@ -169,17 +204,28 @@ window.sendMessage = async function() {
 window.loadMyMessages = async function() {
     const list = document.getElementById('myMessagesList');
     if(!list) return;
+
     try {
         const q = window.query(window.collection(window.db, "messages"), window.where("senderId", "==", window.auth.currentUser.uid), window.orderBy("createdAt", "desc"));
         const snap = await window.getDocs(q);
-        if (snap.empty) { list.innerHTML = '<div class="text-center p-5 text-muted">Nenhuma mensagem.</div>'; return; }
+
+        if (snap.empty) { list.innerHTML = '<div class="text-center p-5 text-muted">Nenhuma mensagem enviada.</div>'; return; }
+
         let html = '';
         snap.forEach(doc => {
             const m = doc.data();
             const date = new Date(m.createdAt).toLocaleDateString('pt-BR');
-            let badge = '<span class="badge bg-light text-dark border">Enviada</span>';
+            let badge = '<span class="badge bg-secondary">Enviada</span>';
             if (m.status === 'replied') badge = '<span class="badge bg-success">Respondida</span>';
-            html += `<div class="list-group-item p-3"><div class="d-flex justify-content-between mb-1"><strong class="text-mars-navy">${m.subject}</strong><small class="text-muted">${date}</small></div><p class="mb-2 small text-muted text-truncate">${m.content}</p><div class="d-flex justify-content-between align-items-center">${badge}</div></div>`;
+            
+            html += `
+                <div class="list-group-item p-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <strong class="text-mars-navy">${m.subject}</strong><small class="text-muted">${date}</small>
+                    </div>
+                    <p class="mb-2 small text-muted text-truncate">${m.content}</p>
+                    <div class="d-flex justify-content-between align-items-center">${badge}</div>
+                </div>`;
         });
         list.innerHTML = html;
     } catch (e) { console.error("Erro msg:", e); }
@@ -188,30 +234,45 @@ window.loadMyMessages = async function() {
 window.loadInbox = async function() {
     const tbody = document.getElementById('inboxTableBody');
     if(!tbody) return;
+
     try {
         const q = window.query(window.collection(window.db, "messages"), window.orderBy("createdAt", "desc"), window.limit(50));
         const snap = await window.getDocs(q);
+
         if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Caixa de entrada vazia.</td></tr>'; return; }
+
         let html = '';
         snap.forEach(doc => {
             const m = doc.data();
             const date = new Date(m.createdAt).toLocaleDateString('pt-BR');
             const roleBadge = m.senderRole === 'parent' ? '<span class="badge bg-warning text-dark me-1">Pai</span>' : '<span class="badge bg-light text-dark border me-1">Aluno</span>';
             const btnReply = `<button class="btn btn-sm btn-outline-primary" onclick="replyToMessage('${doc.id}', '${m.senderId}', '${m.senderName}', '${m.subject}')"><i class="fas fa-reply"></i></button>`;
-            const statusIcon = m.status === 'replied' ? '<i class="fas fa-check-double text-success"></i>' : '<i class="fas fa-envelope text-mars-navy"></i>';
-            html += `<tr><td><small>${date}</small></td><td>${roleBadge} <strong>${m.senderName}</strong></td><td>${statusIcon} ${m.subject}</td><td style="max-width: 250px;"><div class="text-truncate">${m.content}</div></td><td class="text-end">${btnReply}</td></tr>`;
+            const statusIcon = m.status === 'replied' ? '<i class="fas fa-check-double text-success"></i>' : '<i class="fas fa-envelope text-warning"></i>';
+
+            html += `
+                <tr>
+                    <td><small>${date}</small></td>
+                    <td>${roleBadge} <strong>${m.senderName}</strong></td>
+                    <td>${statusIcon} ${m.subject}</td>
+                    <td style="max-width: 250px;"><div class="text-truncate">${m.content}</div></td>
+                    <td class="text-end">${btnReply}</td>
+                </tr>`;
         });
         tbody.innerHTML = html;
     } catch (e) { console.error("Erro inbox:", e); }
 }
 
 window.replyToMessage = function(msgId, studentId, studentName, subject) {
+    // Redireciona para aba de Comunicação
     showAdminTab('comms');
+    
+    // Preenche Form de Notificação
     document.getElementById('notifTitle').value = `RE: ${subject}`;
     document.getElementById('notifMessage').value = `Olá ${studentName}, sobre sua mensagem...`;
     document.getElementById('notifType').value = 'dm';
     document.getElementById('notifUrgency').value = 'chill';
     
+    // Configura Target Dinamicamente
     const targetSelect = document.getElementById('notifTarget');
     let optionExists = false;
     for (let i = 0; i < targetSelect.options.length; i++) {
@@ -219,25 +280,33 @@ window.replyToMessage = function(msgId, studentId, studentName, subject) {
     }
     if (!optionExists) {
         const opt = document.createElement('option');
-        opt.value = studentId; opt.text = `👤 ${studentName}`;
+        opt.value = studentId; 
+        opt.text = `👤 ${studentName}`;
         targetSelect.add(opt);
     }
     targetSelect.value = studentId;
+
+    // Atualiza status da msg original
     window.updateDoc(window.doc(window.db, "messages", msgId), { status: 'replied' });
     alert(`Preencha a resposta e clique em Enviar.`);
 }
 
 // =================================================================
-// 4. DEV
+// 4. DESENVOLVEDOR (USER FACTORY, STORE CRUD, SIMULATOR)
 // =================================================================
 
+// 4.1 Pré-Cadastro de Usuários
 window.createPreRegistry = async function() {
     const role = document.getElementById('devUserRole').value;
     const name = document.getElementById('devUserName').value;
     let login = document.getElementById('devUserEmail').value.trim().toLowerCase();
     
     if(!login || !name) return alert("Dados incompletos.");
-    if (role === 'student' && !login.includes('@')) login += '@aluno.marsflow';
+
+    // Lógica do Login sem Email
+    if (role === 'student' && !login.includes('@')) {
+        login += '@aluno.marsflow';
+    }
 
     const data = { name, email: login, role, createdAt: new Date().toISOString(), isPreRegistered: true };
 
@@ -254,12 +323,14 @@ window.createPreRegistry = async function() {
     try {
         await window.setDoc(window.doc(window.db, "pre_registers", login), data);
         alert(`✅ Cadastro criado!\nLogin: ${login}`);
+        // Limpar
         document.getElementById('devUserName').value = '';
         document.getElementById('devUserEmail').value = '';
     } catch (e) { alert("Erro: " + e.message); }
 }
 
 window.loadDevDropdowns = async function() {
+    // Carregar Turmas
     const snapClasses = await window.getDocs(window.query(window.collection(window.db, "classes")));
     let opts = '<option value="">Selecione...</option>';
     let optsMulti = '';
@@ -267,10 +338,12 @@ window.loadDevDropdowns = async function() {
         opts += `<option value="${doc.id}">${doc.data().name}</option>`;
         optsMulti += `<option value="${doc.id}">${doc.data().name}</option>`;
     });
+    
     if(document.getElementById('devUserClass')) document.getElementById('devUserClass').innerHTML = opts;
     if(document.getElementById('devUserClasses')) document.getElementById('devUserClasses').innerHTML = optsMulti;
     if(document.getElementById('historyFilterClass')) document.getElementById('historyFilterClass').innerHTML = '<option value="all">Todas</option>' + optsMulti;
 
+    // Carregar Alunos (para pais)
     const snapStudents = await window.getDocs(window.query(window.collection(window.db, "users"), window.where("role", "==", "student")));
     let stuOpts = '';
     snapStudents.forEach(doc => { stuOpts += `<option value="${doc.id}">${doc.data().name}</option>`; });
@@ -284,12 +357,14 @@ window.toggleDevFields = function() {
     document.getElementById('devParentFields').style.display = role === 'parent' ? 'block' : 'none';
 }
 
+// 4.2 Gestão da Loja (CRUD)
 window.loadStoreManagement = async function() {
     const tbody = document.getElementById('devStoreList');
     if(!tbody) return;
     try {
         const snap = await window.getDocs(window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc")));
         if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5">Vazia.</td></tr>'; return; }
+        
         let html = '';
         snap.forEach(doc => {
             const i = doc.data();
@@ -314,6 +389,7 @@ window.saveStoreItem = async function() {
         stock: parseInt(document.getElementById('devItemStock').value)
     };
     if (!data.name || !data.price) return alert("Preencha dados.");
+    
     try {
         if (id) await window.updateDoc(window.doc(window.db, "shop_items", id), data);
         else await window.addDoc(window.collection(window.db, "shop_items"), data);
@@ -341,6 +417,7 @@ window.deleteStoreItem = async function(id, name) {
     try { await window.deleteDoc(window.doc(window.db, "shop_items", id)); loadStoreManagement(); } catch(e) { alert("Erro ao deletar."); }
 }
 
+// 4.3 Simulador de Papel
 window.originalRole = null;
 window.activateSimulation = function(targetRole) {
     if (!window.userData) return;
@@ -364,25 +441,26 @@ window.activateSimulation = function(targetRole) {
 }
 
 // =================================================================
-// 5. RANKING (CORRIGIDO)
+// 5. RANKING, TAREFAS E LOJA (CLIENTE)
 // =================================================================
 
 window.currentRankingMode = 'general';
 window.switchRanking = function(mode) {
     window.currentRankingMode = mode;
-    // Lógica para aba ativa (Vermelha) e inativa (Transparente)
-    document.getElementById('tabGeneral').className = mode === 'general' ? 'nav-link active bg-mars-red text-white' : 'nav-link text-muted';
-    document.getElementById('tabClass').className = mode === 'class' ? 'nav-link active bg-mars-red text-white' : 'nav-link text-muted';
+    document.getElementById('tabGeneral').className = mode === 'general' ? 'nav-link active fw-bold' : 'nav-link text-white opacity-75';
+    document.getElementById('tabClass').className = mode === 'class' ? 'nav-link active fw-bold' : 'nav-link text-white opacity-75';
     loadRealRanking();
 }
 
 window.loadRealRanking = async function() {
     const tbody = document.getElementById('tabelaRankingCompleta');
     if(!tbody || !window.db) return;
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4"><div class="spinner-border text-mars-navy"></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4"><div class="spinner-border text-primary"></div></td></tr>';
 
     try {
         let q = window.collection(window.db, "users");
+        
+        // Update badge
         const badge = document.getElementById('myClassBadge');
         if(badge) badge.innerText = window.userData.classId ? "Turma Vinculada" : "Sem Turma";
 
@@ -398,7 +476,7 @@ window.loadRealRanking = async function() {
         snap.forEach(doc => {
             const u = doc.data();
             const isMe = (window.auth.currentUser.uid === doc.id);
-            const rowClass = isMe ? 'table-warning fw-bold' : '';
+            const rowClass = isMe ? 'table-info fw-bold' : '';
             const medals = {1:'🥇', 2:'🥈', 3:'🥉'};
             html += `<tr class="${rowClass}"><td class="text-center">${medals[pos]||pos}</td><td>${u.equippedIcon||''} ${u.name}</td><td class="text-center">${u.level||1}</td><td class="text-end fw-bold text-mars-navy">${u.experience||0} XP</td></tr>`;
             pos++;
@@ -407,12 +485,11 @@ window.loadRealRanking = async function() {
     } catch (e) { console.error(e); }
 }
 
-// ... (Demais funções loadTasks, loadStore etc. mantidas iguais mas com classes de cor corretas no HTML gerado) ...
-
 window.loadTasks = async function() {
     const list = document.getElementById('taskList');
     const countBadge = document.getElementById('taskCount');
     if (!list) return;
+
     try {
         const userId = window.auth.currentUser.uid;
         const tasksSnap = await window.getDocs(window.query(window.collection(window.db, "tasks"), window.orderBy("dueDate", "asc")));
@@ -427,15 +504,15 @@ window.loadTasks = async function() {
             const st = mySubs[doc.id];
             const date = t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : 'S/ Data';
             
-            let action = `<button class="btn btn-danger btn-sm rounded-pill fw-bold" onclick="submitTask('${doc.id}', '${t.title}')">Entregar</button>`;
+            let action = `<button class="btn btn-primary btn-sm rounded-pill" onclick="submitTask('${doc.id}', '${t.title}')">Entregar</button>`;
             let badge = '';
 
             if (st === 'approved') { badge = '<span class="badge bg-success ms-2">Feita</span>'; action = ''; }
-            else if (st === 'pending') { badge = '<span class="badge bg-secondary ms-2">Analisando</span>'; action = ''; }
+            else if (st === 'pending') { badge = '<span class="badge bg-warning text-dark ms-2">Analisando</span>'; action = ''; }
             else { if (st === 'rejected') badge = '<span class="badge bg-danger ms-2">Refazer</span>'; pendentes++; }
 
             html += `
-                <div class="list-group-item p-3 mb-2 shadow-sm rounded border-start border-4 border-danger">
+                <div class="list-group-item p-3 mb-2 shadow-sm rounded border-start border-4 border-primary">
                     <div class="d-flex justify-content-between align-items-center">
                         <div><h6 class="mb-1 text-mars-navy fw-bold">${t.title} ${badge}</h6><small class="text-muted">${t.description} • 📅 ${date}</small></div>
                         <div class="text-end"><div class="mb-2"><span class="badge bg-light text-dark border">+${t.xp} XP</span> <span class="badge bg-light text-dark border">+${t.coins} $</span></div>${action}</div>
@@ -465,7 +542,7 @@ window.loadStore = async function() {
 
     try {
         const snap = await window.getDocs(window.query(window.collection(window.db, "shop_items"), window.orderBy("price", "asc")));
-        if (snap.empty) { list.innerHTML = '<div class="col-12 text-center text-white">Loja vazia.</div>'; return; }
+        if (snap.empty) { list.innerHTML = '<div class="col-12 text-center text-muted">Loja vazia.</div>'; return; }
 
         const inventory = window.userData.inventory || [];
         let html = '';
@@ -480,14 +557,14 @@ window.loadStore = async function() {
             if(stock <= 0) btn = `<button class="btn btn-secondary w-100" disabled>Esgotado</button>`;
             else if(already && item.type !== 'consumable') btn = `<button class="btn btn-secondary w-100" disabled>Comprado</button>`;
             else if(!canBuy) btn = `<button class="btn btn-outline-secondary w-100" disabled>Falta Moeda</button>`;
-            else btn = `<button class="btn btn-danger w-100 fw-bold" onclick="buyItem('${doc.id}', '${item.name}', ${item.price})">COMPRAR</button>`;
+            else btn = `<button class="btn btn-success w-100 fw-bold" onclick="buyItem('${doc.id}', '${item.name}', ${item.price})">COMPRAR</button>`;
 
             html += `
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0 text-center p-3 hover-effect">
                         <div class="display-4 mb-2">${item.icon}</div>
                         <h5 class="fw-bold text-mars-navy">${item.name}</h5>
-                        <h4 class="text-mars-red fw-bold my-3">${item.price} <small class="fs-6 text-muted">coins</small></h4>
+                        <h4 class="text-warning fw-bold my-3">${item.price} <small class="fs-6 text-muted">coins</small></h4>
                         ${btn}
                     </div>
                 </div>`;
@@ -502,6 +579,7 @@ window.buyItem = async function(id, name, price) {
         const userRef = window.doc(window.db, "users", window.auth.currentUser.uid);
         const itemRef = window.doc(window.db, "shop_items", id);
         
+        // Transação ou verificação simples
         const uSnap = await window.getDoc(userRef);
         if(uSnap.data().coins < price) return alert("Saldo insuficiente.");
 
@@ -511,6 +589,7 @@ window.buyItem = async function(id, name, price) {
             pricePaid: price, status: "pending_delivery", purchasedAt: new Date().toISOString()
         });
         
+        // Baixa estoque (simplificado, sem transaction para MVP)
         const iSnap = await window.getDoc(itemRef);
         if(iSnap.exists()) await window.updateDoc(itemRef, { stock: (iSnap.data().stock || 99) - 1 });
 
@@ -520,21 +599,29 @@ window.buyItem = async function(id, name, price) {
     } catch(e) { alert("Erro na compra."); }
 }
 
+// =================================================================
+// 6. PERFIL, FOTOS & BIO
+// =================================================================
+
 window.loadProfile = async function() {
     const u = window.userData;
     document.getElementById('profileName').innerText = u.name;
     document.getElementById('profileLevel').innerText = u.level || 1;
     document.getElementById('xpRatio').innerText = `${(u.experience||0)%100} / 100 XP`;
     document.getElementById('xpBar').style.width = `${(u.experience||0)%100}%`;
+    
+    // Bio
     document.getElementById('profileBioDisplay').innerText = u.bio || "Sem bio definida.";
     
+    // Avatar
     const av = document.getElementById('profileAvatarDisplay');
     if(u.photoURL) { av.innerText = ''; av.style.backgroundImage = `url('${u.photoURL}')`; }
     else { av.style.backgroundImage = ''; av.innerText = u.equippedIcon || '👤'; }
-    av.className = `display-1 bg-light rounded-circle border border-4 border-danger p-3 position-relative overflow-hidden ${u.equippedFrame||''}`;
+    av.className = `display-1 bg-light rounded-circle border border-3 p-3 position-relative overflow-hidden ${u.equippedFrame||''}`;
 
+    // Foto Pendente Badge
     const badge = document.getElementById('photoStatusBadge');
-    if(badge) badge.innerHTML = (u.photoStatus === 'pending') ? '<span class="badge bg-secondary text-white">Foto em Análise ⏳</span>' : '';
+    if(badge) badge.innerHTML = (u.photoStatus === 'pending') ? '<span class="badge bg-warning text-dark">Foto em Análise ⏳</span>' : '';
 
     loadInventory();
 }
@@ -578,7 +665,7 @@ window.loadInventory = async function() {
     const list = document.getElementById('inventoryList');
     try {
         const inv = window.userData.inventory || [];
-        if(inv.length === 0) { list.innerHTML = '<div class="col-12 text-center p-4 text-muted">Mochila vazia.</div>'; return; }
+        if(inv.length === 0) { list.innerHTML = '<div class="col-12 text-center p-4">Mochila vazia.</div>'; return; }
         
         const snap = await window.getDocs(window.query(window.collection(window.db, "shop_items")));
         let html = '';
@@ -589,7 +676,8 @@ window.loadInventory = async function() {
                 let btn = `<button class="btn btn-outline-primary btn-sm w-100" onclick="equipItem('${doc.id}', '${i.category||'avatar'}', '${i.icon}')">Equipar</button>`;
                 if(equipped) btn = `<button class="btn btn-success btn-sm w-100" disabled>Equipado</button>`;
                 if(i.type !== 'permanent') btn = `<button class="btn btn-secondary btn-sm" disabled>Consumível</button>`;
-                html += `<div class="col-6 col-md-4"><div class="card h-100 text-center p-2"><div class="fs-1">${i.icon}</div><div class="small fw-bold text-mars-navy">${i.name}</div><div class="mt-auto pt-2">${btn}</div></div></div>`;
+
+                html += `<div class="col-6 col-md-4"><div class="card h-100 text-center p-2"><div class="fs-1">${i.icon}</div><div class="small fw-bold">${i.name}</div><div class="mt-auto pt-2">${btn}</div></div></div>`;
             }
         });
         list.innerHTML = html;
@@ -605,12 +693,17 @@ window.equipItem = async function(id, cat, val) {
     } catch(e) { alert("Erro."); }
 }
 
+// =================================================================
+// 7. ADMINISTRAÇÃO (PROFESSOR)
+// =================================================================
+
 window.createTask = async function() {
     const title = document.getElementById('taskTitle').value;
     const desc = document.getElementById('taskDesc').value;
     const xp = parseInt(document.getElementById('taskXP').value);
     const coins = parseInt(document.getElementById('taskCoins').value);
     const date = document.getElementById('taskDate').value;
+    
     if(!title) return;
     try {
         await window.addDoc(window.collection(window.db, "tasks"), { title, description: desc, xp, coins, dueDate: date, createdAt: new Date().toISOString() });
@@ -624,10 +717,11 @@ window.loadPendingSubmissions = async function() {
     try {
         const snap = await window.getDocs(window.query(window.collection(window.db, "submissions"), window.where("status", "==", "pending")));
         if(snap.empty) { list.innerHTML = '<div class="p-3 text-center text-muted">Nada pendente.</div>'; return; }
+        
         let html = '';
         snap.forEach(doc => {
             const s = doc.data();
-            html += `<div class="list-group-item"><h6 class="fw-bold text-mars-navy">${s.studentName}</h6><p class="mb-1 small">${s.taskTitle}</p><div class="bg-light p-2 mb-2 small text-muted">${s.justification}</div>
+            html += `<div class="list-group-item"><h6 class="fw-bold">${s.studentName}</h6><p class="mb-1 small">${s.taskTitle}</p><div class="bg-light p-2 mb-2 small text-muted">${s.justification}</div>
             <button class="btn btn-success btn-sm me-1" onclick="approveSubmission('${doc.id}', '${s.taskId}', '${s.userId}')">Aprovar</button>
             <button class="btn btn-danger btn-sm" onclick="rejectSubmission('${doc.id}')">Rejeitar</button></div>`;
         });
@@ -742,6 +836,7 @@ window.sendNotification = async function() {
     const target = document.getElementById('notifTarget').value;
     const type = document.getElementById('notifType').value;
     const urg = document.getElementById('notifUrgency').value;
+    
     if(!title) return;
     try {
         await window.addDoc(window.collection(window.db, "notifications"), {
@@ -752,14 +847,17 @@ window.sendNotification = async function() {
     } catch(e) { alert("Erro."); }
 }
 
+// Notificações (Cliente)
 window.checkNotifications = async function() {
     if (!window.db || !window.auth.currentUser) return;
     try {
         const q = window.query(window.collection(window.db, "notifications"), window.orderBy("createdAt", "desc"), window.limit(20));
         const snapshot = await window.getDocs(q);
+        
         let unreadCount = 0;
         const myId = window.auth.currentUser.uid;
         const myClass = window.userData ? window.userData.classId : null;
+
         snapshot.forEach(doc => {
             const n = doc.data();
             const isForMe = (n.targetId === 'all') || (n.targetId === myId) || (n.targetId === myClass);
@@ -768,6 +866,7 @@ window.checkNotifications = async function() {
                 if (!readBy.includes(myId)) unreadCount++;
             }
         });
+
         const badge = document.getElementById('notifBadge');
         if (badge) badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
     } catch (e) { console.error("Erro check notifs:", e); }
@@ -776,13 +875,16 @@ window.checkNotifications = async function() {
 window.loadNotificationsScreen = async function() {
     const listDiv = document.getElementById('notifList');
     if(!listDiv) return;
+
     try {
         const q = window.query(window.collection(window.db, "notifications"), window.orderBy("createdAt", "desc"), window.limit(15));
         const snapshot = await window.getDocs(q);
+        
         const myId = window.auth.currentUser.uid;
         const myClass = window.userData ? window.userData.classId : null;
         let html = '';
         window.currentNotifs = {}; 
+
         snapshot.forEach(doc => {
             const n = doc.data();
             const isForMe = (n.targetId === 'all') || (n.targetId === myId) || (n.targetId === myClass);
@@ -791,7 +893,15 @@ window.loadNotificationsScreen = async function() {
                 const isUnread = !(n.readBy || []).includes(myId);
                 const bgClass = isUnread ? 'bg-white border-start border-4 border-danger fw-bold' : '';
                 const icon = {'homework':'📚', 'test':'📝', 'event':'🎉', 'dm':'💬'}[n.type] || '📢';
-                html += `<a href="#" class="list-group-item list-group-item-action ${bgClass} py-3" onclick="openNotification('${doc.id}')"><div class="d-flex w-100 justify-content-between"><small class="text-muted">${n.senderName || 'Sistema'}</small><small class="text-muted">${new Date(n.createdAt).toLocaleDateString('pt-BR')}</small></div><div class="mb-1 text-truncate">${icon} ${n.title}</div></a>`;
+                
+                html += `
+                    <a href="#" class="list-group-item list-group-item-action ${bgClass} py-3" onclick="openNotification('${doc.id}')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">${n.senderName || 'Sistema'}</small>
+                            <small class="text-muted">${new Date(n.createdAt).toLocaleDateString('pt-BR')}</small>
+                        </div>
+                        <div class="mb-1 text-truncate">${icon} ${n.title}</div>
+                    </a>`;
             }
         });
         listDiv.innerHTML = html || '<div class="text-center p-4">Nada por aqui.</div>';
@@ -801,9 +911,21 @@ window.loadNotificationsScreen = async function() {
 window.openNotification = async function(docId) {
     const data = window.currentNotifs[docId];
     if (!data) return;
+
     const detailDiv = document.getElementById('notifDetail');
     const icon = {'homework':'📚', 'test':'📝', 'event':'🎉', 'dm':'💬'}[data.type] || '📢';
-    detailDiv.innerHTML = `<div class="text-start w-100"><h3 class="mb-2 text-mars-navy fw-bold">${icon} ${data.title}</h3><div class="text-muted small mb-4 pb-2 border-bottom">Por <strong>${data.senderName}</strong> em ${new Date(data.createdAt).toLocaleString()}<span class="badge bg-secondary text-white float-end">${data.urgency || 'Info'}</span></div><div class="fs-6 text-dark" style="white-space: pre-wrap; line-height: 1.6;">${data.content}</div></div>`;
+    
+    detailDiv.innerHTML = `
+        <div class="text-start w-100">
+            <h3 class="mb-2 text-mars-navy fw-bold">${icon} ${data.title}</h3>
+            <div class="text-muted small mb-4 pb-2 border-bottom">
+                Por <strong>${data.senderName}</strong> em ${new Date(data.createdAt).toLocaleString()}
+                <span class="badge bg-warning text-dark float-end">${data.urgency || 'Info'}</span>
+            </div>
+            <div class="fs-6 text-dark" style="white-space: pre-wrap; line-height: 1.6;">${data.content}</div>
+        </div>
+    `;
+
     const myId = window.auth.currentUser.uid;
     if (!(data.readBy || []).includes(myId)) {
         await window.updateDoc(window.doc(window.db, "notifications", docId), { readBy: window.arrayUnion(myId) });
@@ -811,3 +933,108 @@ window.openNotification = async function(docId) {
         loadNotificationsScreen();
     }
 }
+
+// Comportamento (Regras)
+window.createRule = async function() {
+    const name = document.getElementById('ruleName').value;
+    const xp = parseInt(document.getElementById('ruleXP').value)||0;
+    const coins = parseInt(document.getElementById('ruleCoins').value)||0;
+    const type = document.getElementById('ruleType').value;
+    if(!name) return;
+    await window.addDoc(window.collection(window.db, "rules"), { name, xp, coins, type });
+    loadRules();
+}
+
+window.loadRules = async function() {
+    const list = document.getElementById('rulesList');
+    if(!list) return;
+    const snap = await window.getDocs(window.collection(window.db, "rules"));
+    let html = '';
+    snap.forEach(doc => {
+        const r = doc.data();
+        const cls = r.type === 'positive' ? 'btn-outline-success' : 'btn-outline-danger';
+        html += `<button class="btn ${cls} btn-sm" onclick="applyRuleToStudent('${r.name}', ${r.xp}, ${r.coins})">${r.name}</button>`;
+    });
+    list.innerHTML = html;
+}
+
+window.loadStudentsForAdmin = async function() {
+    const sel = document.getElementById('studentSelect');
+    if(!sel) return;
+    const snap = await window.getDocs(window.query(window.collection(window.db, "users"), window.orderBy("name")));
+    let html = '<option value="">Selecione...</option>';
+    snap.forEach(doc => { html += `<option value="${doc.id}">${doc.data().name}</option>`; });
+    sel.innerHTML = html;
+}
+
+window.applyRuleToStudent = async function(rName, xp, coins) {
+    const sid = document.getElementById('studentSelect').value;
+    if(!sid) return alert("Selecione aluno.");
+    if(!confirm(`Aplicar ${rName}?`)) return;
+    const ref = window.doc(window.db, "users", sid);
+    const u = (await window.getDoc(ref)).data();
+    await window.updateDoc(ref, { experience: (u.experience||0)+xp, coins: (u.coins||0)+coins });
+    alert("Aplicado!");
+}
+
+window.applyManualAdjustment = async function() {
+    const sid = document.getElementById('studentSelect').value;
+    const xp = parseInt(document.getElementById('manualXP').value)||0;
+    const coins = parseInt(document.getElementById('manualCoins').value)||0;
+    if(!sid) return alert("Selecione aluno.");
+    const ref = window.doc(window.db, "users", sid);
+    const u = (await window.getDoc(ref)).data();
+    await window.updateDoc(ref, { experience: (u.experience||0)+xp, coins: (u.coins||0)+coins });
+    alert("Ajustado!");
+}
+
+// Exportações
+window.loadTasks = loadTasks;
+window.loadRealRanking = loadRealRanking;
+window.createTask = createTask;
+window.loadPendingSubmissions = loadPendingSubmissions;
+window.approveSubmission = approveSubmission;
+window.rejectSubmission = rejectSubmission;
+window.loadStore = loadStore;
+window.buyItem = buyItem;
+window.loadPendingOrders = loadPendingOrders;
+window.deliverOrder = deliverOrder;
+window.loadStudentsForAdmin = loadStudentsForAdmin;
+window.createRule = createRule;
+window.loadRules = loadRules;
+window.applyRuleToStudent = applyRuleToStudent;
+window.applyManualAdjustment = applyManualAdjustment;
+window.loadTeacherClasses = loadTeacherClasses;
+window.createNewClassPrompt = createNewClassPrompt;
+window.sendNotification = sendNotification;
+window.switchRanking = switchRanking;
+window.checkNotifications = checkNotifications;
+window.loadNotificationsScreen = loadNotificationsScreen;
+window.openNotification = openNotification;
+window.loadProfile = loadProfile;
+window.loadInventory = loadInventory;
+window.equipItem = equipItem;
+window.handlePhotoUpload = handlePhotoUpload;
+window.editBio = editBio;
+window.saveBio = saveBio;
+window.showAdminTab = showAdminTab;
+window.showDevTab = showDevTab;
+window.createPreRegistry = createPreRegistry;
+window.loadDevDropdowns = loadDevDropdowns;
+window.toggleDevFields = toggleDevFields;
+window.loadStoreManagement = loadStoreManagement;
+window.saveStoreItem = saveStoreItem;
+window.editStoreItem = editStoreItem;
+window.deleteStoreItem = deleteStoreItem;
+window.activateSimulation = activateSimulation;
+window.loadStudentDashboard = loadStudentDashboard;
+window.loadTeacherDashboard = loadTeacherDashboard;
+window.loadParentDashboard = loadParentDashboard;
+window.loadDevStats = loadDevStats;
+window.sendMessage = sendMessage;
+window.loadMyMessages = loadMyMessages;
+window.loadInbox = loadInbox;
+window.replyToMessage = replyToMessage;
+window.loadPendingPhotos = loadPendingPhotos;
+window.decidePhoto = decidePhoto;
+window.loadRedemptionHistory = loadRedemptionHistory;
