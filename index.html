@@ -1,753 +1,349 @@
-// JavaScript Principal - MarsFlow English Academy
-// Versão: 5.1 (Fix para navegadores antigos e erro de carregamento)
-
-document.addEventListener('DOMContentLoaded', () => console.log('MarsFlow App Pronto.'));
-
-window.initializeApp = function() {
-    if (!window.userData) return;
-    const role = window.userData.role;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarsFlow English Academy</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
     
-    if (role === 'student') {
-        loadRealRanking();
-        loadTasks();
-    }
-    if (role === 'teacher' || role === 'admin') {
-        if(window.loadTeacherDashboard) window.loadTeacherDashboard();
-    }
-    if(window.checkNotifications) window.checkNotifications();
-}
-
-// =================================================================
-// 9. JOGO GALAXY DEFENDER (ARCADE ENGINE)
-// =================================================================
-
-let shooterGameInstance = null;
-
-window.startSpaceShooterGame = async function() {
-    const btn = (window.event && window.event.target) || document.querySelector('#gamesMenu button'); // Fallback seguro
-    const txt = btn ? btn.innerText : "Carregando..."; 
-    if(btn) { btn.innerText = "Loading..."; btn.disabled = true; }
-
-    try {
-        const userClass = window.userData.classId;
-        let q = window.collection(window.db, "arcade_questions");
-        
-        // Filtro por turma
-        if (window.userData.role === 'student') {
-            if(!userClass) { alert("Você não tem turma vinculada!"); if(btn){ btn.innerText=txt; btn.disabled=false; } return; }
-            q = window.query(q, window.where("targetClasses", "array-contains", userClass));
-        }
-        
-        const snap = await window.getDocs(q);
-        if (snap.empty) { 
-            alert("Sem perguntas para sua turma."); 
-            if(btn){ btn.innerText=txt; btn.disabled=false; } 
-            return; 
-        }
-
-        const questions = [];
-        snap.forEach(doc => {
-            const data = doc.data();
-            questions.push({ 
-                q: data.question, 
-                options: data.options, 
-                correct: data.correct 
-            });
-        });
-
-        // Alterna telas
-        document.getElementById('gamesMenu').style.display = 'none';
-        document.getElementById('gameUnscramble').style.display = 'none';
-        document.getElementById('quizSelector').style.display = 'none';
-        document.getElementById('gameSpaceShooter').style.display = 'block';
-        document.getElementById('shooterGameOver').style.display = 'none';
-
-        // Inicia Engine
-        if (shooterGameInstance) shooterGameInstance.stop();
-        shooterGameInstance = new SpaceShooterEngine('spaceCanvas');
-        shooterGameInstance.loadQuestions(questions);
-        shooterGameInstance.start();
-
-    } catch(e) { 
-        console.error(e); 
-        alert("Erro ao carregar jogo. Verifique o console."); 
-    } finally {
-        if(btn){ btn.innerText = txt; btn.disabled = false; }
-    }
-}
-
-window.stopSpaceShooter = function() { 
-    if (shooterGameInstance) shooterGameInstance.stop(); 
-}
-
-class SpaceShooterEngine {
-    constructor(canvasId) {
-        this.canvas = document.getElementById(canvasId);
-        this.ctx = this.canvas.getContext('2d');
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
-        this.width = this.canvas.width;
-        this.height = this.canvas.height;
-        this.isRunning = false;
-        this.score = 0;
-        this.qIndex = 0;
-        this.questions = [];
-        this.player = { x: this.width/2, y: this.height-70, width: 60, height: 60, color: '#C8102E', speed: 8 };
-        this.bullets = [];
-        this.monsters = [];
-        this.particles = [];
-        this.keys = {};
-        this.setupControls();
-    }
-
-    setupControls() {
-        window.addEventListener('keydown', e => this.keys[e.code] = true);
-        window.addEventListener('keyup', e => this.keys[e.code] = false);
-        window.addEventListener('keydown', e => { 
-            if (e.code === 'Space' && this.isRunning) this.shoot(); 
-        });
-        
-        let isTouch = false;
-        this.canvas.addEventListener('touchstart', (e) => { 
-            isTouch = true; 
-            const touchX = e.touches[0].clientX - this.canvas.getBoundingClientRect().left; 
-            this.player.x = touchX - this.player.width/2; 
-            this.shoot(); 
-        });
-        this.canvas.addEventListener('touchmove', (e) => { 
-            if(!isTouch) return; 
-            const touchX = e.touches[0].clientX - this.canvas.getBoundingClientRect().left; 
-            this.player.x = touchX - this.player.width/2; 
-            e.preventDefault(); 
-        });
-        this.canvas.addEventListener('touchend', () => isTouch = false);
-    }
-
-    loadQuestions(qs) { 
-        this.questions = [...qs].sort(() => Math.random() - 0.5); 
-        this.qIndex = 0; 
-        this.score = 0; 
-        this.loadNextLevel(); 
-    }
-
-    loadNextLevel() {
-        if (this.qIndex >= this.questions.length) { this.gameOver(); return; }
-        
-        this.bullets = [];
-        this.monsters = [];
-        const currentQ = this.questions[this.qIndex];
-        
-        document.getElementById('shooterQuestion').innerText = currentQ.q;
-        document.getElementById('shooterScore').innerText = this.score;
-
-        const options = [...currentQ.options].sort(() => Math.random() - 0.5);
-        const sectionWidth = this.width / options.length;
-        
-        options.forEach((opt, i) => { 
-            this.monsters.push({ 
-                x: (sectionWidth * i) + (sectionWidth/2) - 40, 
-                y: 50, 
-                width: 100, height: 70, 
-                text: opt, 
-                isCorrect: (opt === currentQ.correct), 
-                color: '#00205B', 
-                dx: (Math.random() > 0.5 ? 1 : -1) * 1.5, 
-                dy: 0.3 
-            }); 
-        });
-    }
-
-    start() { 
-        if (this.isRunning) return; 
-        this.isRunning = true; 
-        this.gameLoop(); 
-    }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    stop() { this.isRunning = false; }
-
-    gameOver() {
-        this.stop();
-        document.getElementById('shooterGameOver').style.display = 'flex';
-        document.getElementById('shooterFinalScore').innerText = this.score;
-        
-        if(window.userData && this.score > 0) {
-            const xpGain = this.score * 2;
-            const userRef = window.doc(window.db, "users", window.auth.currentUser.uid);
-            window.updateDoc(userRef, { experience: window.increment(xpGain) });
+    <style>
+        :root {
+            --mars-navy: #00205B;
+            --mars-navy-hover: #001540;
+            --mars-red: #C8102E;
+            --mars-red-hover: #a50b23;
+            --mars-gold: #D4AF37;
+            --text-dark: #1a1a1a;
         }
-    }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, var(--mars-navy) 0%, #000814 100%); min-height: 100vh; color: var(--text-dark); margin: 0; padding-bottom: 60px; }
+        .text-mars-navy { color: var(--mars-navy) !important; }
+        .text-mars-red { color: var(--mars-red) !important; }
+        .bg-mars-navy { background-color: var(--mars-navy) !important; color: white; }
+        .bg-mars-red { background-color: var(--mars-red) !important; color: white; }
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); background-color: #ffffff; margin-bottom: 24px; overflow: hidden; }
+        .card-header { background-color: white; border-bottom: 1px solid rgba(0,0,0,0.08); padding: 18px 24px; font-weight: 700; color: var(--mars-navy); }
+        .btn-primary { background-color: var(--mars-navy); border-color: var(--mars-navy); font-weight: 600; }
+        .btn-primary:hover { background-color: var(--mars-navy-hover); transform: translateY(-2px); }
+        .btn-danger { background-color: var(--mars-red); border-color: var(--mars-red); font-weight: 700; }
+        .btn-danger:hover { background-color: var(--mars-red-hover); transform: translateY(-2px); }
+        .btn-outline-primary { color: var(--mars-navy); border-color: var(--mars-navy); font-weight: 600; }
+        .btn-outline-primary:hover { background-color: var(--mars-navy); color: white; }
+        .navbar { background-color: var(--mars-navy) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.25); padding: 12px 0; }
+        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; transition: 0.3s; margin: 0 5px; border-radius: 8px; padding: 8px 16px !important; }
+        .nav-link:hover { background-color: rgba(255,255,255,0.1); color: white !important; transform: translateY(-2px); }
+        .nav-link.active { background-color: var(--mars-red); color: white !important; font-weight: 700; box-shadow: 0 4px 10px rgba(200, 16, 46, 0.4); }
+        .login-container { background: #ffffff; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); padding: 40px; margin-top: 60px; border-top: 8px solid var(--mars-red); }
+        
+        /* Jogo Arcade */
+        #gameSpaceShooter { position: relative; width: 100%; height: 600px; background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%); overflow: hidden; border-radius: 16px; box-shadow: inset 0 0 50px #000; border: 4px solid var(--mars-navy); }
+        #gameSpaceShooter::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 200%; background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)); background-repeat: repeat; background-size: 200px 200px; animation: spaceScroll 15s linear infinite; opacity: 0.6; }
+        @keyframes spaceScroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+        .arcade-text { text-shadow: 3px 3px 0px #000; font-family: 'Courier New', monospace; letter-spacing: -1px; }
+        .pointer-events-none { pointer-events: none; }
+        .content-section { display: none; }
+        .hover-effect { cursor: pointer; transition: transform 0.2s; }
+        .hover-effect:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        #simulationBar { background-color: var(--mars-gold); color: var(--mars-navy); border-top: 4px solid var(--mars-navy); }
+        .word-btn { transition: 0.3s; border: 2px solid var(--mars-navy); background: white; color: var(--mars-navy); font-weight: 600; padding: 8px 16px; border-radius: 12px; cursor: pointer; }
+        .word-btn.correct-pos { background-color: #28a745 !important; border-color: #28a745 !important; color: white !important; transform: scale(1.05); }
+    </style>
+</head>
+<body>
 
-    shoot() { 
-        this.bullets.push({ 
-            x: this.player.x + this.player.width/2 - 5, 
-            y: this.player.y, 
-            width: 10, height: 20, 
-            color: '#FFD700', speed: 12 
-        }); 
-    }
+    <div id="loginScreen" class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="login-container text-center">
+                    <div class="mb-4">
+                        <img src="img/logo.png" alt="Logo" style="max-height: 100px; width: auto;" class="mb-3">
+                        <h1 class="text-mars-navy fw-bold" style="letter-spacing: 1px;">MarsFlow</h1>
+                        <p class="text-mars-red fw-bold small text-uppercase">English Academy</p>
+                    </div>
+                    <form id="loginForm" class="text-start mt-4">
+                        <div class="mb-3"><label class="form-label small fw-bold">USUÁRIO</label><input type="text" class="form-control" id="loginUser" required placeholder="Ex: pedro.h"></div>
+                        <div class="mb-4"><label class="form-label small fw-bold">SENHA</label><input type="password" class="form-control" id="password" required></div>
+                        <div class="d-grid"><button type="submit" class="btn btn-danger btn-lg fw-bold shadow">ACESSAR</button></div>
+                        <div class="text-center mt-3" style="display:none;" id="loadingSpinner"><div class="spinner-border text-mars-navy"></div></div>
+                        <div id="loginError" class="alert alert-danger mt-3 small border-0" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    gameLoop() { 
-        if (!this.isRunning) return; 
-        this.update(); 
-        this.draw(); 
-        requestAnimationFrame(() => this.gameLoop()); 
-    }
+    <div id="appScreen" style="display: none;">
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#" onclick="showHome()">
+                    <img src="img/logo.png" alt="MF" height="35" class="me-2 d-inline-block align-text-top bg-white rounded-circle p-1">
+                    <span>MarsFlow</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto ms-lg-3">
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showHome()" id="linkHome">Home</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showGames()" id="linkGames">Jogos</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showStore()" id="linkStore">Loja</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showTasks()" id="linkTasks">Tarefas</a></li>
+                        <li class="nav-item nav-student"><a class="nav-link" href="#" onclick="showRanking()" id="linkRanking">Ranking</a></li>
+                        <li class="nav-item nav-parent"><a class="nav-link" href="#" onclick="showMessages()" id="linkMessages">Falar com Escola</a></li>
+                        <li class="nav-item"><a class="nav-link text-warning fw-bold" href="#" onclick="showAdmin()" id="navAdminBtn">Professor</a></li>
+                        <li class="nav-item"><a class="nav-link text-danger fw-bold" href="#" onclick="showDev()" id="navDevBtn">DEV</a></li>
+                    </ul>
+                    <ul class="navbar-nav align-items-center">
+                        <li class="nav-item me-3 position-relative"><a class="nav-link" href="#" onclick="showNotifications()"><i class="fas fa-bell"></i><span id="notifBadge" class="position-absolute badge bg-danger rounded-circle" style="display:none; width:10px; height:10px; top:10px; right:5px;"></span></a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"><span id="userName" class="fw-bold text-white small">Aluno</span></a>
+                            <ul class="dropdown-menu dropdown-menu-end mt-2 shadow border-0">
+                                <li><a class="dropdown-item nav-student" href="#" onclick="showProfile()">Perfil</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Sair</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-    update() {
-        if ((this.keys['ArrowLeft'] || this.keys['KeyA']) && this.player.x > 0) this.player.x -= this.player.speed;
-        if ((this.keys['ArrowRight'] || this.keys['KeyD']) && this.player.x + this.player.width < this.width) this.player.x += this.player.speed;
+        <div class="container mt-4">
+            
+            <div id="homeContent" class="content-section">
+                <div id="dash-student" class="role-dashboard">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card mb-4 border-0 text-white" style="background: linear-gradient(135deg, var(--mars-navy) 0%, #001030 100%);">
+                                <div class="card-body p-4 d-flex align-items-center">
+                                    <div class="me-4 position-relative">
+                                        <div id="homeStudentAvatar" class="display-3 bg-white rounded-circle border border-4 border-white p-1" style="width:100px; height:100px; background-size:cover; background-position:center;">👤</div>
+                                        <div class="position-absolute bottom-0 start-50 translate-middle-x badge bg-mars-red border border-white">Lvl <span id="homeStudentLevel">1</span></div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h2 class="fw-bold mb-0">Hi, <span id="homeStudentName">Student</span>!</h2>
+                                        <div class="progress mt-3" style="height:10px; background:rgba(255,255,255,0.2);"><div id="homeStudentXPBar" class="progress-bar bg-danger" style="width:0%"></div></div>
+                                        <small class="text-white-50 fw-bold"><span id="homeStudentXP">0</span> XP Total</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6"><div class="card h-100 border-start border-4 border-danger"><div class="card-body d-flex align-items-center"><i class="fas fa-coins fa-3x text-mars-red me-3"></i><div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentCoins">0</h3><small class="text-muted fw-bold">COINS</small></div></div></div></div>
+                                <div class="col-md-6"><div class="card h-100 border-start border-4 border-primary hover-effect" onclick="showTasks()"><div class="card-body d-flex align-items-center"><i class="fas fa-star fa-3x text-primary me-3"></i><div><h3 class="mb-0 fw-bold text-mars-navy" id="homeStudentTasks">0</h3><small class="text-muted fw-bold">MISSÕES</small></div></div></div></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4"><div class="card h-100"><div class="card-header bg-mars-navy text-white fw-bold">Top Alunos</div><div class="card-body p-0"><div id="homeTopStudents" class="list-group list-group-flush"></div></div></div></div>
+                    </div>
+                </div>
+                <div id="dash-teacher" class="role-dashboard" style="display:none;"><h2 class="text-white mb-4">Painel Professor</h2><div class="row g-3"><div class="col-md-4"><div class="card h-100 border-start border-4 border-danger" onclick="showAdminTab('tasks'); showAdmin();"><div class="card-body"><h6>CORREÇÕES</h6><h2 id="dashTeacherSubs">0</h2></div></div></div><div class="col-md-4"><div class="card h-100 border-start border-4 border-primary" onclick="showAdminTab('gamebank'); showAdmin();"><div class="card-body"><h6>JOGOS</h6><h2 class="text-mars-navy"><i class="fas fa-gamepad"></i></h2></div></div></div><div class="col-md-4"><div class="card h-100 border-start border-4 border-info" onclick="showAdminTab('classes'); showAdmin();"><div class="card-body"><h6>FOTOS</h6><h2 id="dashTeacherPhotos">0</h2></div></div></div></div></div>
+                <div id="dash-parent" class="role-dashboard" style="display:none;"><div class="alert bg-mars-navy text-white">Área do Responsável</div><div class="card text-center"><div class="card-body"><h3 id="dashParentChildName">Filho</h3></div></div></div>
+                <div id="dash-dev" class="role-dashboard" style="display:none;"><h2 class="text-danger">>_ ROOT</h2><div class="row"><div class="col-6"><button class="btn btn-outline-danger w-100 py-4" onclick="showDev()">Factory</button></div><div class="col-6"><button class="btn btn-outline-light w-100 py-4" onclick="showDevTab('simulator'); showDev();">Simulador</button></div></div></div>
+            </div>
 
-        this.bullets.forEach(b => b.y -= b.speed);
-        this.bullets = this.bullets.filter(b => b.y + b.height > 0);
+            <div id="gamesContent" class="content-section">
+                <div id="gamesMenu">
+                    <div class="card shadow-sm mb-4"><div class="card-header bg-mars-navy text-white"><i class="fas fa-gamepad me-2"></i>Arcade MarsFlow</div><div class="card-body"><div class="row g-4">
+                        <div class="col-md-4"><div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="showQuizSelector()"><i class="fas fa-brain fa-4x text-mars-navy mb-3"></i><h4 class="fw-bold text-mars-navy">Quiz</h4><button class="btn btn-outline-primary rounded-pill w-100 mt-2">JOGAR</button></div></div>
+                        <div class="col-md-4"><div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="startUnscrambleGame()"><i class="fas fa-sort-alpha-down fa-4x text-mars-red mb-3"></i><h4 class="fw-bold text-mars-navy">Unscramble</h4><button class="btn btn-outline-danger rounded-pill w-100 mt-2">JOGAR</button></div></div>
+                        <div class="col-md-4"><div class="card h-100 text-center p-4 border-0 shadow-sm hover-effect" onclick="startSpaceShooterGame()"><i class="fas fa-rocket fa-4x text-warning mb-3"></i><h4 class="fw-bold text-mars-navy">Galaxy Defender</h4><button class="btn btn-warning text-dark fw-bold rounded-pill w-100 mt-2">JOGAR</button></div></div>
+                    </div></div></div>
+                </div>
+                <div id="quizSelector" style="display:none;"><button class="btn btn-link fw-bold text-mars-navy mb-3" onclick="backToGamesMenu()"><i class="fas fa-arrow-left"></i> Voltar</button><div id="quizListContainer" class="row"></div></div>
+                <div id="quizPlayer" style="display:none;"><div class="row justify-content-center"><div class="col-md-8"><div class="card shadow-lg border-0"><div class="card-header bg-mars-navy text-white d-flex justify-content-between"><span>Quiz</span><span class="badge bg-danger">Score: <span id="quizScore">0</span></span></div><div class="card-body p-5 text-center"><div id="quizQuestionArea"><div class="progress mb-4" style="height:5px;"><div id="quizProgressBar" class="progress-bar bg-success" style="width:0%"></div></div><h4 id="qText" class="mb-4 fw-bold text-mars-navy">...</h4><div id="qOptions" class="d-grid gap-3"></div></div><div id="quizResultArea" style="display:none;"><h2>Fim!</h2><p>Acertos: <span id="finalScore" class="fw-bold text-success"></span></p><button class="btn btn-primary rounded-pill px-4" onclick="showQuizSelector()">Voltar</button></div></div></div></div></div></div>
+                <div id="gameUnscramble" style="display:none;"><button class="btn btn-link fw-bold text-mars-navy mb-3" onclick="backToGamesMenu()"><i class="fas fa-arrow-left"></i> Voltar</button><div class="row justify-content-center"><div class="col-md-8"><div class="card shadow-lg border-0"><div class="card-header bg-mars-navy text-white d-flex justify-content-between"><span>Sentence Builder</span><span class="badge bg-light text-dark" id="unscrambleLevelBadge">Level 1</span></div><div class="card-body p-4 text-center"><h5 class="text-muted mb-4 fst-italic">"<span id="unscrambleTranslation">...</span>"</h5><div id="unscrambleAnswerArea" class="p-3 mb-4 rounded border-bottom border-2 border-primary d-flex flex-wrap gap-2 justify-content-center bg-light" style="min-height:80px;"></div><div id="unscramblePoolArea" class="d-flex flex-wrap gap-2 justify-content-center mb-4"></div><div id="unscrambleSuccessMsg" style="display:none;"><div class="alert alert-success fw-bold">CORRECT!</div><button class="btn btn-primary rounded-pill px-5" onclick="nextUnscrambleLevel()">NEXT <i class="fas fa-arrow-right"></i></button></div></div></div></div></div></div>
+                <div id="gameSpaceShooter" style="display: none;"><button class="btn btn-sm btn-light position-absolute top-0 start-0 m-3 fw-bold" style="z-index: 10;" onclick="stopSpaceShooter(); backToGamesMenu();"><i class="fas fa-arrow-left"></i> Sair</button><div id="shooterOverlay" class="position-absolute w-100 p-3 text-center pointer-events-none" style="z-index: 5; top: 40px;"><h4 class="text-white fw-bold arcade-text" id="shooterQuestion">Ready?</h4><div class="badge bg-danger fs-6 mt-2 border border-white">Score: <span id="shooterScore">0</span></div></div><canvas id="spaceCanvas" width="800" height="600" style="width: 100%; height: 100%; display: block;"></canvas><div id="shooterGameOver" class="position-absolute w-100 h-100 flex-column justify-content-center align-items-center bg-dark bg-opacity-75 text-white" style="z-index: 20; display: none; top:0; left:0;"><h1 class="fw-bold text-mars-gold mb-3 arcade-text">GAME OVER</h1><p class="fs-4">Final Score: <span id="shooterFinalScore" class="fw-bold text-success">0</span></p><button class="btn btn-primary btn-lg rounded-pill mt-3 px-5 border border-white" onclick="startSpaceShooterGame()">TRY AGAIN</button></div></div>
+            </div>
 
-        this.monsters.forEach(m => { 
-            m.x += m.dx; 
-            m.y += m.dy; 
-            if (m.x < 0 || m.x + m.width > this.width) m.dx *= -1; 
-        });
+            <div id="storeContent" class="content-section"><div class="d-flex justify-content-between mb-4"><h2 class="text-white">Loja</h2><div class="bg-white p-2 px-4 rounded-pill"><span class="h4 text-mars-gold fw-bold" id="storeBalance">...</span></div></div><div class="row" id="storeList"></div></div>
+            <div id="tasksContent" class="content-section"><div class="row"><div class="col-md-8"><div class="card"><div class="card-header bg-primary text-white d-flex justify-content-between"><h5>Missões</h5><span class="badge bg-white text-primary" id="taskCount">0</span></div><div class="card-body p-0"><div id="taskList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-4"><div class="card bg-mars-red text-white"><div class="card-body text-center"><h5>XP Boost</h5><p>Complete as tarefas.</p></div></div></div></div></div>
+            <div id="rankingContent" class="content-section"><div class="card"><div class="card-header bg-mars-navy"><div class="d-flex justify-content-between mb-2"><h5 class="mb-0 text-white"><i class="fas fa-trophy text-mars-gold me-2"></i>Ranking</h5><span class="badge bg-light text-mars-navy" id="myClassBadge">...</span></div><ul class="nav nav-tabs border-bottom-0"><li class="nav-item"><a class="nav-link active" id="tabGeneral" href="#" onclick="switchRanking('general')">Geral</a></li><li class="nav-item"><a class="nav-link" id="tabClass" href="#" onclick="switchRanking('class')">Turma</a></li></ul></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover table-striped mb-0"><thead class="bg-light text-mars-navy"><tr><th class="text-center">#</th><th>Aluno</th><th class="text-center">Lvl</th><th class="text-end pe-4">XP</th></tr></thead><tbody id="tabelaRankingCompleta"></tbody></table></div></div></div></div>
+            <div id="profileContent" class="content-section"><div class="row"><div class="col-md-4 mb-4"><div class="card shadow border-0" id="profileCard"><div class="card-body text-center pt-5 pb-4"><div class="mb-4 position-relative d-inline-block"><div id="profileAvatarDisplay" class="display-1 bg-light rounded-circle border border-4 border-white shadow-sm p-1 position-relative overflow-hidden" style="width: 140px; height: 140px; background-size: cover; background-position: center;">👤</div><label for="photoUpload" class="position-absolute top-0 end-0 btn btn-sm btn-light rounded-circle border shadow-sm" style="cursor: pointer;"><i class="fas fa-camera text-mars-navy"></i></label><input type="file" id="photoUpload" style="display: none;" onchange="handlePhotoUpload(this)"><div class="position-absolute bottom-0 start-50 translate-middle-x badge bg-mars-red border border-white">Lvl <span id="profileLevel">1</span></div></div><h3 class="mt-3 fw-bold text-mars-navy" id="profileName">...</h3><div class="px-4 mb-3"><button class="btn btn-link btn-sm text-danger" onclick="editBio()">Editar Bio</button><div id="bioEditContainer" style="display:none;" class="mt-2"><textarea id="bioInput" class="form-control form-control-sm mb-2" rows="2"></textarea><button class="btn btn-danger btn-sm w-100" onclick="saveBio()">Salvar</button></div></div><div class="mt-4 px-3"><div class="d-flex justify-content-between small text-muted mb-1"><span>Progresso</span><span id="xpRatio">0/100</span></div><div class="progress" style="height: 8px;"><div id="xpBar" class="progress-bar bg-mars-red" style="width: 0%"></div></div></div></div></div></div><div class="col-md-8"><div class="card shadow-sm h-100"><div class="card-header bg-white text-mars-navy">Inventário</div><div class="card-body bg-light"><div class="row g-3" id="inventoryList"></div></div></div></div></div></div>
+            <div id="messagesContent" class="content-section"><div class="row"><div class="col-md-5"><div class="card"><div class="card-header bg-mars-navy text-white">Nova Mensagem</div><div class="card-body"><form onsubmit="event.preventDefault(); sendMessage();"><select id="msgSubject" class="form-select mb-3"><option>Dúvida</option><option>Outros</option></select><textarea id="msgContent" class="form-control mb-3" rows="5"></textarea><button class="btn btn-primary w-100">ENVIAR</button></form></div></div></div><div class="col-md-7"><div class="card"><div class="card-header">Histórico</div><div class="card-body p-0"><div id="myMessagesList"></div></div></div></div></div></div>
+            <div id="notificationsContent" class="content-section"><div class="row h-100"><div class="col-md-4 border-end"><div class="list-group list-group-flush" id="notifList"></div></div><div class="col-md-8"><div id="notifDetail" class="p-5 text-center text-muted">Selecione...</div></div></div></div>
 
-        this.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
-        this.particles = this.particles.filter(p => p.life > 0);
-
-        this.checkCollisions();
-    }
-
-    checkCollisions() {
-        this.bullets.forEach((b, bIdx) => {
-            this.monsters.forEach((m, mIdx) => {
-                if (b.x < m.x + m.width && b.x + b.width > m.x && b.y < m.y + m.height && b.y + b.height > m.y) {
-                    this.bullets.splice(bIdx, 1);
+            <div id="adminContent" class="content-section">
+                <div class="row h-100"><div class="col-md-3 mb-4"><div class="card h-100 border-0"><div class="card-header bg-mars-navy text-white text-center py-4"><h5 class="mb-0">Professor</h5></div><div class="list-group list-group-flush" id="adminSidebar"><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('tasks')">Atividades</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('gamebank')"><i class="fas fa-gamepad text-primary me-2"></i> Banco de Jogos</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('classes')">Turmas</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('attendance')">Chamada</button><button class="list-group-item list-group-item-action fw-bold py-3 border-0" onclick="showAdminTab('comms')">Comunicação</button></div></div></div>
+                <div class="col-md-9">
+                    <div id="adminTab-gamebank" class="admin-tab" style="display:none;">
+                        <h3 class="text-mars-navy mb-4"><i class="fas fa-gamepad me-2"></i>Banco de Jogos</h3>
+                        <div class="row g-4">
+                            <div class="col-md-4"><div class="card h-100 text-center p-4 hover-effect" onclick="showAdminTab('quiz')"><i class="fas fa-brain fa-3x text-mars-navy mb-3"></i><h5>Quiz</h5><button class="btn btn-outline-primary rounded-pill w-100 btn-sm">Gerenciar</button></div></div>
+                            <div class="col-md-4"><div class="card h-100 text-center p-4 hover-effect" onclick="showAdminTab('unscramble')"><i class="fas fa-sort-alpha-down fa-3x text-mars-red mb-3"></i><h5>Unscramble</h5><button class="btn btn-outline-danger rounded-pill w-100 btn-sm">Gerenciar</button></div></div>
+                            <div class="col-md-4"><div class="card h-100 text-center p-4 hover-effect" onclick="showAdminTab('arcade')"><i class="fas fa-rocket fa-3x text-warning mb-3"></i><h5>Galaxy</h5><button class="btn btn-outline-warning text-dark rounded-pill w-100 btn-sm fw-bold">Gerenciar</button></div></div>
+                        </div>
+                    </div>
+                    <div id="adminTab-quiz" class="admin-tab" style="display:none;"><button class="btn btn-link" onclick="showAdminTab('gamebank')">Voltar</button><div class="row"><div class="col-md-4"><div id="quizLibraryList"></div><button class="btn btn-primary w-100" onclick="resetQuizForm()">Novo</button></div><div class="col-md-8"><form onsubmit="event.preventDefault(); saveQuiz();"><input type="hidden" id="quizId"><div class="row"><div class="col-3"><input id="quizUnit" placeholder="Unit" class="form-control" required></div><div class="col-3"><input id="quizLesson" placeholder="Lesson" class="form-control" required></div><div class="col-6"><input id="quizTitle" placeholder="Titulo" class="form-control" required></div></div><div class="mb-3 p-3 bg-light rounded"><label>TURMAS:</label><div id="quizClassSelector"></div></div><div id="questionsContainer"></div><button type="button" class="btn btn-light w-100" onclick="addQuestionField()">+ Pergunta</button><button class="btn btn-success w-100 mt-2">SALVAR</button></form></div></div></div>
+                    <div id="adminTab-unscramble" class="admin-tab" style="display:none;"><button class="btn btn-link" onclick="showAdminTab('gamebank')">Voltar</button><div class="row"><div class="col-md-5"><div id="unscrambleLibraryList"></div><button class="btn btn-danger w-100" onclick="resetUnscrambleForm()">Novo</button></div><div class="col-md-7"><form onsubmit="event.preventDefault(); saveUnscrambleActivity();"><input type="hidden" id="unscrambleId"><div class="row"><div class="col-3"><input id="unscrambleUnit" placeholder="U" class="form-control" required></div><div class="col-3"><input id="unscrambleLesson" placeholder="L" class="form-control" required></div><div class="col-6"><select id="unscrambleLevel" class="form-select"><option value="easy">Easy</option><option value="medium">Medium</option></select></div></div><div class="mb-3 p-3 bg-light rounded"><label>TURMAS:</label><div id="unscrambleClassSelector"></div></div><input id="unscrambleSentence" class="form-control mb-2" placeholder="Frase" required><input id="unscrambleTranslation" class="form-control mb-2" placeholder="Tradução" required><button class="btn btn-success w-100">SALVAR</button></form></div></div></div>
+                    <div id="adminTab-arcade" class="admin-tab" style="display:none;"><button class="btn btn-link" onclick="showAdminTab('gamebank')">Voltar</button><div class="row"><div class="col-md-5"><div id="arcadeLibraryList"></div><button class="btn btn-warning w-100 fw-bold" onclick="resetArcadeForm()">Novo</button></div><div class="col-md-7"><form onsubmit="event.preventDefault(); saveArcadeQuestion();"><input type="hidden" id="arcadeId"><div class="row mb-2"><div class="col-6"><input id="arcadeUnit" placeholder="U" class="form-control" required></div><div class="col-6"><input id="arcadeLesson" placeholder="L" class="form-control" required></div></div><div class="mb-3 p-3 bg-light rounded"><label>TURMAS:</label><div id="arcadeClassSelector"></div></div><input id="arcadeQuestion" class="form-control mb-2" placeholder="Pergunta" maxlength="30" required><input id="arcadeCorrect" class="form-control mb-2 border-success" placeholder="Correta" required><div class="row"><div class="col-6"><input id="arcadeWrong1" class="form-control" placeholder="Errada 1" required></div><div class="col-6"><input id="arcadeWrong2" class="form-control" placeholder="Errada 2" required></div></div><button class="btn btn-success w-100 mt-3 fw-bold">SALVAR</button></form></div></div></div>
                     
-                    if (m.isCorrect) {
-                        this.score += 20; 
-                        this.createExplosion(m.x + m.width/2, m.y + m.height/2, '#28a745'); 
-                        this.monsters.splice(mIdx, 1);
-                        setTimeout(() => { this.qIndex++; this.loadNextLevel(); }, 800);
-                    } else {
-                        this.score = Math.max(0, this.score - 10); 
-                        document.getElementById('shooterScore').innerText = this.score;
-                        m.color = '#C8102E'; 
-                        this.createExplosion(m.x + m.width/2, m.y + m.height/2, '#C8102E'); 
-                        setTimeout(() => m.color = '#00205B', 500);
-                    }
+                    <div id="adminTab-tasks" class="admin-tab">
+                        <div class="row"><div class="col-md-5"><div class="card shadow-sm mb-4"><div class="card-header bg-mars-red text-white">Criar Missão</div><div class="card-body"><form onsubmit="event.preventDefault(); createTask();"><input type="text" id="taskTitle" class="form-control mb-2" required placeholder="Título"><textarea id="taskDesc" class="form-control mb-2" required placeholder="Descrição"></textarea><div class="row mb-2"><div class="col"><input type="number" id="taskXP" class="form-control" placeholder="XP" value="100"></div><div class="col"><input type="number" id="taskCoins" class="form-control" placeholder="$" value="50"></div></div><input type="date" id="taskDate" class="form-control mb-2"><button type="submit" class="btn btn-danger w-100 fw-bold">PUBLICAR</button></form></div></div></div><div class="col-md-7"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Entregas</span><button class="btn btn-sm btn-outline-light" onclick="loadPendingSubmissions()">Sync</button></div><div class="card-body p-0"><div id="submissionsList" class="list-group list-group-flush"></div></div></div></div></div>
+                    </div>
+                    
+                    <div id="adminTab-store" class="admin-tab" style="display:none;">
+                        <div class="row"><div class="col-md-6"><div class="card shadow-sm border-success h-100"><div class="card-header bg-success text-white d-flex justify-content-between"><span>Pedidos</span><button class="btn btn-sm btn-light text-success" onclick="loadPendingOrders()">Sync</button></div><div class="card-body p-0"><div id="ordersList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm"><div class="card-header bg-dark text-white d-flex justify-content-between"><span>Histórico</span><button class="btn btn-sm btn-light" onclick="loadRedemptionHistory()">Sync</button></div><div class="card-body p-0"><div class="table-responsive" style="max-height:400px;"><table class="table table-striped mb-0 text-center small"><thead><tr><th>Data</th><th>Aluno</th><th>Item</th><th>$</th></tr></thead><tbody id="redemptionHistoryBody"></tbody></table></div></div></div></div></div>
+                    </div>
+                    
+                    <div id="adminTab-classes" class="admin-tab" style="display:none;">
+                        <div class="row mb-4"><div class="col-md-6"><div class="card shadow-sm border-info h-100"><div class="card-header bg-info text-white d-flex justify-content-between"><span>Aprovar Fotos</span><button class="btn btn-sm btn-light text-info" onclick="loadPendingPhotos()">Sync</button></div><div class="card-body p-0"><div id="pendingPhotosList" class="list-group list-group-flush"></div></div></div></div><div class="col-md-6"><div class="card shadow-sm border-primary h-100"><div class="card-header bg-primary text-white d-flex justify-content-between"><span>Minhas Turmas</span><button class="btn btn-sm btn-light text-primary fw-bold" onclick="createNewClassPrompt()">Nova</button></div><div class="card-body p-0"><div id="classList" class="list-group list-group-flush"></div></div></div></div></div>
+                        <div class="card shadow-sm border-dark"><div class="card-header bg-dark text-white">Regras</div><div class="card-body"><div class="row"><div class="col-md-4"><select id="studentSelect" class="form-select mb-3"><option>Carregando...</option></select><form onsubmit="event.preventDefault(); applyManualAdjustment();"><div class="input-group mb-2"><span class="input-group-text">XP</span><input type="number" id="manualXP" class="form-control"></div><div class="input-group mb-2"><span class="input-group-text">$</span><input type="number" id="manualCoins" class="form-control"></div><button type="submit" class="btn btn-outline-primary w-100 btn-sm">Aplicar</button></form></div><div class="col-md-4"><div id="rulesList" class="d-flex flex-wrap gap-2 mt-2"></div></div><div class="col-md-4 border-start"><form onsubmit="event.preventDefault(); createRule();"><input type="text" id="ruleName" class="form-control form-control-sm mb-2" placeholder="Nome" required><div class="row mb-2"><div class="col"><input type="number" id="ruleXP" class="form-control form-control-sm" placeholder="XP"></div><div class="col"><input type="number" id="ruleCoins" class="form-control form-control-sm" placeholder="$"></div></div><select id="ruleType" class="form-select form-select-sm mb-2"><option value="positive">Positiva</option><option value="negative">Negativa</option></select><button type="submit" class="btn btn-secondary btn-sm w-100">Salvar</button></form></div></div></div></div>
+                    </div>
+                    
+                    <div id="adminTab-comms" class="admin-tab" style="display:none;">
+                        <div class="card shadow-sm border-danger mb-4"><div class="card-header bg-danger text-white d-flex justify-content-between"><span>Inbox</span><button class="btn btn-sm btn-light text-danger fw-bold" onclick="loadInbox()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle"><thead class="table-light"><tr><th>Data</th><th>De</th><th>Assunto</th><th>Msg</th><th>Ação</th></tr></thead><tbody id="inboxTableBody"></tbody></table></div></div></div><div class="card shadow-sm border-primary"><div class="card-header bg-mars-navy text-white">Enviar Comunicado</div><div class="card-body"><form onsubmit="event.preventDefault(); sendNotification();"><div class="row mb-3"><div class="col-8"><input type="text" id="notifTitle" class="form-control" placeholder="Título" required></div><div class="col-4"><select id="notifTarget" class="form-select"></select></div></div><textarea id="notifMessage" class="form-control mb-3" rows="3" placeholder="Mensagem"></textarea><div class="row mb-3"><div class="col"><select id="notifType" class="form-select"><option value="homework">Homework</option><option value="test">Prova</option><option value="event">Evento</option><option value="dm">DM</option></select></div><div class="col"><select id="notifUrgency" class="form-select"><option value="chill">Tranquilo</option><option value="attention">Atenção</option><option value="urgent">Urgente</option></select></div></div><button type="submit" class="btn btn-danger w-100 fw-bold">ENVIAR</button></form></div></div>
+                    </div>
+                    
+                    <div id="adminTab-attendance" class="admin-tab" style="display: none;">
+                        <div class="card shadow-sm border-primary mb-4"><div class="card-header bg-mars-navy text-white">Chamada</div><div class="card-body"><div class="row g-2 align-items-end mb-3"><div class="col-md-4"><label class="small">Data</label><input type="date" id="attDate" class="form-control" onchange="loadAttendanceSheet()"></div><div class="col-md-5"><label class="small">Turma</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div><div class="col-md-3"><button class="btn btn-outline-primary w-100" onclick="loadAttendanceSheet()">Carregar</button></div></div><div id="attendanceSheetArea" style="display: none;"><div class="table-responsive border rounded mb-3" style="max-height: 400px;"><table class="table table-hover align-middle mb-0"><thead class="bg-light"><tr><th>Aluno</th><th class="text-center" width="150">Status</th></tr></thead><tbody id="attendanceListBody"></tbody></table></div><div class="d-flex justify-content-between align-items-center"><div class="small" id="attTotalCount"></div><button class="btn btn-success fw-bold px-4" onclick="saveAttendance()">SALVAR</button></div></div><div id="attendanceEmptyState" class="text-center py-5 text-muted">Selecione Data e Turma.</div></div></div><div class="card shadow-sm"><div class="card-header bg-white d-flex justify-content-between"><span>Histórico</span><input type="month" id="attHistoryMonth" class="form-control form-control-sm" style="width: 150px;" onchange="loadAttendanceHistory()"></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-striped mb-0 small text-center"><thead class="bg-light"><tr><th>Data</th><th>Turma</th><th>Status</th><th>Edit</th></tr></thead><tbody id="attHistoryBody"></tbody></table></div></div></div>
+                    </div>
+                </div></div>
+            </div>
+            
+            <div id="devContent" class="content-section">
+                <div class="row h-100"><div class="col-md-3"><div class="card border-danger h-100"><div class="card-header bg-danger text-white"><h5>DEV</h5></div><div class="list-group list-group-flush" id="devSidebar"><button class="list-group-item" onclick="showDevTab('users')">Users</button><button class="list-group-item" onclick="showDevTab('store')">Loja</button><button class="list-group-item" onclick="showDevTab('simulator')">Simular</button></div></div></div>
+                <div class="col-md-9">
+                    <div id="devTab-users" class="dev-tab">
+                        <h3 class="text-white mb-3">Cadastro de Usuários</h3>
+                        <div class="card shadow-sm border-danger"><div class="card-body"><form onsubmit="event.preventDefault(); createPreRegistry();"><div class="row mb-3"><div class="col-md-4"><label class="form-label">Função</label><select id="devUserRole" class="form-select" onchange="toggleDevFields()"><option value="student">Aluno</option><option value="teacher">Professor</option><option value="parent">Responsável</option></select></div><div class="col-md-8"><label class="form-label">Nome</label><input type="text" id="devUserName" class="form-control" required></div></div><label class="form-label">Login/Email</label><input type="text" id="devUserEmail" class="form-control mb-3" required><div id="devStudentFields" class="p-3 bg-light rounded mb-3"><div class="row"><div class="col"><input type="date" id="devUserDOB" class="form-control"></div><div class="col"><select id="devUserClass" class="form-select"></select></div></div></div><div id="devTeacherFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserClasses" class="form-select" multiple></select></div><div id="devParentFields" style="display:none;" class="p-3 bg-light rounded mb-3"><select id="devUserChildren" class="form-select" multiple></select></div><button type="submit" class="btn btn-danger w-100 fw-bold">CRIAR</button></form></div></div>
+                    </div>
+                    <div id="devTab-store" class="dev-tab" style="display:none;">
+                        <h3 class="text-white mb-3">Catálogo</h3>
+                        <div class="card shadow-sm mb-4 border-dark"><div class="card-header bg-dark text-white">Item</div><div class="card-body"><form onsubmit="event.preventDefault(); saveStoreItem();"><input type="hidden" id="devItemId"><div class="row mb-2"><div class="col-md-2"><input type="text" id="devItemIcon" class="form-control text-center fs-4" placeholder="🎁" required></div><div class="col-md-7"><input type="text" id="devItemName" class="form-control" required placeholder="Nome"></div><div class="col-md-3"><input type="number" id="devItemPrice" class="form-control" value="100"></div></div><input type="text" id="devItemDesc" class="form-control mb-2" placeholder="Desc"><div class="row mb-3"><div class="col-md-4"><select id="devItemType" class="form-select"><option value="permanent">Permanente</option><option value="consumable">Consumível</option></select></div><div class="col-md-4"><select id="devItemCat" class="form-select"><option value="avatar">Avatar</option><option value="frame">Moldura</option></select></div><div class="col-md-2"><input type="number" id="devItemStock" class="form-control" value="99"></div><div class="col-md-2"><button type="submit" class="btn btn-success w-100">Salvar</button></div></div></form></div></div>
+                        <div class="card shadow-sm"><div class="card-header d-flex justify-content-between"><span>Itens</span><button class="btn btn-sm btn-outline-secondary" onclick="loadStoreManagement()">Sync</button></div><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0 align-middle text-center"><thead class="table-light"><tr><th>Icon</th><th>Nome</th><th>$</th><th>Est</th><th>Ações</th></tr></thead><tbody id="devStoreList"></tbody></table></div></div></div>
+                    </div>
+                    <div id="devTab-simulator" class="dev-tab" style="display:none;">
+                        <h3 class="text-white mb-3">Simulador</h3><div class="card shadow-sm border-primary"><div class="card-body text-center"><div class="row g-3"><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('student')"><div class="card-body"><i class="fas fa-user-graduate fa-3x text-primary mb-3"></i><h5>Aluno</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('teacher')"><div class="card-body"><i class="fas fa-chalkboard-teacher fa-3x text-warning mb-3"></i><h5>Professor</h5></div></div></div><div class="col-md-4"><div class="card h-100 bg-light border-0 hover-effect" onclick="activateSimulation('parent')"><div class="card-body"><i class="fas fa-user-friends fa-3x text-success mb-3"></i><h5>Pai</h5></div></div></div></div><div class="mt-4 pt-3 border-top"><button class="btn btn-outline-danger" onclick="activateSimulation('dev')">Reset</button></div></div></div>
+                    </div>
+                </div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="simulationBar" class="fixed-bottom text-center py-2 fw-bold shadow" style="display: none; z-index: 9999;"><i class="fas fa-glasses me-2"></i> MODO SIMULAÇÃO<button class="btn btn-sm btn-light ms-3 fw-bold border-0 text-mars-navy" onclick="activateSimulation('dev')">SAIR</button></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, collection, query, orderBy, limit, getDocs, where, getCountFromServer, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ============================================================
+        // ⚠️ ATENÇÃO: COLOQUE SUAS CHAVES AQUI!
+        // ============================================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyBYe4oRa-uS1hTodVAsa7Zer1fOAU9-kcA",
+          authDomain: "marsflow-english-academy.firebaseapp.com",
+          projectId: "marsflow-english-academy",
+          storageBucket: "marsflow-english-academy.firebasestorage.app",
+          messagingSenderId: "527381031956",
+          appId: "1:527381031956:web:495fb3da0a3cea8b864b01",
+          measurementId: "G-1NC30HNJLQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        window.db = db; window.auth = auth; window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.addDoc = addDoc; window.deleteDoc = deleteDoc; window.arrayUnion = arrayUnion; window.arrayRemove = arrayRemove; window.collection = collection; window.query = query; window.orderBy = orderBy; window.limit = limit; window.getDocs = getDocs; window.where = where; window.getCountFromServer = getCountFromServer; window.increment = increment;
+
+        let currentUser = null;
+        let userData = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(); 
+                showAppScreen();
+                if (window.initializeApp) window.initializeApp();
+                if(window.checkNotifications) setInterval(() => window.checkNotifications(), 60000);
+            } else {
+                showLoginScreen();
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let loginUser = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('password').value;
+            if (!loginUser.includes('@')) loginUser += '@aluno.marsflow';
+            try {
+                document.getElementById('loadingSpinner').style.display = 'block';
+                await signInWithEmailAndPassword(auth, loginUser, password);
+                document.getElementById('loadingSpinner').style.display = 'none';
+            } catch (error) {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('errorMessage').innerText = "Login inválido.";
+            }
+        });
+
+        async function loadUserData() {
+            if (!currentUser) return;
+            try {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                if (userDoc.exists()) { userData = userDoc.data(); } 
+                else {
+                    const emailKey = currentUser.email.toLowerCase();
+                    const preRegDoc = await getDoc(doc(db, "pre_registers", emailKey));
+                    let initialData = {};
+                    if (preRegDoc.exists()) { initialData = preRegDoc.data(); delete initialData.isPreRegistered; } 
+                    else { initialData = { name: currentUser.email.split('@')[0], role: 'student', level: 1, coins: 50, experience: 0 }; }
+                    userData = { ...initialData, uid: currentUser.uid, email: currentUser.email, inventory: [], createdAt: new Date().toISOString() };
+                    await setDoc(doc(db, 'users', currentUser.uid), userData);
                 }
-            });
-        });
-    }
-
-    createExplosion(x, y, color) { 
-        for (let i = 0; i < 20; i++) { 
-            this.particles.push({ 
-                x: x, y: y, 
-                vx: (Math.random() - 0.5) * 12, 
-                vy: (Math.random() - 0.5) * 12, 
-                size: Math.random() * 6 + 2, 
-                color: color, 
-                life: 40 
-            }); 
-        } 
-    }
-
-    draw() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        
-        const p = this.player; 
-        this.ctx.fillStyle = p.color;
-        this.ctx.beginPath(); 
-        this.ctx.moveTo(p.x + p.width/2, p.y); 
-        this.ctx.lineTo(p.x + p.width, p.y + p.height); 
-        this.ctx.lineTo(p.x, p.y + p.height); 
-        this.ctx.fill();
-        this.ctx.fillStyle = '#00205B'; 
-        this.ctx.fillRect(p.x + 10, p.y + p.height - 10, p.width - 20, 10);
-
-        this.bullets.forEach(b => { 
-            this.ctx.fillStyle = b.color; 
-            this.ctx.beginPath(); 
-            // Fix de Compatibilidade: Usa rect se roundRect não existir
-            if (this.ctx.roundRect) this.ctx.roundRect(b.x, b.y, b.width, b.height, 5);
-            else this.ctx.rect(b.x, b.y, b.width, b.height);
-            this.ctx.fill(); 
-        });
-
-        this.monsters.forEach(m => { 
-            this.ctx.fillStyle = m.color; 
-            this.ctx.beginPath(); 
-            if (this.ctx.roundRect) this.ctx.roundRect(m.x, m.y, m.width, m.height, 15); 
-            else this.ctx.rect(m.x, m.y, m.width, m.height);
-            this.ctx.fill(); 
-            
-            this.ctx.fillStyle = '#fff'; 
-            this.ctx.beginPath(); 
-            this.ctx.arc(m.x + 30, m.y + 25, 8, 0, Math.PI*2); 
-            this.ctx.fill(); 
-            this.ctx.beginPath(); 
-            this.ctx.arc(m.x + m.width - 30, m.y + 25, 8, 0, Math.PI*2); 
-            this.ctx.fill(); 
-            
-            this.ctx.font = 'bold 16px Poppins'; 
-            this.ctx.textAlign = 'center'; 
-            this.ctx.fillText(m.text, m.x + m.width/2, m.y + m.height/2 + 15); 
-        });
-
-        this.particles.forEach(pt => { 
-            this.ctx.fillStyle = pt.color; 
-            this.ctx.globalAlpha = pt.life / 40; 
-            this.ctx.beginPath(); 
-            this.ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI*2); 
-            this.ctx.fill(); 
-        });
-        this.ctx.globalAlpha = 1;
-    }
-}
-
-// =================================================================
-// GESTÃO DE JOGOS & FILTRO DE TURMAS
-// =================================================================
-
-window.renderClassSelector = async function(containerId, selectedIds = []) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '<div class="spinner-border spinner-border-sm text-mars-navy"></div>';
-    
-    try {
-        const snap = await window.getDocs(window.query(window.collection(window.db, "classes"), window.orderBy("name")));
-        let html = '';
-        
-        snap.forEach(doc => {
-            const isChecked = selectedIds.includes(doc.id) ? 'checked' : '';
-            html += `
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input class-checkbox" type="checkbox" value="${doc.id}" id="${containerId}_${doc.id}" ${isChecked}>
-                    <label class="form-check-label" for="${containerId}_${doc.id}">${doc.data().name}</label>
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html || '<span class="text-muted small">Crie turmas primeiro.</span>';
-    } catch(e) { console.error(e); }
-}
-
-window.getSelectedClasses = function(containerId) {
-    return Array.from(document.querySelectorAll(`#${containerId} .class-checkbox:checked`)).map(cb => cb.value);
-}
-
-// --- GESTÃO DE ARCADE ---
-window.loadArcadeLibrary = async function() {
-    const list = document.getElementById('arcadeLibraryList');
-    const snap = await window.getDocs(window.query(window.collection(window.db, "arcade_questions"), window.orderBy("unit")));
-    let html = '';
-    
-    if (snap.empty) { list.innerHTML = '<div class="p-3 text-muted">Vazio.</div>'; return; }
-
-    snap.forEach(doc => {
-        const q = doc.data(); 
-        const str = encodeURIComponent(JSON.stringify({...q, id: doc.id})); 
-        const cc = q.targetClasses ? q.targetClasses.length : 0;
-        
-        html += `
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="badge bg-secondary">U${q.unit}</span> 
-                    <span class="fw-bold text-mars-navy">${q.question}</span>
-                    <br><small class="text-muted">Resp: ${q.correct} | Turmas: ${cc}</small>
-                </div>
-                <div>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editArcade('${str}')"><i class="fas fa-pen"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteArcade('${doc.id}')"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>`;
-    });
-    list.innerHTML = html;
-}
-
-window.saveArcadeQuestion = async function() {
-    const id = document.getElementById('arcadeId').value;
-    const targetClasses = getSelectedClasses('arcadeClassSelector');
-    
-    if (targetClasses.length === 0) return alert("Selecione a turma!");
-
-    const data = {
-        unit: parseInt(document.getElementById('arcadeUnit').value), 
-        lesson: parseInt(document.getElementById('arcadeLesson').value),
-        question: document.getElementById('arcadeQuestion').value, 
-        correct: document.getElementById('arcadeCorrect').value,
-        options: [
-            document.getElementById('arcadeCorrect').value, 
-            document.getElementById('arcadeWrong1').value, 
-            document.getElementById('arcadeWrong2').value
-        ],
-        targetClasses: targetClasses, 
-        updatedAt: new Date().toISOString()
-    };
-
-    try {
-        if(id) await window.updateDoc(window.doc(window.db, "arcade_questions", id), data);
-        else await window.addDoc(window.collection(window.db, "arcade_questions"), data);
-        alert("Salvo!"); resetArcadeForm(); loadArcadeLibrary();
-    } catch(e) { alert("Erro: " + e.message); }
-}
-
-window.editArcade = function(str) {
-    const q = JSON.parse(decodeURIComponent(str));
-    document.getElementById('arcadeId').value = q.id; 
-    document.getElementById('arcadeUnit').value = q.unit; 
-    document.getElementById('arcadeLesson').value = q.lesson;
-    document.getElementById('arcadeQuestion').value = q.question; 
-    document.getElementById('arcadeCorrect').value = q.correct;
-    
-    const wrongs = q.options.filter(o => o !== q.correct);
-    document.getElementById('arcadeWrong1').value = wrongs[0] || ''; 
-    document.getElementById('arcadeWrong2').value = wrongs[1] || '';
-    
-    renderClassSelector('arcadeClassSelector', q.targetClasses || []);
-}
-
-window.deleteArcade = async function(id) { 
-    if(confirm("Apagar?")) { 
-        await window.deleteDoc(window.doc(window.db, "arcade_questions", id)); 
-        loadArcadeLibrary(); 
-    } 
-}
-
-window.resetArcadeForm = function() { 
-    document.querySelector('#adminTab-arcade form').reset(); 
-    document.getElementById('arcadeId').value = ''; 
-    renderClassSelector('arcadeClassSelector'); 
-}
-
-// =================================================================
-// OUTROS MÓDULOS (QUIZ, UNSCRAMBLE, ATTENDANCE)
-// =================================================================
-
-// UNSCRAMBLE
-window.unscrambleLevels=[]; window.currentUnscrambleIndex=0; window.userAnswerWords=[]; window.poolWords=[];
-
-window.startUnscrambleGame = async function() {
-    const btn = (window.event && window.event.target) || null;
-    const txt = btn ? btn.innerText : "Loading";
-    if(btn) { btn.innerText="Carregando..."; btn.disabled=true; }
-    
-    try { 
-        const userClass = window.userData.classId;
-        let q = window.collection(window.db, "unscramble_activities");
-        
-        if (window.userData.role === 'student') {
-            if(!userClass) { alert("Sem turma vinculada."); if(btn){btn.disabled=false;btn.innerText=txt;} return; }
-            q = window.query(q, window.where("targetClasses", "array-contains", userClass), window.orderBy("unit"));
-        } else {
-            q = window.query(q, window.orderBy("unit"));
+                window.userData = userData;
+                updateUserInterface();
+            } catch (error) { console.error('Erro load user:', error); }
         }
-        
-        const snap = await window.getDocs(q);
-        if(snap.empty){ alert("Sem frases disponíveis."); if(btn){btn.innerText=txt; btn.disabled=false;} return; }
-        
-        window.unscrambleLevels=[]; 
-        snap.forEach(d=>window.unscrambleLevels.push(d.data()));
-        
-        document.getElementById('gamesMenu').style.display='none'; 
-        document.getElementById('gameUnscramble').style.display='block'; 
-        window.currentUnscrambleIndex=0; 
-        loadUnscrambleLevel(0);
-        
-    } catch(e){ console.error(e); alert("Erro ao carregar."); } 
-    if(btn){ btn.innerText=txt; btn.disabled=false; }
-}
 
-window.loadUnscrambleLevel = function(i) {
-    const d=window.unscrambleLevels[i]; 
-    document.getElementById('unscrambleLevelBadge').innerText=`${i+1}/${window.unscrambleLevels.length}`; 
-    document.getElementById('unscrambleTranslation').innerText=d.translation; 
-    document.getElementById('unscrambleSuccessMsg').style.display='none';
-    
-    const w=d.sentence.trim().split(/\s+/); 
-    window.poolWords=[...w].sort(()=>Math.random()-0.5); 
-    window.userAnswerWords=[]; 
-    renderUnscrambleUI();
-}
+        function updateUserInterface() {
+            if (!userData) return;
+            const icon = userData.equippedIcon || '';
+            const roleLabels = {'student': 'Aluno', 'teacher': 'Professor', 'parent': 'Responsável', 'admin': 'Admin'};
+            document.getElementById('userName').innerHTML = `${icon} ${userData.name} <span class="badge bg-white text-mars-navy ms-2" style="font-size:0.7em">${roleLabels[userData.role]||'User'}</span>`;
+            const role = userData.role; 
+            const isDev = (currentUser.email === 'fmartimr@gmail.com');
+            document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'none');
+            document.getElementById('navAdminBtn').style.display = 'none';
+            document.getElementById('navDevBtn').style.display = 'none';
 
-window.renderUnscrambleUI = function() {
-    const p=document.getElementById('unscramblePoolArea'); 
-    const a=document.getElementById('unscrambleAnswerArea'); 
-    p.innerHTML=''; a.innerHTML='';
-    
-    if(window.userAnswerWords.length===0) a.innerHTML='<small class="text-muted">Monte a frase</small>';
-    
-    window.userAnswerWords.forEach((w,i)=>a.appendChild(createWordButton(w,i,'answer'))); 
-    window.poolWords.forEach((w,i)=>p.appendChild(createWordButton(w,i,'pool'))); 
-    checkUnscramble();
-}
+            if (isDev) { document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block'); document.getElementById('navAdminBtn').style.display = 'block'; document.getElementById('navDevBtn').style.display = 'block'; }
+            else if (role === 'teacher' || role === 'admin') { document.getElementById('navAdminBtn').style.display = 'block'; document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block'); }
+            else if (role === 'parent') { document.querySelectorAll('.nav-parent').forEach(el => el.style.display = 'block'); }
+            else { document.querySelectorAll('.nav-student').forEach(el => el.style.display = 'block'); }
+            
+            if (role === 'teacher' || role === 'admin' || isDev) { if(window.loadPendingPhotos) window.loadPendingPhotos(); }
+        }
 
-function createWordButton(w,i,l){ 
-    const b=document.createElement('button'); 
-    b.className='word-btn m-1'; b.innerText=w; 
-    b.onclick=()=>{ 
-        if(l==='pool'){ window.userAnswerWords.push(w); window.poolWords.splice(i,1); }
-        else{ window.poolWords.push(w); window.userAnswerWords.splice(i,1); } 
-        renderUnscrambleUI(); 
-    }; 
-    return b; 
-}
+        window.logout = async function() { await signOut(auth); window.location.reload(); };
+        window.showLoginScreen = () => { document.getElementById('loginScreen').style.display='block'; document.getElementById('appScreen').style.display='none'; }
+        window.showAppScreen = () => { document.getElementById('loginScreen').style.display='none'; document.getElementById('appScreen').style.display='block'; window.showHome(); }
+        window.hideAllSections = () => { document.querySelectorAll('.content-section').forEach(s => s.style.display='none'); }
+        function setActiveNav(id) { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
 
-window.checkUnscramble=function(){
-    const correct=window.unscrambleLevels[window.currentUnscrambleIndex].sentence.trim().split(/\s+/); 
-    let allOk=true;
-    
-    document.querySelectorAll('#unscrambleAnswerArea button').forEach((b,i)=>{ 
-        if(allOk && window.userAnswerWords[i]===correct[i]){ b.classList.add('correct-pos'); }
-        else{ allOk=false; b.classList.remove('correct-pos'); } 
-    });
-    
-    if(window.userAnswerWords.length===correct.length && allOk) { 
-        document.getElementById('unscrambleSuccessMsg').style.display='block'; 
-        if(window.userData){ window.updateDoc(window.doc(window.db,"users",window.auth.currentUser.uid),{experience:window.increment(10)}); } 
-    }
-}
+        window.showHome = () => { 
+            hideAllSections(); document.getElementById('homeContent').style.display='block'; setActiveNav('linkHome');
+            const role = window.userData.role;
+            const isDev = (window.auth.currentUser.email === 'fmartimr@gmail.com');
+            document.querySelectorAll('.role-dashboard').forEach(el => el.style.display = 'none');
+            if (isDev && !window.originalRole) { document.getElementById('dash-dev').style.display = 'block'; if(window.loadDevStats) window.loadDevStats(); } 
+            else if (role === 'teacher') { document.getElementById('dash-teacher').style.display = 'block'; if(window.loadTeacherDashboard) window.loadTeacherDashboard(); } 
+            else if (role === 'parent') { document.getElementById('dash-parent').style.display = 'block'; if(window.loadParentDashboard) window.loadParentDashboard(); } 
+            else { document.getElementById('dash-student').style.display = 'block'; if(window.loadStudentDashboard) window.loadStudentDashboard(); }
+        };
 
-window.nextUnscrambleLevel=function(){ 
-    window.currentUnscrambleIndex++; 
-    if(window.currentUnscrambleIndex<window.unscrambleLevels.length) loadUnscrambleLevel(window.currentUnscrambleIndex); 
-    else { alert("Fim!"); backToGamesMenu(); } 
-}
-
-window.backToGamesMenu=function(){ 
-    document.getElementById('gamesMenu').style.display='block'; 
-    document.getElementById('gameUnscramble').style.display='none'; 
-    document.getElementById('quizSelector').style.display='none'; 
-    document.getElementById('gameSpaceShooter').style.display='none'; 
-    stopSpaceShooter(); 
-}
-
-// QUIZ
-window.showQuizSelector=async function(){ 
-    document.getElementById('gamesMenu').style.display='none'; 
-    document.getElementById('quizSelector').style.display='block'; 
-    const c=document.getElementById('quizListContainer'); 
-    c.innerHTML='Loading...';
-    
-    let q = window.collection(window.db,"quizzes");
-    if (window.userData.role === 'student') { 
-        if(!window.userData.classId) return alert("Sem turma.");
-        q = window.query(q, window.where("targetClasses", "array-contains", window.userData.classId), window.orderBy("unit")); 
-    } else { q = window.query(q, window.orderBy("unit")); }
-    
-    try { 
-        const s=await window.getDocs(q);
-        let h=''; 
-        s.forEach(d=>{ 
-            const z=d.data(); 
-            const str=encodeURIComponent(JSON.stringify({...z,id:d.id})); 
-            h+=`<div class="col-md-6 mb-3"><div class="card h-100 p-3 hover-effect" onclick="startQuiz('${str}')"><h5 class="text-mars-navy">Unit ${z.unit}</h5><p>${z.title}</p></div></div>`; 
-        }); 
-        c.innerHTML=h||'Nenhum quiz disponível.';
-    } catch(e) { console.error(e); c.innerHTML = "Erro ao carregar."; }
-}
-
-window.activeQuiz=null; window.quizScore=0; window.qIdx=0;
-
-window.startQuiz=function(str){ 
-    window.activeQuiz=JSON.parse(decodeURIComponent(str)); 
-    window.qIdx=0; window.quizScore=0; 
-    document.getElementById('quizSelector').style.display='none'; 
-    document.getElementById('quizPlayer').style.display='block'; 
-    document.getElementById('quizQuestionArea').style.display='block'; 
-    document.getElementById('quizResultArea').style.display='none'; 
-    renderQuizQ(); 
-}
-
-window.renderQuizQ=function(){ 
-    const q=window.activeQuiz.questions[window.qIdx]; 
-    document.getElementById('qText').innerText=q.text; 
-    let h=''; 
-    q.options.forEach((o,i)=>h+=`<button class="btn btn-outline-primary p-3 text-start" onclick="checkQ(${i},this)">${o}</button>`); 
-    document.getElementById('qOptions').innerHTML=h; 
-    document.getElementById('quizProgressBar').style.width=`${(window.qIdx/window.activeQuiz.questions.length)*100}%`; 
-}
-
-window.checkQ=function(i,btn){ 
-    const q=window.activeQuiz.questions[window.qIdx]; 
-    const ok=(i===q.correct); 
-    btn.className=ok?'btn btn-success p-3 text-start':'btn btn-danger p-3 text-start'; 
-    if(ok) window.quizScore++; 
-    setTimeout(()=>{ 
-        window.qIdx++; 
-        if(window.qIdx<window.activeQuiz.questions.length) renderQuizQ(); 
-        else finishQuiz(); 
-    },1000); 
-}
-
-window.finishQuiz=function(){ 
-    document.getElementById('quizQuestionArea').style.display='none'; 
-    document.getElementById('quizResultArea').style.display='block'; 
-    document.getElementById('finalScore').innerText=`${window.quizScore}/${window.activeQuiz.questions.length}`; 
-    if(window.userData) window.updateDoc(window.doc(window.db,"users",window.auth.currentUser.uid),{experience:window.increment(window.quizScore*10)}); 
-}
-
-// ADMIN - QUIZ
-window.loadQuizLibrary=async function(){ 
-    const l=document.getElementById('quizLibraryList'); 
-    const s=await window.getDocs(window.collection(window.db,"quizzes")); 
-    let h=''; 
-    s.forEach(d=>{ h+=`<div class="list-group-item d-flex justify-content-between"><div>U${d.data().unit} ${d.data().title}</div><button class="btn btn-sm btn-danger" onclick="deleteQuiz('${d.id}')">X</button></div>`; }); 
-    l.innerHTML=h; 
-}
-
-window.deleteQuiz=async function(id){ 
-    if(confirm('Apagar?')) await window.deleteDoc(window.doc(window.db,"quizzes",id)); 
-    loadQuizLibrary(); 
-}
-
-window.resetQuizForm=function(){ 
-    document.getElementById('quizId').value=''; 
-    document.getElementById('questionsContainer').innerHTML=''; 
-    addQuestionField(); 
-    renderClassSelector('quizClassSelector'); 
-}
-
-window.addQuestionField=function(){ 
-    document.getElementById('questionsContainer').insertAdjacentHTML('beforeend',`<div class="card p-2 mb-2 bg-light question-item"><input class="form-control mb-1 q-text" placeholder="Pergunta"><div class="row g-1"><div class="col-6"><input class="form-control q-opt" placeholder="A"></div><div class="col-6"><input class="form-control q-opt" placeholder="B"></div><div class="col-6"><input class="form-control q-opt" placeholder="C"></div><div class="col-6"><input class="form-control q-opt" placeholder="D"></div></div><select class="form-select mt-1 q-correct"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div>`); 
-}
-
-window.saveQuiz=async function(){
-    const tcs = getSelectedClasses('quizClassSelector'); 
-    if(!tcs.length) return alert("Selecione Turma.");
-    
-    const q=[]; 
-    document.querySelectorAll('.question-item').forEach(d=>{ 
-        q.push({
-            text:d.querySelector('.q-text').value, 
-            options:[...d.querySelectorAll('.q-opt')].map(i=>i.value), 
-            correct:parseInt(d.querySelector('.q-correct').value)
-        }); 
-    });
-    
-    const d={
-        unit:parseInt(document.getElementById('quizUnit').value), 
-        lesson:parseInt(document.getElementById('quizLesson').value), 
-        title:document.getElementById('quizTitle').value, 
-        questions:q, 
-        targetClasses:tcs
-    };
-    
-    await window.addDoc(window.collection(window.db,"quizzes"),d); 
-    alert('Salvo!'); 
-    loadQuizLibrary();
-}
-
-// ADMIN - UNSCRAMBLE
-window.loadUnscrambleLibrary=async function(){ 
-    const l=document.getElementById('unscrambleLibraryList'); 
-    const s=await window.getDocs(window.collection(window.db,"unscramble_activities")); 
-    let h=''; 
-    s.forEach(d=>{ h+=`<div class="list-group-item d-flex justify-content-between"><div>${d.data().sentence}</div><button class="btn btn-sm btn-danger" onclick="deleteUnscramble('${d.id}')">X</button></div>`; }); 
-    l.innerHTML=h; 
-}
-
-window.deleteUnscramble=async function(id){ 
-    if(confirm('Apagar?')) await window.deleteDoc(window.doc(window.db,"unscramble_activities",id)); 
-    loadUnscrambleLibrary(); 
-}
-
-window.saveUnscrambleActivity=async function(){
-    const tcs = getSelectedClasses('unscrambleClassSelector'); 
-    if(!tcs.length) return alert("Selecione Turma.");
-    
-    const d={
-        unit:parseInt(document.getElementById('unscrambleUnit').value), 
-        lesson:parseInt(document.getElementById('unscrambleLesson').value), 
-        sentence:document.getElementById('unscrambleSentence').value, 
-        translation:document.getElementById('unscrambleTranslation').value, 
-        targetClasses:tcs
-    };
-    
-    await window.addDoc(window.collection(window.db,"unscramble_activities"),d); 
-    alert('Salvo!'); 
-    loadUnscrambleLibrary();
-}
-
-window.resetUnscrambleForm=function(){ 
-    document.querySelector('#adminTab-unscramble form').reset(); 
-    renderClassSelector('unscrambleClassSelector'); 
-}
-
-// ATTENDANCE & OUTROS
-window.initAttendanceTab=async function(){ 
-    const d=new Date().toISOString().split('T')[0]; 
-    document.getElementById('attDate').value=d; 
-    document.getElementById('attHistoryMonth').value=d.slice(0,7); 
-    
-    const s=await window.getDocs(window.collection(window.db,"classes")); 
-    let o='<option value="">Turma...</option>'; 
-    s.forEach(d=>o+=`<option value="${d.id}">${d.data().name}</option>`); 
-    document.getElementById('attClassSelect').innerHTML=o; 
-    loadAttendanceHistory(); 
-}
-
-window.loadAttendanceSheet=async function(){ 
-    const cid=document.getElementById('attClassSelect').value; 
-    const dt=document.getElementById('attDate').value; 
-    if(!cid||!dt)return;
-    
-    const docSnap=await window.getDoc(window.doc(window.db,"attendance",`${cid}_${dt}`)); 
-    window.originalAttendanceData=docSnap.exists()?docSnap.data().records:{};
-    
-    const s=await window.getDocs(window.query(window.collection(window.db,"users"),window.where("classId","==",cid),window.orderBy("name")));
-    let h=''; window.currentAttendanceData={};
-    
-    s.forEach(d=>{ 
-        const st=window.originalAttendanceData[d.id]||'P'; 
-        window.currentAttendanceData[d.id]=st; 
-        const cls=st==='P'?'btn-success':(st==='A'?'btn-warning':'btn-danger'); 
-        const txt=st==='P'?'PRESENTE':(st==='A'?'ATRASO':'FALTOU');
-        h+=`<tr><td>${d.data().name}</td><td><button class="btn btn-sm w-100 fw-bold ${cls}" onclick="togglePresence('${d.id}',this)">${txt}</button></td></tr>`; 
-    });
-    
-    document.getElementById('attendanceListBody').innerHTML=h||'<tr><td>Vazio</td></tr>'; 
-    document.getElementById('attendanceSheetArea').style.display='block'; 
-    document.getElementById('attendanceEmptyState').style.display='none';
-}
-
-window.togglePresence=function(id,btn){ 
-    const m={'P':'A','A':'F','F':'P'}; 
-    const c={'P':'btn-success','A':'btn-warning','F':'btn-danger'}; 
-    const t={'P':'PRESENTE','A':'ATRASO','F':'FALTOU'};
-    const n=m[window.currentAttendanceData[id]]; 
-    window.currentAttendanceData[id]=n; 
-    btn.className=`btn btn-sm w-100 fw-bold ${c[n]}`; 
-    btn.innerText=t[n];
-}
-
-window.saveAttendance=async function(){
-    const cid=document.getElementById('attClassSelect').value; 
-    const dt=document.getElementById('attDate').value;
-    const xp={'P':10,'A':-5,'F':-20};
-    
-    for(const [uid,nst] of Object.entries(window.currentAttendanceData)){
-        const ost=window.originalAttendanceData[uid]; 
-        if(ost===nst)continue;
-        const delta=xp[nst]-(ost?xp[ost]:0); 
-        if(delta!==0) await window.updateDoc(window.doc(window.db,"users",uid),{experience:window.increment(delta)});
-    }
-    
-    const vals=Object.values(window.currentAttendanceData); 
-    const stats={total:vals.length, presents:vals.filter(v=>v==='P').length, percentage:Math.round((vals.filter(v=>v==='P').length/vals.length)*100)};
-    await window.setDoc(window.doc(window.db,"attendance",`${cid}_${dt}`),{classId:cid, date:dt, records:window.currentAttendanceData, stats, teacherId:window.auth.currentUser.uid});
-    alert('Salvo!'); 
-    loadAttendanceHistory();
-}
-
-window.loadAttendanceHistory=async function(){
-    const m=document.getElementById('attHistoryMonth').value; 
-    const s=await window.getDocs(window.query(window.collection(window.db,"attendance"),window.where("date",">=",m+"-01"),window.where("date","<=",m+"-31"),window.orderBy("date","desc")));
-    let h=''; 
-    s.forEach(d=>{ 
-        const a=d.data(); 
-        h+=`<tr><td>${a.date.slice(8)}</td><td>${a.stats.percentage}%</td><td><button class="btn btn-sm btn-primary" onclick="document.getElementById('attDate').value='${a.date}';document.getElementById('attClassSelect').value='${a.classId}';loadAttendanceSheet()">Edit</button></td></tr>`; 
-    });
-    document.getElementById('attHistoryBody').innerHTML=h||'<tr><td>Vazio</td></tr>';
-}
-
-// Exports
-window.startSpaceShooterGame = startSpaceShooterGame;
-window.stopSpaceShooter = stopSpaceShooter;
+        window.showGames = () => { hideAllSections(); document.getElementById('gamesContent').style.display='block'; setActiveNav('linkGames'); };
+        window.showStore = () => { hideAllSections(); document.getElementById('storeContent').style.display='block'; setActiveNav('linkStore'); if(window.loadStore) window.loadStore(); };
+        window.showTasks = () => { hideAllSections(); document.getElementById('tasksContent').style.display='block'; setActiveNav('linkTasks'); if(window.loadTasks) window.loadTasks(); };
+        window.showRanking = () => { hideAllSections(); document.getElementById('rankingContent').style.display='block'; setActiveNav('linkRanking'); if(window.loadRealRanking) window.loadRealRanking(); };
+        window.showProfile = () => { hideAllSections(); document.getElementById('profileContent').style.display = 'block'; setActiveNav(''); if(window.loadProfile) window.loadProfile(); };
+        window.showMessages = () => { hideAllSections(); document.getElementById('messagesContent').style.display = 'block'; setActiveNav('linkMessages'); if(window.loadMyMessages) window.loadMyMessages(); };
+        window.showAdmin = () => { hideAllSections(); document.getElementById('adminContent').style.display = 'block'; setActiveNav('navAdminBtn'); if(window.showAdminTab) window.showAdminTab('tasks'); };
+        window.showNotifications = () => { hideAllSections(); document.getElementById('notificationsContent').style.display = 'block'; setActiveNav(''); if(window.loadNotificationsScreen) window.loadNotificationsScreen(); };
+        window.showDev = function() { hideAllSections(); document.getElementById('devContent').style.display = 'block'; setActiveNav('navDevBtn'); if(window.showDevTab) window.showDevTab('users'); }
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html>
